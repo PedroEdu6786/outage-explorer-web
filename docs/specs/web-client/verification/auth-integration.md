@@ -246,3 +246,21 @@ original Overview desktop reference was inspected; new controls reuse existing
 variants as a user-requested design extension. No new screenshot comparison or
 visual acceptance was performed. Browser responses were synthetic; no real
 refresh/ingestion or live Admin session acceptance was triggered here.
+
+## Reload restoration presentation — October 5, 2026
+
+The user confirmed the sign-in screen only flashes until the existing cookie
+session check completes. Pending restoration now uses a neutral heading and
+no sign-in button. This changes presentation, preserving cookie-based session
+restoration, role checks, fixed expiry and deliberate recovery.
+
+- `npm test -- --reporter=dot`: all 213 tests passed, including withheld protected
+  content/login actions during a held startup resolution.
+- `npm run typecheck`, `npm run lint` and `git diff --check`: passed.
+- Development Chromium: 15 tests passed. Three new role-specific cases each
+  reload twice, hold the response to inspect restoration UI, verify a controlled
+  HttpOnly cookie reaches the intercepted session endpoint, preserve the route
+  and role navigation/refresh controls, and assert zero login requests.
+
+Cookie values/responses in these tests are explicitly synthetic. These checks
+are not live backend/Cognito acceptance. No new visual comparison was performed.

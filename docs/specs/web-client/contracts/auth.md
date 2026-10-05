@@ -375,3 +375,14 @@ The latest user request enables the Overview refresh control for Admin.
 refresh adapter uses auth-owned in-memory CSRF and independently checks the
 current session before admission/status requests; Flask remains authoritative.
 Viewer remains Overview-only and Analyst retains Explorer/SQL without refresh.
+
+## Session restoration presentation — October 5
+
+The user confirmed the login screen disappears automatically after a reload;
+there is no repeated authentication requirement in that reported behavior.
+The existing startup `GET /api/auth/session` already restores the cookie session.
+While unresolved, presentation now says **Restoring your session**, withholds
+login actions and keeps protected content unmounted. A valid response returns
+to the current page; confirmed signed-out/expired responses retain explicit
+sign-in. Failed checks retain deliberate retry. No session caching, automatic
+renewal or backend cookie/expiry policy changes are introduced.

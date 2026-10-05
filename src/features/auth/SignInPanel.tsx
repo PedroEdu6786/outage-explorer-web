@@ -19,13 +19,15 @@ export function SignInPanel({ session, activity, onSignIn, onResolve, onSignOut 
   const redirecting = activity.status === "redirecting";
   const pending = session.status === "pending";
   const expired = session.status === "expired";
+  const restoring = pending && !failure && !redirecting
+    && (activity.status !== "working" || activity.action === "resolve");
   const denied = failure?.failure.kind === "forbidden";
   const retry = failure?.action === "resolve" ? onResolve : failure?.action === "logout" ? onSignOut : onSignIn;
   return <AuthTemplate
-    title={expired ? "Sign in again" : "Sign in to your workspace"}
-    description="Explore stored daily observations and run read-only analysis."
+    title={restoring ? "Restoring your session" : expired ? "Sign in again" : "Sign in to your workspace"}
+    description={restoring ? "Checking your existing session. Your workspace will open automatically." : "Explore stored daily observations and run read-only analysis."}
     footer="Access is determined by your application account."
-    actions={failure ? <Button className="w-full min-h-[38px]" onClick={retry}>
+    actions={restoring ? undefined : failure ? <Button className="w-full min-h-[38px]" onClick={retry}>
       {failure.action === "logout" ? "Retry sign out" : failure.action === "resolve" ? "Check session again" : "Try sign in again"}
     </Button> : redirecting ? <Button className="w-full min-h-[38px]" onClick={onResolve}>Check session</Button>
       : <Button className="w-full min-h-[38px]" loading={working || pending}

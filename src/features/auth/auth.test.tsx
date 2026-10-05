@@ -28,6 +28,9 @@ describe("Auth fixture lifecycle", () => {
     const delayed = controller.deferNext("resolveSession");
     render(entry);
     expect(screen.getByText("Checking session")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Restoring your session" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Sign in to your workspace" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Continue to sign in" })).toBeNull();
     expect(protectedContent).not.toHaveBeenCalled();
     expect(controller.callLog.read().map((call) => call.operation)).toEqual(["resolveSession"]);
     await act(async () => { delayed.release(); await Promise.resolve(); });
