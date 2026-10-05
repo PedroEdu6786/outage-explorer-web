@@ -1,7 +1,30 @@
 import { expect, it, vi } from "vitest";
-import { readLiveConfiguration } from "./config";
+import { readCognitoLogoutUrl, readLiveConfiguration } from "./config";
 import { createLiveComposition } from "./live-composition";
 import { createSessionRuntime } from "../session/session-runtime";
+
+it("builds only public Cognito logout parameters with an explicit return URL", () => {
+  const value = readCognitoLogoutUrl("https://synthetic.auth.example.invalid/", "public123", "http://localhost:3000/sign-in");
+  expect(value).toBe("https://synthetic.auth.example.invalid/logout?client_id=public123&logout_uri=http%3A%2F%2Flocalhost%3A3000%2Fsign-in");
+  expect([...new URL(value).searchParams.keys()]).toEqual(["client_id", "logout_uri"]);
+});
+
+it("rejects missing or malformed Cognito logout configuration without echoing values", () => {
+  for (const [domain, clientId, uri] of [
+    [undefined, "public123", "http://localhost:3000/sign-in"],
+    ["https://example.invalid", undefined, "http://localhost:3000/sign-in"],
+    ["https://example.invalid", "public123", undefined],
+    ["https://private@example.invalid", "public123", "http://localhost:3000/sign-in"],
+    ["https://example.invalid/logout", "public123", "http://localhost:3000/sign-in"],
+    ["http://example.invalid", "public123", "http://localhost:3000/sign-in"],
+    ["https://example.invalid", "public123", "http://remote.invalid/sign-in"],
+    ["https://example.invalid", "public123", "http://localhost:3000/sign-in?private=value"],
+    ["https://example.invalid", "public123", "/sign-in"],
+  ]) {
+    expect(() => readCognitoLogoutUrl(domain, clientId, uri)).toThrow(/OUTAGE_AUTH_LOGOUT_URI/);
+    try { readCognitoLogoutUrl(domain, clientId, uri); } catch (error) { expect(String(error)).not.toContain("private"); }
+  }
+});
 
 it("leaves an absent target unavailable and accepts only credential-free origins", () => {
   expect(readLiveConfiguration(undefined)).toEqual({ status: "unavailable" });

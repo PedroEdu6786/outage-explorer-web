@@ -9,11 +9,12 @@ function payload(role = "viewer", token = "synthetic-session-csrf") {
   return { user: { id: "000opaque-application-id", email: "synthetic@example.invalid", role }, expires_at: new Date(Date.now() + 3600_000).toISOString(), csrf_token: token };
 }
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status });
+const logoutUrl = "https://synthetic.auth.example.invalid/logout?client_id=public123&logout_uri=http%3A%2F%2Flocalhost%3A3000%2Fsign-in";
 function setup() {
   const runtime = createSessionRuntime();
   const fetch = vi.fn<typeof globalThis.fetch>();
   const navigate = vi.fn();
-  const adapter = createAuthAdapter({ runtime, fetch, navigate });
+  const adapter = createAuthAdapter({ runtime, fetch, navigate, logoutUrl });
   const service = createAuthService(adapter.operations, runtime);
   resources.push(() => { adapter.dispose(); runtime.dispose(); });
   const callbacks = { onSuccess: vi.fn(), onFailure: vi.fn() };
@@ -78,13 +79,14 @@ describe("live auth adapter with controlled HTTP responses", () => {
   });
 
   it.each([503, 403, "network"] as const)("retains only the scoped token for deliberate logout retry after %s", async (status) => {
-    const { fetch, runtime, adapter, service, callbacks } = setup();
+    const { fetch, runtime, adapter, service, callbacks, navigate } = setup();
     fetch.mockResolvedValueOnce(json(payload()));
     await service.perform("resolve", callbacks);
     if (status === "network") fetch.mockRejectedValueOnce(new Error("private connection detail"));
     else fetch.mockResolvedValueOnce(json({ error: { message: "private provider detail" } }, status));
     await service.perform("logout", callbacks);
     expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
+    expect(navigate).not.toHaveBeenCalled();
     expect(adapter.csrfToken()).toBe("synthetic-session-csrf");
     expect(fetch.mock.calls[1]).toEqual(["/api/auth/logout", { method: "POST", credentials: "include", cache: "no-store", redirect: "error", headers: { "X-CSRF-Token": "synthetic-session-csrf" } }]);
     expect(JSON.stringify(callbacks.onFailure.mock.calls)).not.toContain("private");
@@ -94,19 +96,63 @@ describe("live auth adapter with controlled HTTP responses", () => {
     expect(fetch.mock.calls[2]?.[1]?.headers).toEqual({ "X-CSRF-Token": "synthetic-session-csrf" });
     expect(runtime.getSnapshot()).toMatchObject({ status: "unauthenticated", generation: generation + 1 });
     expect(adapter.csrfToken()).toBeNull();
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(logoutUrl);
   });
 
   it("never treats unexpected 200 logout as confirmation and supports repeated 204 logout", async () => {
-    const { fetch, runtime, service, callbacks } = setup();
+    const { fetch, runtime, service, callbacks, navigate } = setup();
     fetch.mockResolvedValueOnce(json(payload())); await service.perform("resolve", callbacks);
     callbacks.onSuccess.mockClear();
     fetch.mockResolvedValueOnce(json({})); await service.perform("logout", callbacks);
     expect(callbacks.onSuccess).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
     expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
     fetch.mockResolvedValueOnce(new Response(null, { status: 204 })); await service.perform("logout", callbacks);
     fetch.mockResolvedValueOnce(new Response(null, { status: 204 })); await service.perform("logout", callbacks);
     expect(fetch.mock.calls[3]?.[1]?.headers).toBeUndefined();
     expect(runtime.getSnapshot().status).toBe("unauthenticated");
+  });
+
+  it("waits for 204, confirms locally before browser navigation, then resolves the returned session as signed out", async () => {
+    const { fetch, runtime, adapter, service, callbacks, navigate } = setup();
+    fetch.mockResolvedValueOnce(json(payload())); await service.perform("resolve", callbacks);
+    let release!: (response: Response) => void;
+    fetch.mockReturnValueOnce(new Promise((resolve) => { release = resolve; }));
+    const operation = service.perform("logout", callbacks);
+    expect(navigate).not.toHaveBeenCalled();
+    expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
+    navigate.mockImplementation(() => {
+      expect(runtime.getSnapshot().status).toBe("unauthenticated");
+      expect(adapter.csrfToken()).toBeNull();
+    });
+    release(new Response(null, { status: 204 }));
+    await operation;
+    expect(navigate).toHaveBeenCalledExactlyOnceWith(logoutUrl);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    fetch.mockResolvedValueOnce(json({}, 401)); await service.perform("resolve", callbacks);
+    expect(runtime.getSnapshot().status).toBe("unauthenticated");
+    await service.perform("login", callbacks);
+    expect(navigate).toHaveBeenLastCalledWith("/api/auth/login?return_to=%2F");
+  });
+
+  it.each(["identity-change", "abort"] as const)("discards late logout 204 after %s without navigating", async (change) => {
+    const { fetch, runtime, service, callbacks, navigate } = setup();
+    fetch.mockResolvedValueOnce(json(payload())); await service.perform("resolve", callbacks);
+    let release!: (response: Response) => void;
+    fetch.mockReturnValueOnce(new Promise((resolve) => { release = resolve; }));
+    const controller = new AbortController();
+    const operation = service.perform("logout", callbacks, controller.signal);
+    if (change === "abort") controller.abort();
+    else {
+      runtime.invalidate("pending");
+      fetch.mockResolvedValueOnce(json(payload("analyst", "new-token")));
+      await service.perform("resolve", callbacks);
+    }
+    callbacks.onSuccess.mockClear();
+    release(new Response(null, { status: 204 }));
+    await expect(operation).resolves.toBe("discarded");
+    expect(navigate).not.toHaveBeenCalled();
+    expect(callbacks.onSuccess).not.toHaveBeenCalled();
   });
 
   it("clears tokens at original expiry even while logout remains unresolved", async () => {
@@ -156,13 +202,14 @@ describe("live auth adapter with controlled HTTP responses", () => {
   });
 
   it("clears the retry token on logout 401 without claiming successful logout", async () => {
-    const { fetch, runtime, adapter, service, callbacks } = setup();
+    const { fetch, runtime, adapter, service, callbacks, navigate } = setup();
     fetch.mockResolvedValueOnce(json(payload())); await service.perform("resolve", callbacks);
     callbacks.onSuccess.mockClear();
     fetch.mockResolvedValueOnce(json({}, 401)); await service.perform("logout", callbacks);
     expect(runtime.getSnapshot().status).toBe("unauthenticated");
     expect(adapter.csrfToken()).toBeNull();
     expect(callbacks.onSuccess).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it("discards JSON decoding that completes after abort without exposing a token", async () => {

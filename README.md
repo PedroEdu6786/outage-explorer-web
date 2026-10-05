@@ -158,6 +158,17 @@ Flask remains on port 8000 with its existing Cognito callback there; its
 logout Origin checks match the UI. Cookies are shared by the localhost host,
 not by port; use localhost consistently rather than mixing it with 127.0.0.1.
 
+For complete browser logout, copy only `COGNITO_DOMAIN` and
+`COGNITO_APP_CLIENT_ID` from the backend configuration into `.env.local`, and set
+`OUTAGE_AUTH_LOGOUT_URI=http://localhost:3000/sign-in` explicitly. That return
+URL is already registered in Cognito Allowed sign-out URLs per the user.
+Never copy `COGNITO_APP_CLIENT_SECRET`. Configured auth requires these logout
+settings; restart/rebuild Next after changes. Only the constructed public URL
+is passed to the browser. After API logout returns `204`, protected state is
+cleared and local logout confirmed, then `window.location.assign()` opens Cognito
+`/logout`. Cognito returns to `/sign-in`. API errors or uncertain outcomes keep
+the existing deliberate retry and never navigate to Cognito.
+
 The user confirmed the role-only response and supplied Viewer/Analyst/Admin
 presentation restrictions. Backend-assigned role now maps to UI capabilities;
 Flask still enforces every request. No capability expansion is required for this

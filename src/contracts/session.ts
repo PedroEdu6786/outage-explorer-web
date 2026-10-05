@@ -43,4 +43,6 @@ export interface SessionOperations {
   resolveSession(context: OperationContext): Promise<OperationResult<SessionResolution>>;
   beginLogin(context: OperationContext): Promise<OperationResult<void>>;
   logout(context: OperationContext): Promise<OperationResult<void>>;
+  /** Browser side effect, invoked only after guarded logout confirmation and local cleanup. */
+  completeLogout?(): void;
 }

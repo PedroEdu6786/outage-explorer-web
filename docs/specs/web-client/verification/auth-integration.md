@@ -146,3 +146,32 @@ Authenticated reload/reopen, fixed expiry, permission enforcement/access
 reduction, authenticated CSRF logout and independent-session behavior remain
 unverified. This confirmation does not close T5.L, T6.L or Phase7. The next
 implementation remains data adapter integration T5.6–T5.8 and production wiring.
+
+## Cognito browser logout — October 5
+
+Implemented the user-requested provider navigation after guarded API `204`.
+Local state and memory-only CSRF are cleared before the public Cognito logout
+URL is passed to `window.location.assign()`. The domain/client ID were read from
+the existing backend configuration and copied as public values into gitignored
+frontend configuration; the explicit return is `http://localhost:3000/sign-in`.
+No app client secret was read, copied, used or serialized. User confirmed the
+return URL's Allowed sign-out registration.
+
+Validation on the updated tree:
+
+- 184 Vitest tests passed, including URL construction/configuration validation,
+  confirmation-before-navigation, no provider fetch, errors/retry, unexpected
+  status, aborted/stale `204` and independent runtime protection.
+- Two Chromium scenarios on actual development routes passed with controlled
+  API/provider responses: `204` → document navigation to Cognito → `/sign-in`
+  return → controlled session `401`; `503` → retry without provider navigation.
+- Typecheck, lint, webpack production build, source boundaries and emitted
+  fixture exclusion passed. Initial checks found exact-optional typing and two
+  lint issues in the new browser test; corrected and rerun successfully.
+- Real local Next-to-Flask proxy, with an already signed-out caller: logout
+  POST with UI Origin returned `204`; subsequent session GET returned `401`.
+
+The controlled provider redirect does not establish real Cognito cookie
+clearance. An authenticated real browser logout and the next login credential
+prompt still require verification in the user's authenticated browser. No new
+visual comparison, data acceptance, global revocation or release acceptance.

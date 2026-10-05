@@ -34,6 +34,7 @@ export function createAuthService(operations: SessionOperations, runtime: Sessio
     return guardOperation(runtime, context, () => action === "login" ? operations.beginLogin(context) : operations.logout(context), {
       ...options, onSuccess: () => {
         if (action === "logout") runtime.invalidate();
+        if (action === "logout") operations.completeLogout?.();
         callbacks.onSuccess();
       },
     });

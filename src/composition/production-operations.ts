@@ -14,7 +14,7 @@ export interface QuerySettings { readonly initialPageSize: number; readonly maxi
 export const productionRegistration = { status: "unavailable" } as const;
 export const productionQuerySettings: QuerySettings | null = null;
 const unavailable = () => ({ ok: false as const, failure: { kind: "service-failure" as const, message: "Backend connection unavailable. Session and data contracts are awaiting configuration." } });
-export function createProductionOperations(options?: { readonly runtime: SessionRuntime; readonly authEnabled: boolean }): ApplicationOperations {
+export function createProductionOperations(options?: { readonly runtime: SessionRuntime; readonly authEnabled: boolean; readonly logoutUrl?: string | undefined }): ApplicationOperations {
   const auth = options ? createLiveComposition({
     ...options, fetch: (...args) => globalThis.fetch(...args), navigate: (path) => { window.location.assign(path); },
   }) : null;

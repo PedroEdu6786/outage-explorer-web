@@ -1,5 +1,31 @@
 # Authentication HTTP contract
 
+## Cognito browser logout — October 5, 2026
+
+The user requested clearing Cognito's browser session after current application
+session logout and confirmed `http://localhost:3000/sign-in` is already in the
+app client's Allowed sign-out URLs. This extends the earlier local-only logout.
+Flask still owns session invalidation and CSRF validation. The frontend sends
+`POST /api/auth/logout` with cookies and the current in-memory CSRF token.
+Only a current, non-aborted `204` confirms local logout and invokes browser
+navigation to Cognito. Failed, unexpected or uncertain responses preserve
+existing failure/retry behavior; late responses cannot navigate or restore data.
+
+Server configuration reads `COGNITO_DOMAIN` and `COGNITO_APP_CLIENT_ID` copied
+from the existing backend configuration, plus explicit `OUTAGE_AUTH_LOGOUT_URI`.
+The local return is `http://localhost:3000/sign-in`. A credential-free HTTPS
+domain, public client ID and explicit HTTPS or loopback HTTP `/sign-in` return
+are required when auth is configured. `URL` and `searchParams` build `/logout`
+with exactly `client_id` and `logout_uri`; only this public URL is serialized.
+`COGNITO_APP_CLIENT_SECRET` is never read or exposed. Navigation uses
+`window.location.assign()`, with no fetch to Cognito, GlobalSignOut or global
+device revocation. See [AWS logout endpoint](https://docs.aws.amazon.com/cognito/latest/developerguide/logout-endpoint.html).
+
+Acceptance requires API `204` → Cognito navigation → `/sign-in` return → API
+session `401` → next login asks for credentials. Controlled tests cover the
+frontend transitions; an authenticated real Cognito browser lifecycle must
+separately establish provider-cookie clearance and the next credential prompt.
+
 Status: **backend authentication working and ready for frontend integration,
 user-confirmed October 5, 2026; web implementation and live verification pending**.
 Received October 5, 2026. This document records the supplied auth

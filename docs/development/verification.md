@@ -186,6 +186,14 @@ See [auth evidence](../specs/web-client/verification/auth-integration.md).
 
 ## Development login-return regression
 
+`tests/development/logout.spec.ts` also verifies `204` produces a document
+navigation to Cognito with only the public client ID and explicit return URL,
+then returns to `/sign-in` with controlled session `401`. A `503` clears protected
+content and offers retry without provider navigation. These tests intercept API
+and provider responses, so they do not prove real Cognito cookie clearance or
+the next credential prompt. Run them with the same development Playwright command
+below, after configuring the public logout settings described in the README.
+
 With `OUTAGE_API_ORIGIN` configured in `.env.local`, run `npm run dev` on
 localhost:3000, then in a separate terminal run:
 

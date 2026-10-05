@@ -7,6 +7,7 @@ export interface AuthAdapterOptions {
   readonly runtime: SessionRuntime;
   readonly fetch: typeof globalThis.fetch;
   readonly navigate: (path: string) => void;
+  readonly logoutUrl?: string | undefined;
   readonly now?: () => number;
 }
 interface SessionSecret {
@@ -80,6 +81,9 @@ export function createAuthAdapter(options: AuthAdapterOptions) {
     return runtime.isCurrent(context) ? response : null;
   }
   const operations: SessionOperations = {
+    completeLogout() {
+      if (options.logoutUrl) options.navigate(options.logoutUrl);
+    },
     async resolveSession(context): Promise<OperationResult<SessionResolution>> {
       try {
         const response = await request(context, "/api/auth/session", { method: "GET" });
