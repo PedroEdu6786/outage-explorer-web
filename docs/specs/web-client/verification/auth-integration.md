@@ -175,3 +175,13 @@ The controlled provider redirect does not establish real Cognito cookie
 clearance. An authenticated real browser logout and the next login credential
 prompt still require verification in the user's authenticated browser. No new
 visual comparison, data acceptance, global revocation or release acceptance.
+
+## User-confirmed Cognito logout — October 5
+
+After configuration and testing, the user confirmed that the Cognito logout
+flow works as expected. This records user-reported acceptance of the requested
+browser logout behavior, superseding the pending user verification above.
+No new automated live journey or individual HTTP/credential-prompt observations
+were captured in this update. Earlier controlled tests retain their stated scope.
+Reload/reopen, expiry, permission enforcement and independent-session checks,
+data integration and release acceptance remain separate.
