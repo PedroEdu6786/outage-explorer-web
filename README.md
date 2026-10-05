@@ -47,6 +47,21 @@ all analytical datasets; Admins additionally have backend refresh capability.
 A dedicated Admin UI is conditional. The client consumes authorized backend
 APIs and does not directly access EIA, S3, RDS or DuckDB.
 
+## Current integration intake — October 5, 2026
+
+The user confirms the documented backend services are implemented and ready for
+frontend integration. The updated source handoff confirms all seven operations
+are implemented and opt-in, closes the former B1–B3 artifact issues and permits
+null query generation identity for reference-free SQL. See the [Integration completion spec](specs/backend-integration/spec.md)
+and [state/security assessment](docs/specs/web-client/integration-assessment.md) for current source hashes, remaining frontend behavior,
+state-management options and SQL-security recommendations.
+
+This update supersedes backend-pending statements below, which retain historical
+intake provenance. Prepared client adapters exist; production data registration
+and connected acceptance remain open. Backend analytical resources must be
+explicitly configured for the named live target; user-owned isolation validation
+is outside this frontend work. No live or visual acceptance gate is closed here.
+
 ## Current state and open decisions
 
 Phases 1–4 have established a pinned toolchain, minimal Next.js App

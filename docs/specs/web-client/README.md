@@ -20,6 +20,21 @@ first, parallel feature work and individual pages last, then confirmed:
 | [Council decisions](council/03-decisions.md) | Contested choices, original arguments and concessions |
 | [Risks and test scenarios](council/05-risks-and-tests.md) | Cross-session races, cursor/execution lifecycles, precision and production fixture exclusion |
 
+## Current integration intake — October 5, 2026
+
+The user confirms the documented backend services are implemented and ready for
+frontend integration. The updated source handoff confirms all seven operations
+are implemented and opt-in, closes the former B1–B3 artifact issues and permits
+null query generation identity for reference-free SQL. See the [integration completion spec](../../../specs/backend-integration/spec.md)
+and [state/security assessment](integration-assessment.md) for current source hashes, remaining frontend behavior,
+state-management options and SQL-security recommendations.
+
+This update supersedes backend-pending statements below, which retain historical
+intake provenance. Prepared client adapters exist; production data registration
+and connected acceptance remain open. Backend analytical resources must be
+explicitly configured for the named live target; user-owned isolation validation
+is outside this frontend work. No live or visual acceptance gate is closed here.
+
 ## Parallel delivery
 
 The task manifest contains **78 tasks across seven phases**, with **21 marked

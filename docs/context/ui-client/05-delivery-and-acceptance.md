@@ -4,6 +4,21 @@ Use this checklist in `outage-explorer-web`, the separate UI repository. The han
 context preparation; it does not itself provision a repository, deploy an app
 or declare a visual/API integration complete.
 
+## Current integration intake — October 5, 2026
+
+The user confirms the documented backend services are implemented and ready for
+frontend integration. The updated source handoff confirms all seven operations
+are implemented and opt-in, closes the former B1–B3 artifact issues and permits
+null query generation identity for reference-free SQL. See the [integration spec](../../../specs/backend-integration/spec.md)
+and [assessment](../../specs/web-client/integration-assessment.md) for current source hashes, remaining frontend behavior,
+state-management options and SQL-security recommendations.
+
+This update supersedes backend-pending statements below, which retain historical
+intake provenance. Prepared client adapters exist; production data registration
+and connected acceptance remain open. Backend analytical resources must be
+explicitly configured for the named live target; user-owned isolation validation
+is outside this frontend work. No live or visual acceptance gate is closed here.
+
 ## Suggested implementation sequence
 
 1. Read this pack and the destination repository's instructions. Inspect Figma
