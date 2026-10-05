@@ -17,8 +17,8 @@ export const syntheticSettings = {
 const coverage = { status: "available", range: { start: "2026-09-01", end: "2026-09-04" } } as const;
 export const syntheticCatalog: readonly DatasetSummary[] = [
   { id: "synthetic-national", label: "Synthetic national observations", description: "Invented test data, not EIA findings.", grain: "national", sqlName: "synthetic_national", coverage, filters: { dates: true, facilities: [] } },
-  { id: "synthetic-facility", label: "Synthetic facility observations", description: "Invented test data, not EIA findings.", grain: "facility", sqlName: "synthetic_facility", coverage, filters: { dates: true, facilities: [{ id: "0012", label: "Synthetic Facility 0012" }, { id: "A07", label: "Synthetic Facility A07" }] } },
-  { id: "synthetic-generator", label: "Synthetic generator observations", description: "Invented test data, not EIA findings.", grain: "generator", sqlName: "synthetic_generator", coverage, filters: { dates: true, facilities: [{ id: "0012", label: "Synthetic Facility 0012" }] } },
+  { id: "synthetic-facility", label: "Synthetic facility observations", description: "Invented test data, not EIA findings.", grain: "facility", sqlName: "synthetic_facility", coverage, filters: { dates: true, facilities: [] } },
+  { id: "synthetic-generator", label: "Synthetic generator observations", description: "Invented test data, not EIA findings.", grain: "generator", sqlName: "synthetic_generator", coverage, filters: { dates: true, facilities: [] } },
 ];
 
 export const syntheticObservations: readonly NationalObservation[] = [
@@ -45,7 +45,7 @@ export function syntheticSchema(datasetId: string): DatasetSchema {
 
 export function syntheticPreviewTable(datasetId: string): TableData {
   const rows: TableRow[] = syntheticObservations.filter((row) => row.status === "available").map((row, position) => {
-    const cells: TableCell[] = [{ kind: "date", value: row.date }, ...[row.capacityMw, row.outageMw, row.reportedPercentage, row.calculatedPercentage].map((value): TableCell => value === null ? { kind: "null" } : { kind: "decimal", ...value })];
+    const cells: TableCell[] = [{ kind: "date", value: row.date }, ...[row.capacityMw, row.outageMw, row.reportedPercentage, row.calculatedPercentage].map((value): TableCell => value === null ? { kind: "null" } : "numerator" in value ? { kind: "rational", ...value } : { kind: "decimal", ...value })];
     if (datasetId !== "synthetic-national") cells.push({ kind: "identifier", value: "0012" });
     if (datasetId === "synthetic-generator") cells.push({ kind: "identifier", value: "G-01" });
     return { position, cells };

@@ -52,6 +52,29 @@ describe("Queries explicit execution lifecycle", () => {
     await controller.run();
     expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(2);
   });
+  it("recovers an owned first page after an execution error with GET only and its captured size", async () => {
+    const fixture = createFixtureOperations();
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const operations = { ...fixture.operations, executeQuery: async (...args: Parameters<typeof fixture.operations.executeQuery>) => {
+      const response = await fixture.operations.executeQuery(...args);
+      if (!response.ok) return response;
+      return { ok: false as const, failure: { kind: "invalid-input" as const, message: "Requested page unavailable", retainedQuery: { queryId: response.value.execution.queryId, expiresAt: response.value.execution.expiresAt, pageSize: response.value.execution.pageSize } } };
+    } };
+    const controller = createQueriesController({ runtime, operations, initialPageSize: 2, maximumPageSize: 100 });
+    controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+    controller.editDraft(sql); await controller.run();
+    expect(controller.getSnapshot().result).toBeNull();
+    controller.setPageSize(5);
+    fixture.failNext("readQueryPage", { kind: "service-failure", message: "Retry later" });
+    await controller.recoverPage();
+    expect(controller.getSnapshot().failure).toMatchObject({ retainedQuery: { pageSize: 2 } });
+    await controller.recoverPage();
+    expect(controller.getSnapshot().result).toMatchObject({ page: 1, execution: { pageSize: 2 } });
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+    expect(fixture.callLog.read().filter((call) => call.operation === "readQueryPage").map((call) => call.input)).toEqual([
+      { queryId: "synthetic-query-1", page: 1, pageSize: 2 }, { queryId: "synthetic-query-1", page: 1, pageSize: 2 },
+    ]);
+  });
   it("clears lost results without silently returning page 1 or executing", async () => {
     const { fixture, controller } = setup(); controller.editDraft(sql); await controller.run(); await controller.readPage(2); fixture.loseResults(); await controller.readPage(1);
     expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-lost" } });

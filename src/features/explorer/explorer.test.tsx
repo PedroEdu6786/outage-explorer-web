@@ -31,7 +31,7 @@ describe("Explorer authorized cursor lifecycle", () => {
     expect(fixture.callLog.read().filter((call) => call.operation === "readSchema").map((call) => call.input)).toEqual([{ datasetId: "synthetic-national" }]);
     expect(controller.getSnapshot().schema?.columns.some((column) => column.kind === "identifier")).toBe(false);
   });
-  it("starts at 100 by default and refuses invalid calendars, ranges, unauthorized facilities and sizes", async () => {
+  it("starts at 100 by default and refuses invalid calendars, ranges, unsupported facilities and sizes", async () => {
     const fixture = createFixtureOperations();
     const runtime = createSessionRuntime();
     runtime.setResolution(fixture.sessionResolution());
@@ -43,13 +43,24 @@ describe("Explorer authorized cursor lifecycle", () => {
     for (const [filters, size] of [
       [{ dates: { start: "2026-02-30", end: "2026-09-03" } }, 100],
       [{ dates: { start: "2026-09-04", end: "2026-09-01" } }, 100],
-      [{ dates: { start: "2026-08-31", end: "2026-09-03" } }, 100],
       [{ facilityId: "0012" }, 100], [{}, 501], [{}, 0], [{}, 1.5],
     ] as const) controller.select("synthetic-national", filters, size);
     expect(fixture.callLog.read()).toHaveLength(count);
     expect(controller.getSnapshot().failure?.kind).toBe("invalid-input");
     expect(isCalendarDate("2024-02-29")).toBe(true);
     expect(isCalendarDate("2100-02-29")).toBe(false);
+  });
+  it("accepts optional bounds and empty results outside coverage while forbidding facility filters for Analysts", async () => {
+    const { controller, fixture } = setup(); await ready(controller);
+    controller.select("synthetic-facility", { dates: { start: "2026-09-03" } }); await ready(controller);
+    expect(controller.getSnapshot().pages[0]?.table.rows).not.toHaveLength(0);
+    const before = fixture.callLog.read().length;
+    controller.select("synthetic-facility", { facilityId: "0012" });
+    expect(fixture.callLog.read()).toHaveLength(before);
+    controller.select("synthetic-facility", { dates: { end: "2025-12-31" } }); await ready(controller);
+    expect(controller.getSnapshot().pages[0]?.table.rows).toHaveLength(0);
+    controller.select("synthetic-facility", {}); await ready(controller);
+    expect(controller.getSnapshot().failure).toBeNull();
   });
   it("rejects out-of-order schema, preview successes and forbidden errors for old selections", async () => {
     const { fixture, controller } = setup();
@@ -71,14 +82,14 @@ describe("Explorer authorized cursor lifecycle", () => {
     const { controller, fixture } = setup();
     await ready(controller);
     controller.next(); await ready(controller);
-    controller.select("synthetic-generator", { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-03" } }, 2);
+    controller.select("synthetic-generator", { dates: { start: "2026-09-01", end: "2026-09-03" } }, 2);
     expect(controller.getSnapshot().pages).toEqual([]);
     await ready(controller);
     expect(controller.getSnapshot().pages).toHaveLength(1);
     const cells = controller.getSnapshot().pages[0]?.table.rows[0]?.cells;
     expect(cells).toContainEqual({ kind: "identifier", value: "0012" });
     expect(cells).toContainEqual({ kind: "identifier", value: "G-01" });
-    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-generator", filters: { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-03" } }, pageSize: 2 });
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-generator", filters: { dates: { start: "2026-09-01", end: "2026-09-03" } }, pageSize: 2 });
   });
   it("retains original snapshot/expiry across publication and cached backward navigation", async () => {
     const { controller, fixture } = setup();
@@ -165,8 +176,8 @@ describe("Explorer authorized cursor lifecycle", () => {
   });
   it("creates only a generation-bound authorized SQL intent and never executes", async () => {
     const { controller, fixture, runtime } = setup(); await ready(controller);
-    controller.select("synthetic-facility", { facilityId: "0012" }); await ready(controller);
-    expect(controller.sqlIntent()).toEqual({ target: "queries", generation: runtime.getSnapshot().generation, datasetId: "synthetic-facility", filters: { facilityId: "0012" } });
+    controller.select("synthetic-facility", { dates: { start: "2026-09-03" } }); await ready(controller);
+    expect(controller.sqlIntent()).toEqual({ target: "queries", generation: runtime.getSnapshot().generation, datasetId: "synthetic-facility", filters: { dates: { start: "2026-09-03" } } });
     expect(fixture.callLog.read().some((call) => call.operation === "executeQuery")).toBe(false);
     runtime.invalidate(); expect(controller.sqlIntent()).toBeNull();
   });

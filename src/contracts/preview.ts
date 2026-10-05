@@ -1,4 +1,4 @@
-import type { DatasetId, DateRange } from "./catalog";
+import type { DatasetId, DateBounds } from "./catalog";
 import type { OperationResult } from "./failures";
 import type { ExpiryInstant, OperationContext } from "./session";
 import type { OpaqueIdentifier, TableData } from "./table";
@@ -7,7 +7,7 @@ import type { OpaqueIdentifier, TableData } from "./table";
 export type PreviewCursor = string;
 
 export interface AppliedFilters {
-  readonly dates?: DateRange;
+  readonly dates?: DateBounds;
   readonly facilityId?: OpaqueIdentifier;
 }
 
@@ -27,6 +27,8 @@ export interface PreviewSequence {
 export interface PreviewPage {
   readonly sequence: PreviewSequence;
   readonly table: TableData;
+  readonly pageCursor?: PreviewCursor;
+  readonly hasMore?: boolean;
   readonly nextCursor: PreviewCursor | null;
 }
 

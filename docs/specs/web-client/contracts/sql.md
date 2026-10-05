@@ -63,8 +63,9 @@ The internal canonical document is not the HTTP response shape.
 - `503 query_busy` is retryable by deliberate user action; `504 query_timeout`
   is a confirmed deadline. `Retry-After` is advisory, not an automatic POST policy.
 
-The frontend currently drops structured error details/retry metadata, supports
-fewer cell types, and does not retain returned `total_pages`/`has_more`/`limits`.
-Agree decoding/mapping and validate consistency before transport coding. See
+Local adapters now preserve structured recovery/retry metadata, rich typed cells
+and returned totals/limits, with consistency checks. The UI offers explicit GET
+first-page recovery and distinguishes empty byte-truncated results. Production
+registration and live proof remain pending; see [the adaptation](frontend-adaptation.md). See
 [contract comparison](contract-review.md); source fixture issues must not become
 production behavior.

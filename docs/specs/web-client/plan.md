@@ -1,5 +1,5 @@
 # Plan: Outage Explorer web client
-> Status: council synthesis; live contracts pending · Slug: web-client · Spec: ./spec.md
+> Status: fixture milestone complete; data adapters prepared; revised auth DTO and live integration pending · Slug: web-client · Spec: ./spec.md
 
 ## Approach
 
@@ -37,17 +37,19 @@ Keep state in feature React controllers/reducers. The common session runtime coo
 
 These are feature-facing responsibilities, not invented endpoint paths. The integration owner controls shared changes and affected consumer tests. (TR7–TR8)
 
-October 5 update: the [auth handoff](contracts/auth.md) now supplies endpoint,
-cookie/CSRF and backend callback contracts. Its role-only session response and
-confirmed-logout behavior require frontend seam reconciliation. This documents
-inputs only. The subsequent [Data API v1 intake](contracts/data-api.md) now
-supplies service contracts/Q3 values; [differences and artifact issues](contracts/contract-review.md),
-backend runtime, target configuration and live evidence remain pending under
-[readiness revision 3](contracts/live-readiness.md).
+October 5 current agreement: cookie sessions, backend-owned Cognito callback and
+CSRF transport are documented. The backend assigns roles and controls effective
+capabilities; the frontend sends no permission claims, does not derive capabilities
+from role names, and does not require a role in the response. Await the revised
+session capability DTO before auth mapping. The [data contract](contracts/data-api.md)
+and SQL settings are supplied; local data adaptations are implemented and tested
+with controlled responses. Backend source corrections are user-owned. See
+[auth authority](contracts/auth.md), [adaptation evidence](verification/contract-adaptation.md)
+and [readiness revision 5](contracts/live-readiness.md).
 
 | Operation | Input → output / behavior | Trace |
 | --- | --- | --- |
-| Resolve session / begin login / logout | Resolve backend identity/capabilities/expiry; begin selected code/PKCE flow; invalidate current application session | FR2–FR6 |
+| Resolve session / begin login / logout | Resolve backend identity/capabilities/expiry; navigate to backend login (Flask owns PKCE/callback); confirm current-session logout | FR2–FR6 |
 | List datasets / read schema | Session context and dataset ID → authorized catalog/schema/coverage; shared by Explorer and Queries | FR6–FR7 |
 | Start/continue preview | Selection/effective size or opaque cursor → ordered rows, snapshot, cursor/expiry and supported navigation metadata | FR8–FR9 |
 | Read national series | Authorized date selection → exact observations, coverage and same-observation metric values for cards/trend/table | FR10–FR11, FR20 |
@@ -58,7 +60,7 @@ backend runtime, target configuration and live evidence remain pending under
 - Failure states: unauthenticated, forbidden, invalid input, unsupported SQL, unavailable data, expired preview, expired/lost result, busy, execution timeout, unknown execution outcome and service failure. Do not invent HTTP status/error identifiers before agreement. (FR16, TR7)
 - A lost execute response is not proof of failure/cancellation. Preserve safe submitted/draft context, explain uncertainty and require a new deliberate Run; it may receive busy. Do not invent an execution ID, lookup or idempotent retry. (FR12–FR16)
 - Preview previous navigation can revisit locally retained pages only within the same identity/snapshot/expiry, or use an agreed backend facility; otherwise omit it. Never promise random cursor jumps or totals. SQL navigation stays independently numbered. (FR8–FR9, FR13–FR14)
-- Freeze only shared session invalidation, catalog/schema, operation/failure models, positional table data, cross-view intents and consumed shared props. Feature internals remain adjustable. Transport stays unapproved until Q2/Q3 resolve. (FR19; TR7–TR10)
+- Freeze only shared session invalidation, catalog/schema, operation/failure models, positional table data, cross-view intents and consumed shared props. Feature internals remain adjustable. Data transport is locally prepared; auth DTO/configuration and live verification remain pending. SQL contract settings are resolved. (FR19; TR7–TR10)
 - **Live-contract gate:** record integration responsibility, backend environment/version, each operation's request/response/error/encoding/authorization semantics and applicable session exchange/storage/transport/callback/logout decisions. SQL additionally requires size defaults/maxima, TTL, delivery mode, out-of-range and unknown-outcome semantics. A completed record gates only its affected live adapter; all live records and evidence are required for release. (TR3, TR5, TR7, TR9)
 - **Fixture boundary:** Storybook and test-only composition roots inject synthetic adapters/session providers. Production composition imports only live modules, fails closed when unavailable/misconfigured, and never imports an adapter selector that references fixtures. Verify both the source import graph and emitted artifacts; a missing marker alone is insufficient proof. (FR18; TR6, TR9)
 
@@ -105,7 +107,7 @@ The numbered phases describe delivery layers, not a blanket prohibition on start
 - Complete an exhaustive component library before feature work — delays independent lanes and creates unused abstractions. (FR19; TR10)
 - Start pages as each feature finishes — conflicts with the user's final page-assembly stage and bypasses composed integration proof. (FR19, FR21)
 - Universal preview/SQL paginator or auto-retrying query library — blurs distinct semantics and risks extra execution. (FR8–FR9, FR12–FR16)
-- Choose browser-direct or Next.js bridge now — would invent the unresolved session contract. (TR3, TR6–TR7)
+- Implement a frontend OAuth exchange — conflicts with the accepted Flask-owned callback. Same-origin `/api` proxy is selected for local development; target values remain pending. (TR3, TR6–TR7)
 
 ## Test strategy
 
@@ -117,7 +119,7 @@ The numbered phases describe delivery layers, not a blanket prohibition on start
 - **AC17:** Keyboard-only labels/focus/tab/drawer/editor operation, status announcements, zoom and narrow overflow; scoped chart has equivalent accessible data. Browser matrix decision is Q4.
 - **AC18:** Source import reachability plus emitted production artifact fixture sentinels; reject demo configuration in production and test backend failure on a production build. Fixtures remain test-only injections even for page demos.
 - **AC19, AC21:** Verify exact task predecessors/ownership; four feature checkpoints and composed cross-view harness before page assembly; intents never trigger execution or silently replace edited drafts. Access loss invalidates pending intents.
-- Run type, lint, production build and relevant behavior/browser checks selected by this plan. Record what actually ran; no application check has run during this documentation-only planning session. (TR9)
+- Run type, lint, production build and relevant behavior/browser checks selected by this plan. Existing controlled evidence is recorded in verification documents; future live acceptance requires actual connected checks. (TR9)
 
 ## Assumptions
 
@@ -133,3 +135,33 @@ The numbered phases describe delivery layers, not a blanket prohibition on start
 - **Q3:** [SQL v1 contract](contracts/sql.md) now supplies default100/max500, fixed15-minute expiry, synchronous delivery and out-of-range recovery. Source fixture corrections, frontend reconciliation and backend runtime/live evidence remain pending.
 - **Q4:** Browser/viewport acceptance beyond inspected references. Proposed baseline includes current Chromium/Firefox/WebKit, 1440/390 widths and observed breakpoint boundaries; confirm before final visual/browser sign-off.
 - **Asset gate:** Resolve font/icon/logo provenance and usable authoritative assets during phase 1. The unread Make PNGs are not assumed necessary; if a visible asset cannot be sourced faithfully, block only its visual implementation and record the missing item.
+
+## Frontend contract adaptation — October 5, 2026
+
+The user accepted date-only filters and independently optional start/end bounds;
+valid ranges outside coverage show empty results. The backend will add auth
+capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+injected operations, complete national preview assembly, exact fractions, richer
+tables and explicit SQL recovery are prepared; production remains unavailable.
+See the [expected-versus-available proposal and implementation record](contracts/frontend-adaptation.md).
+Controlled tests do not establish live readiness; no backend responses are
+expected yet. Earlier fixture milestones remain historical evidence.
+
+## Remaining implementation sequence — reconciled October 5
+
+This sequence governs the remaining work; earlier numbered phases retain their
+accepted fixture milestones. No new implementation is performed by this plan update.
+
+| Order / task | Work and completion criteria | Dependencies / current status |
+| --- | --- | --- |
+| 1 — T5.3 | Receive revised session capability DTO and user-owned source corrections; record target backend revision/origins/return paths and responsible integration owner. Distinguish effective permissions from data availability. | Auth field names and target configuration pending; data/SQL contracts already supplied. |
+| 2 — T5.4 | Finish fail-closed configuration and injected transport/composition seams. Reuse prepared data HTTP client; configure same-origin `/api` proxy from explicit backend target. Preserve redirects and cookies. | Configuration work follows agreed target; no frontend OAuth callback or provider exchange. |
+| 3 — T5.5 | Implement session decoding, browser login navigation, fixed expiry and memory-only CSRF. Clear protected state and reject stale completions; retain scoped logout retry context on `503`, confirm sign-out only on `204`. Handle `401`/`403`/network errors. | Revised capability DTO required. Use controlled responses while API unavailable. |
+| 4 — T5.6–T5.8 | Reuse and finish integration of existing catalog/preview/metric/query modules. Preserve date-only optional bounds, embedded schemas, exact fractions, complete preview series and GET-only SQL recovery. Revalidate affected consumers against corrected artifacts. | Local implementation already tested; remaining shared-module changes serialized under Integration. |
+| 5 — T6.L and T5.9/T5.L | Wire auth/data factories into production operations and author real-environment scenarios. Verify configuration failures without fixtures; exercise accepted adapters against the target when available. | Completed adapter contracts/composition; live checks also need backend/environment/accounts. |
+| 6 — Phase 7 | Verify real auth/permissions, snapshot/expiry, exact values, SQL request traces and failure isolation; complete agreed accessibility/visual review and release evidence. | T6.L/T5.L plus actual live and visual prerequisites. No release from mock responses. |
+
+Concrete remaining paths and acceptance are owned by [Phase 5](tasks/phase-5.md).
+Production stays explicitly unavailable until registration is ready. Backend
+unavailability does not prevent agreed controlled tests, and is never counted as
+live success. Admin UI, new-data card and deployment remain outside this work.

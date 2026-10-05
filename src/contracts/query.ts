@@ -2,7 +2,7 @@ import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from 
 import type { ExpiryInstant, OperationContext } from "./session";
 import type { TableData } from "./table";
 
-/** Proposed execution seam. Limits, TTL and synchronous/asynchronous delivery remain unapproved. */
+/** Data API v1 executes synchronously; pagination never submits SQL again. */
 export type QueryId = string;
 
 export interface ExecuteQueryInput {
@@ -15,7 +15,7 @@ export interface ExecuteQueryInput {
 
 export type QueryTruncation =
   | { readonly truncated: false }
-  | { readonly truncated: true; readonly reason: "row-limit" | "byte-limit" | "both" };
+  | { readonly truncated: true; readonly reason: "row-limit" | "byte-limit" };
 
 export interface QueryExecution {
   readonly queryId: QueryId;
@@ -24,12 +24,15 @@ export interface QueryExecution {
   readonly expiresAt: ExpiryInstant;
   /** Count retained in this execution, not total source matches. */
   readonly retainedRowCount: number;
+  readonly totalPages?: number;
+  readonly limits?: { readonly maxRows: number; readonly maxBytes: number };
   readonly truncation: QueryTruncation;
 }
 
 export interface QueryPage {
   readonly execution: QueryExecution;
   readonly page: number;
+  readonly hasMore?: boolean;
   readonly table: TableData;
 }
 

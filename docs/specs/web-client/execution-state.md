@@ -1,27 +1,27 @@
 # Execution state
 
-> Phases 1–4 complete; Phase 5 composed fixture and Phase 6 fixture pages accepted; live branches blocked on Q2/Q3. Coordinator-owned dispatch ledger for the
+> Phases 1–4 complete; Phase 5 composed fixture and Phase 6 fixture pages accepted; local data adaptation verified; revised auth DTO/configuration and live acceptance pending. Coordinator-owned dispatch ledger for the
 > [technical execution plan](execution-plan.md). This file records runtime
 > scheduling; the [task files](tasks.md) remain authoritative for task completion.
 
 ## Current run
 
-- October 5 latest scope: document auth plus the supplied Data API v1 OpenAPI,
-  handoff and fixtures before implementation; [comparison](contracts/contract-review.md)
-  records discrepancies. Readiness revision 3 supplies service/Q3 contract inputs
-  without accepting runtime, code changes or live tasks.
-- Earlier October 5 scope: document the supplied auth contract before implementation.
-  [Auth handoff](contracts/auth.md) and readiness revision 2 record transport and
-  endpoint details, plus remaining mapping/environment gaps. No new implementation
-  or live task is accepted; the implementation scope below is historical.
+- Latest October 5 planning reconciliation: main plan, task manifest and Phase 5
+  records now reflect prepared data modules, accepted date-only optional bounds
+  and backend-only authorization ownership. Revised auth capability DTO is pending;
+  client sends no permission claims, derives no capabilities from roles, and does
+  not require role in the response. See readiness revision 5.
+- Earlier October 5 intake documented auth/data contracts; subsequent user-authorized
+  adaptation implemented local data models/decoders/transport with controlled tests.
+  Those changes remain uncommitted. No auth connection or live acceptance claimed.
 - Authorized implementation scope: user requested implementation of the execution plan on October 4, 2026; the user successively authorized Phases 1, 2 and 3, all accepted, requested continuation of Phase 4, then invoked /implement for Phase 5 and requested Phase 6 implementation.
 - Coordinator: root Codex agent.
 - Capacity: current runtime supports four concurrent agents; reserve one for
   coordination and at most three for workers/reviewers.
-- Integrated revision: `d85410486de5055237a4f66cde197250555e9bd8`; branch `feat/web-client-foundation`. Pre-existing changes: modified README.md, untracked AGENTS.md and docs/. Preserve all supplied planning/context documents.
+- Current base: `3b0cbe3` on `main`, with uncommitted data adaptation and documentation. Preserve this work. Original Phase 1 evidence was recorded on `feat/web-client-foundation` at `d85410486de5055237a4f66cde197250555e9bd8`.
 - Accepted implementation tasks: all Phase 1–4 tasks, including four isolated fixture feature checkpoints; Phase 5 T5.1, T5.2 and T5.H plus Phase 6 T6.1–T6.6/T6.C accepted.
 - Evidence: [Phase 1 verification](verification/phase-1.md) and [source digests](verification/phase-1-digests.json).
-- Next gate: T6.L requires approved T5.5–T5.8 adapters/Q2/Q3. Phase 6 fixture milestone is accepted; Phase 7 live work remains gated.
+- Next gate: revised auth DTO/configuration enables remaining composition/session work; T6.L requires accepted T5.5–T5.8 adapters. SQL contract values are supplied. Phase 6 fixture milestone is accepted; Phase 7 live work remains gated.
 
 ## Assignments and acceptance
 
@@ -39,7 +39,7 @@ No running assignments or retained mutable resources. Phase 6 Page-integration o
 | Gate | State | Scope of blockage | Evidence to attach |
 | --- | --- | --- | --- |
 | Q2 Auth/session and operation contracts | auth and data source artifacts documented; reconciliation/runtime pending | Affected live composition/adapters and release | [Data intake](contracts/data-api.md), [comparison](contracts/contract-review.md); owner, target configuration, mappings and live evidence pending |
-| Q3 SQL settings/outcomes | contract supplied; source issues/runtime/mappings pending | Live SQL adapter and release evidence | [SQL v1](contracts/sql.md): default100/max500, fixed15-minute expiry, synchronous POST/GET recovery; no live acceptance |
+| Q3 SQL settings/outcomes | contract supplied; local mappings verified, user-owned source corrections/runtime checks pending | Live SQL adapter and release evidence | [SQL v1](contracts/sql.md): default100/max500, fixed15-minute expiry, synchronous POST/GET recovery; no live acceptance |
 | Q4 browser/viewport agreement | unresolved | Final visual/browser sign-off | Agreed matrix and review result |
 | T1.3 visible asset/font provenance | source documentation and local Inter650 runtime evidence accepted | Dependent visual work as specified by task graph | Source/license/export and documented deviations |
 
@@ -201,3 +201,26 @@ Do not erase prior evidence; identify what became stale and what supersedes it.
   existence; currently unavailable and release fails closed. T6.L remains blocked on
   T5.5–T5.8/Q2/Q3. Fixture milestone never accepts real transport/security or Q4 sign-off.
 - Build, Storybook6007 and production6008 resources released. No Phase7 performed.
+
+## Contract adaptation after user decisions — October 5, 2026
+
+- User accepts date-only v1 and independently optional date bounds, owns B1–B3
+  backend documentation corrections, and confirms backend auth capability fields
+  will be added. No API responses are expected during this preparation.
+- Coordinator alone owns shared contracts, affected features/table presentation,
+  `src/adapters/live/*`, `src/integration/data-http-client*`, tests and docs.
+  No agents, production registration, backend edits, commit, push or deployment.
+- Local models, mappings, injected transport and controlled checks are recorded in
+  [contract-adaptation evidence](verification/contract-adaptation.md). Historical
+  fixture acceptance remains dated; affected consumers are revalidated here.
+- Auth adapter, expanded capability response, confirmed logout/CSRF lifecycle,
+  target proxy/environment and actual live evidence remain pending. T5.L/T6.L
+  and release remain unaccepted; production operations still fail closed.
+
+## Main plan reconciliation — October 5
+
+Updated active plan/manifest/Phase 5 paths and acceptance to match the latest
+contract decisions. Reuse implemented data modules; serialize overlapping T5.6–T5.8
+work. Assign remaining auth/runtime/configuration/proxy/composition paths explicitly.
+No task checkbox closed, runtime code changed, backend request made or commit/push
+performed by this documentation update.

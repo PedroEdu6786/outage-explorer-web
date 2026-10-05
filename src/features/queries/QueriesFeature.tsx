@@ -30,6 +30,7 @@ export function QueriesFeature(props: QueriesFeatureProps) {
     <SqlEditorPanel draft={state.draft} onChange={(value) => { controller.editDraft(value); }} onRun={() => { void controller.run(); }} busy={busy} disabled={false} />
     <div className="max-w-[290px]"><FormField label="Rows per page for next execution" description="Changing size keeps existing pages fixed. Only a deliberate Run applies the new size.">{(association) => <Input {...association} type="number" min={1} max={props.maximumPageSize} value={state.pageSize} disabled={busy} onChange={(event) => { controller.setPageSize(Number(event.currentTarget.value)); }} />}</FormField></div>
     <QueryStatus state={state} />
+    {state.failure && "retainedQuery" in state.failure && state.failure.retainedQuery.pageSize && <Button variant="secondary" disabled={busy} onClick={() => { void controller.recoverPage(); }}>Load retained first page</Button>}
     <QueryResults state={state} onPage={(page) => { void controller.readPage(page); }} />
   </div>} />;
 }

@@ -61,7 +61,7 @@ readiness records; see [Phase 3 verification](docs/specs/web-client/verification
 Auth, Overview, Explorer and Queries now expose injected feature entries,
 synthetic Storybook stories and adversarial lifecycle coverage; see
 [Phase 4 verification](docs/specs/web-client/verification/phase-4.md).
-The composed fixture harness is now accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Phase 5 live adapters and T6.L registration remain blocked on Q2/Q3.
+The composed fixture harness is now accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Local data adapters are prepared; auth capability fields, target configuration and live checks still gate T6.L registration.
 Source-boundary and emitted-fixture checks are executable. Product routes now build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Production operations fail closed with explicit backend unavailability until live registration; fixture page demos remain in isolated Storybook roots. See the coordinator-owned
 [execution state](docs/specs/web-client/execution-state.md) for accepted tasks
 and the [Phase 1 verification record](docs/specs/web-client/verification/phase-1.md)
@@ -83,8 +83,8 @@ now documents catalog/preview, prepared national metrics, SQL and refresh, with
 local OpenAPI/fixture snapshots and a [comparison report](docs/specs/web-client/contracts/contract-review.md).
 Backend data endpoints remain pending implementation; frontend hosting remains open.
 The supplied published Figma
-prototype has been inspected; live integration still needs contract reconciliation,
-backend runtime/environment and mapping verification, plus asset provenance; see
+prototype has been inspected; live integration still needs expanded auth capabilities,
+backend runtime/environment and live mapping verification, plus asset provenance; see
 the [remaining inputs](docs/context/ui-client/05-delivery-and-acceptance.md#inputs-still-needed-for-implementation).
 Explicit synthetic fixtures support independent UI work while live integration
 is pending. They are isolated from production and do not establish EIA findings.
@@ -133,3 +133,14 @@ Delivery is evaluated against the
 [acceptance criteria](docs/context/ui-client/05-delivery-and-acceptance.md#acceptance-criteria).
 Report fixture behavior, live integration and Figma comparison separately,
 with the checks actually run and any remaining gaps.
+
+## Frontend contract adaptation — October 5, 2026
+
+The user accepted date-only filters and independently optional start/end bounds;
+valid ranges outside coverage show empty results. The backend will add auth
+capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+injected operations, complete national preview assembly, exact fractions, richer
+tables and explicit SQL recovery are prepared; production remains unavailable.
+See the [expected-versus-available proposal and implementation record](docs/specs/web-client/contracts/frontend-adaptation.md).
+Controlled tests do not establish live readiness; no backend responses are
+expected yet. Earlier fixture milestones remain historical evidence.

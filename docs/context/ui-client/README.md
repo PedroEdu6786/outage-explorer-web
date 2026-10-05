@@ -113,3 +113,14 @@ Implement only when that work is requested; this prompt establishes context.
 Report checks actually run and separate fixture validation, live integration
 and visual comparison results.
 ```
+
+## Frontend contract adaptation — October 5, 2026
+
+The user accepted date-only filters and independently optional start/end bounds;
+valid ranges outside coverage show empty results. The backend will add auth
+capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+injected operations, complete national preview assembly, exact fractions, richer
+tables and explicit SQL recovery are prepared; production remains unavailable.
+See the [expected-versus-available proposal and implementation record](../../specs/web-client/contracts/frontend-adaptation.md).
+Controlled tests do not establish live readiness; no backend responses are
+expected yet. Earlier fixture milestones remain historical evidence.

@@ -2,9 +2,22 @@
 
 October 5, 2026. Compared the [received contract](data-api.md), OpenAPI and
 58 fixtures with current `src/contracts/*` and Auth/Explorer/Overview/Queries
-controllers. Findings are documentation inputs; no implementation changed.
+controllers. The table below preserves the intake findings. Subsequent user
+decisions and local adaptations are recorded immediately below.
 
-## Frontend differences and newly specified behavior
+## Resolution after user feedback — October 5
+
+- F1: user accepts date-only v1; facility selector removed, dataset access retained.
+- F2: user accepts API-compatible optional bounds and valid out-of-coverage empty results.
+- F3–F10 and the SQL portion of F12: local data decoders, mappings, richer models and controlled transport
+  are prepared; see [frontend adaptation](frontend-adaptation.md) and its verification.
+- F11: backend will add capability fields. Await the expanded auth DTO; no role-only
+  capability substitute or live auth connection is implemented.
+- B1–B3: user owns backend corrections. Imported source snapshots remain unchanged;
+  the inconsistent row-limit response is rejected rather than copied into behavior.
+- F13: refresh UI remains conditional. Live readiness is still unverified.
+
+## Frontend differences and newly specified behavior (intake baseline)
 
 | ID | Current expectation / code | Received contract | Consequence before implementation |
 | --- | --- | --- | --- |
@@ -57,7 +70,7 @@ Received: stable dataset/SQL names, embedded schema route, date-only filtering,
 revisit cursors, national metric projection, richer lossless encodings, SQL
 defaults/limits/expiry/delivery/recovery, error codes and refresh lifecycle.
 
-Still needed: decisions for F1–F8/F11, correction/clarification of B1–B3,
+Still needed: expanded auth capability DTO, user-owned correction/clarification of B1–B3,
 actual backend implementation and runtime isolation/capacity evidence, named
 integration owner, target revision/environment, auth/proxy/CORS configuration
 and live request/permission/session verification. Proposed result-retention

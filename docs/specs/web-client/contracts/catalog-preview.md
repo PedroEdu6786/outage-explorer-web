@@ -67,7 +67,8 @@ restart. Unknown or unauthorized dataset IDs return generic
 `404 dataset_unavailable` without schemas. `403 forbidden` can also deny access;
 the UI must support both without exposing hidden datasets.
 
-Current frontend gaps: date bounds currently must be paired and in coverage;
-facility options exist; `PreviewPage` retains only `nextCursor`. See
-[comparison F1–F4](contract-review.md) before implementation. Backend wire examples
+Following user feedback, the frontend accepts date-only optional bounds and
+valid ranges outside coverage. V1 decoders retain current/next cursors and validate
+`has_more`; local Previous navigation still uses unexpired retained pages. See
+[the adaptation record](frontend-adaptation.md). Backend wire examples
 are synthetic; their dates and IDs are not production coverage.

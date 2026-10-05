@@ -5,6 +5,56 @@ pending**. Received October 5, 2026. This document records the supplied auth
 contract before implementation. The later [Data API v1 intake](data-api.md)
 supplies the service contracts and extends CSRF usage to SQL/refresh POST.
 
+## Accepted authorization boundary — October 5, 2026
+
+Roles are assigned by the backend, and effective capabilities are controlled by
+the backend. The frontend never assigns, sends or overrides either one.
+
+- `GET /api/auth/session` sends the session cookie with `credentials: "include"`;
+  it has no request body or role/capability query parameters or headers.
+- The backend resolves identity and effective permissions. Returned capabilities
+  guide UI navigation/actions; every API operation independently enforces
+  current backend authorization.
+- The frontend does not require a `role` field in the response and must not
+  derive capabilities from role names or a client-maintained role matrix.
+- The backend will add effective capabilities to its session response. Exact
+  JSON field names await the updated backend contract. Capabilities describe
+  permissions, not whether published data is currently available.
+
+The role-bearing response below is the **original received handoff**, preserved
+for provenance. It is not a frontend request or a requirement to expose roles in
+the revised response. This newer user decision governs integration; no updated
+backend implementation or live response is claimed.
+
+### Backend implementation handoff
+
+Return application identity (`user.id`, `user.email`), the existing expiry and
+session-bound CSRF token, and backend-resolved capabilities for authorized dataset
+IDs, national-series visibility and read-only SQL execution. The frontend maps
+those values into its presentation model without assigning access.
+
+Illustrative **response proposal**, not a request payload or finalized wire DTO:
+
+```json
+{
+  "user": {
+    "id": "application-user-id",
+    "email": "user@mail.com"
+  },
+  "expires_at": "2026-10-05T15:00:00+00:00",
+  "csrf_token": "opaque-session-bound-value",
+  "capabilities": {
+    "dataset_ids": ["national"],
+    "can_read_national_series": true,
+    "can_execute_query": true
+  }
+}
+```
+
+Confirm the proposed capability field names in the backend contract before auth
+adapter implementation. A true SQL capability does not grant access to additional
+datasets. No role-management or capability-setting endpoint is requested.
+
 ## Sources and authority
 
 - Primary input: the user's October 5 auth endpoint handoff.
@@ -43,7 +93,7 @@ The callback is a backend route, even when publicly served through the UI's
 same-origin proxy. Do not add a frontend OAuth callback or exchange provider
 codes in browser code. Redirect completion alone does not establish UI identity.
 
-## Endpoint contract
+## Received endpoint contract (handoff baseline)
 
 | Endpoint | Request | Success |
 | --- | --- | --- |
@@ -64,7 +114,7 @@ create no session. Provider callback failures clear the binding cookie and
 return a generic error without exposing provider descriptions. A frontend error
 redirect for these failures is not promised by this contract.
 
-### Session response
+### Received session response (handoff baseline)
 
 Illustrative payload supplied in the handoff, not a live account or session:
 
@@ -210,16 +260,25 @@ Service, metric, preview and SQL endpoints are outside this auth-only handoff.
 
 ## Verification required when implementation is authorized
 
-- Decode valid and malformed sessions/errors; reject unknown roles/invalid expiry
-  without publishing protected UI. Verify token isolation between sessions.
+- Decode the revised identity/capability response and errors; withhold protected
+  UI when capabilities are unresolved or expiry is invalid. Do not require role
+  names to resolve UI permissions. Verify token isolation between sessions.
 - Exercise browser navigation through Cognito, backend callback, cookie handling,
   final UI redirect and session restoration with the actual proxy/configuration.
 - Verify reload/reopen before expiry, fixed expiry despite API calls, explicit
   re-login and no restricted-content flash during resolution.
 - Verify `204` logout, repeat logout, `401`, Origin/CSRF `403`, and retryable `503`
   or lost response without false success; independent sessions remain independent.
-- Verify identity/role changes, late responses and token cleanup cannot restore
-  stale protected data; test role-derived presentation with agreed service data.
+- Verify identity/effective-capability changes, late responses and token cleanup
+  cannot restore stale protected data. Confirm requests contain no role/capability
+  claims and backend enforcement is independent of UI visibility.
 
 No live calls, adapter tests or visual checks were run for this documentation-only
 handoff. Fixture acceptance remains separate from live auth acceptance.
+
+## User decision after intake — October 5
+
+The backend will add capability fields. Preserve the existing frontend capability
+model and await the expanded response for validation/mapping. Do not infer
+capability flags from role as a substitute. No API responses are expected yet;
+auth transport/session integration remains pending. See [the adaptation record](frontend-adaptation.md).

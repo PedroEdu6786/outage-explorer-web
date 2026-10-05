@@ -22,12 +22,11 @@ That fraction is a percentage, not a raw capacity ratio. Do not present the
 rounded `3.33` as its exact mathematical value or recalculate display through
 floating point. Preserve source-reported and calculated percentages separately.
 
-The current `DecimalValue.exact` expects decimal text, and plotting uses
-`Number(value.exact)`. It cannot preserve a repeating rational such as `10/3`
-as exact decimal text. A rational-aware mapping/seam decision is still needed;
-keep backend display authoritative and restrict approximations to plot coordinates.
+The frontend now has a rational percentage model alongside legacy decimal
+fixtures. Numerator, denominator, rounded decimal and display remain separate;
+only plot coordinates approximate the fraction. Backend display is authoritative.
 
-Proposed frontend adaptation, **not implemented**: use national preview with
+Implemented locally through injected transport, **not connected to a live API**: use national preview with
 the requested range, follow cursor pages on the same generation until complete,
 then build the series in ascending calendar order for the existing chart.
 Never show a single default 100-row page as a complete longer series. Abort on

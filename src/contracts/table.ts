@@ -10,7 +10,17 @@ export interface DecimalValue {
   readonly display: string;
 }
 
-export type TableValueKind = "text" | "identifier" | "date" | "integer" | "decimal" | "boolean";
+export interface RationalValue {
+  /** Exact percentage supplied by the backend; never replace with rounded decimal. */
+  readonly numerator: string;
+  readonly denominator: string;
+  readonly rounded: string;
+  readonly display: string;
+}
+
+export type PercentageValue = DecimalValue | RationalValue;
+export type TableValueKind = "text" | "identifier" | "date" | "integer" | "decimal" | "boolean"
+  | "rational" | "float" | "time" | "timestamp" | "timestamp_tz" | "binary" | "list" | "struct" | "map" | "null";
 
 export interface TableColumn {
   /** Stable per projection position; repeated labels are allowed. */
@@ -18,7 +28,7 @@ export interface TableColumn {
   readonly label: string;
   readonly kind: TableValueKind;
   readonly unit: string | null;
-  readonly nullable: boolean;
+  readonly nullable: boolean | null;
 }
 
 export type TableCell =
@@ -28,7 +38,13 @@ export type TableCell =
   | { readonly kind: "date"; readonly value: CalendarDate }
   | { readonly kind: "integer"; readonly exact: string; readonly display: string }
   | ({ readonly kind: "decimal" } & DecimalValue)
-  | { readonly kind: "boolean"; readonly value: boolean };
+  | { readonly kind: "boolean"; readonly value: boolean }
+  | ({ readonly kind: "rational" } & RationalValue)
+  | { readonly kind: "float"; readonly value: number | "NaN" | "Infinity" | "-Infinity" }
+  | { readonly kind: "time" | "timestamp" | "timestamp_tz" | "binary"; readonly value: string }
+  | { readonly kind: "list"; readonly items: readonly TableCell[] }
+  | { readonly kind: "struct"; readonly fields: readonly { readonly name: string; readonly value: TableCell }[] }
+  | { readonly kind: "map"; readonly entries: readonly { readonly key: TableCell; readonly value: TableCell }[] };
 
 export interface TableRow {
   /** Position in this table page; scope rendering keys to its sequence/execution. */

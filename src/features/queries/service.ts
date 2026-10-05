@@ -85,6 +85,24 @@ export function createQueriesController({ runtime, operations, initialPageSize, 
       onRejected: () => { if (version === request) fail({ kind: "service-failure", message: "Page could not be loaded. Choose the page again to retry; SQL was not rerun." }); },
     });
   }
+  async function recoverPage() {
+    const recovery = state.failure && "retainedQuery" in state.failure ? state.failure.retainedQuery : undefined;
+    if (!allowed() || busy() || !recovery?.pageSize) return;
+    if (!Number.isFinite(Date.parse(recovery.expiresAt)) || Date.parse(recovery.expiresAt) <= now()) { fail({ kind: "result-expired", message: "Retained results expired. Use Run deliberately." }); return; }
+    const pageSize = recovery.pageSize;
+    const context = runtime.capture(lifetime.signal);
+    const version = ++request;
+    publish({ activity: "paging" });
+    await guardOperation(runtime, context, () => operations.readQueryPage(context, { queryId: recovery.queryId, page: 1, pageSize }), {
+      onSuccess: (result) => {
+        if (version !== request) return;
+        if (result.execution.queryId !== recovery.queryId || result.execution.pageSize !== recovery.pageSize || result.execution.expiresAt !== recovery.expiresAt || result.page !== 1) { fail({ kind: "result-lost", message: "Retained execution changed." }); return; }
+        publish({ activity: "success", result, failure: null });
+      },
+      onFailure: (failure) => { if (version === request) fail(["service-failure", "busy", "capacity-exhausted"].includes(failure.kind) ? { ...failure, retainedQuery: recovery } : failure); },
+      onRejected: () => { if (version === request) fail({ kind: "service-failure", message: "Could not load the retained page. Retry deliberately; SQL was not rerun.", retainedQuery: recovery }); },
+    });
+  }
   function receiveIntent(intent: NavigationIntent) {
     const context = runtime.capture(lifetime.signal);
     if (!allowed() || intent.generation !== context.generation || consumedIntent === intent) return;
@@ -99,7 +117,7 @@ export function createQueriesController({ runtime, operations, initialPageSize, 
     subscribe: (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; },
     attach() { cleanup(); lifetime = new AbortController(); cleanup = runtime.registerCleanup(reset); },
     dispose() { lifetime.abort(); cleanup(); reset(); },
-    loadCatalog, selectDataset, run, readPage, receiveIntent,
+    loadCatalog, selectDataset, run, readPage, recoverPage, receiveIntent,
     editDraft(draft: string) { if (allowed()) publish({ draft, edited: true }); },
     setPageSize(pageSize: number) { if (allowed() && Number.isSafeInteger(pageSize) && pageSize > 0 && pageSize <= maximumPageSize) publish({ pageSize }); },
     confirmHandoff() { if (allowed() && state.handoff) publish({ draft: state.handoff.proposedDraft, context: state.handoff, handoff: null, edited: false }); },

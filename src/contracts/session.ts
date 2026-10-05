@@ -1,7 +1,7 @@
 import type { DatasetId } from "./catalog";
 import type { OperationResult } from "./failures";
 
-/** Proposed frontend models only. No credential/session transport is selected. */
+/** Frontend models. Cookie transport is documented; expanded capability DTO is awaited. */
 export type SessionGeneration = number;
 /** Backend-supplied instant, unlike an observation's timezone-free calendar date. */
 export type ExpiryInstant = string;

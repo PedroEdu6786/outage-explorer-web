@@ -13,12 +13,36 @@ export interface DataTableProps {
   className?: string;
 }
 
+function structuredText(cell: TableCell): string {
+  switch (cell.kind) {
+    case "null": return "null";
+    case "integer": return cell.exact;
+    case "decimal": return cell.exact;
+    case "rational": return `${cell.numerator}/${cell.denominator}`;
+    case "boolean":
+    case "float": return String(cell.value);
+    case "list": return `[${cell.items.map(structuredText).join(", ")}]`;
+    case "struct": return `{${cell.fields.map((field) => `${JSON.stringify(field.name)}: ${structuredText(field.value)}`).join(", ")}}`;
+    case "map": return `[${cell.entries.map((entry) => `[${structuredText(entry.key)}, ${structuredText(entry.value)}]`).join(", ")}]`;
+    default: return JSON.stringify(cell.value);
+  }
+}
+
 function displayCell(cell: TableCell, missingText: string, missingLabel: string) {
   switch (cell.kind) {
     case "null": return <span aria-label={missingLabel} className="text-text-muted">{missingText}</span>;
     case "integer":
     case "decimal": return cell.display;
+    case "rational": return <span title={`Exact: ${cell.numerator}/${cell.denominator}`}>{cell.display}</span>;
+    case "float": return String(cell.value);
+    case "binary": return <span title="Base64 encoded binary">{cell.value}</span>;
+    case "list":
+    case "struct":
+    case "map": return structuredText(cell);
     case "boolean": return cell.value ? "true" : "false";
+    case "time":
+    case "timestamp":
+    case "timestamp_tz":
     case "date":
     case "identifier":
     case "text": return cell.value;

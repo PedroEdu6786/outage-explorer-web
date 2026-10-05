@@ -62,6 +62,13 @@ Seeded accounts are sufficient and public registration is disabled. Application
 permissions belong to PostgreSQL, and the backend must enforce them on every
 operation, including subsequent preview/result pages.
 
+The user clarified that roles and capabilities are assigned and controlled only
+by the backend. The client sends no role/capability claims. Session resolution
+uses the cookie and consumes backend-returned effective capabilities for UI
+visibility; a role field is not required by the frontend. The original handoff's
+role-bearing response is historical evidence, not the revised response requirement.
+See the [accepted auth boundary](../../specs/web-client/contracts/auth.md#accepted-authorization-boundary--october-5-2026).
+
 The October 5 handoff supplies browser-to-Flask authentication through a
 same-origin local `/api` proxy. Flask owns code exchange and callback, sets an
 HttpOnly session cookie, and returns an in-memory CSRF token for logout. Provider
@@ -120,3 +127,14 @@ Synthetic observations must be labeled synthetic. If real EIA fixtures are
 used, include provenance and preserve their access restrictions. Keep fixture
 data out of production client bundles, especially facility/generator examples
 that could be downloaded by a Viewer even when their screen is hidden.
+
+## Frontend contract adaptation — October 5, 2026
+
+The user accepted date-only filters and independently optional start/end bounds;
+valid ranges outside coverage show empty results. The backend will add auth
+capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+injected operations, complete national preview assembly, exact fractions, richer
+tables and explicit SQL recovery are prepared; production remains unavailable.
+See the [expected-versus-available proposal and implementation record](../../specs/web-client/contracts/frontend-adaptation.md).
+Controlled tests do not establish live readiness; no backend responses are
+expected yet. Earlier fixture milestones remain historical evidence.

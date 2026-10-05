@@ -1,4 +1,4 @@
-import type { CatalogOperations, DateRange } from "../../contracts/catalog";
+import type { CatalogOperations, DateBounds } from "../../contracts/catalog";
 import type { ObservationOperations } from "../../contracts/observations";
 import type { SessionRuntime } from "../../session/session-runtime";
 import { guardOperation } from "../../session/guard-operation";
@@ -9,8 +9,8 @@ export function validCalendarDate(value: string): boolean {
   const date = new Date(`${value}T00:00:00Z`);
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
-export function validRange(range: DateRange): boolean {
-  return validCalendarDate(range.start) && validCalendarDate(range.end) && range.start <= range.end;
+export function validRange(range: DateBounds): boolean {
+  return (range.start === undefined || validCalendarDate(range.start)) && (range.end === undefined || validCalendarDate(range.end)) && (range.start === undefined || range.end === undefined || range.start <= range.end);
 }
 export function createOverviewService(runtime: SessionRuntime, operations: OverviewOperations) {
   return { runtime, operations, guard: guardOperation };

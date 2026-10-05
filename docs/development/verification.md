@@ -149,3 +149,11 @@ serialize builds/captures and keep mutable browser output isolated. This scenari
 verifies unavailable configuration fails closed; connected backend-failure/live
 checks remain behind T6.L/T5.L. The explicit unavailable registration marker
 continues to fail `npm run check:release-boundaries` until T6.L is accepted.
+
+## Contract adaptation checks — October 5
+
+See [contract-adaptation evidence](../specs/web-client/verification/contract-adaptation.md)
+for current affected-consumer, decoder, injected HTTP, browser and build results.
+Data adapter tests use supplied synthetic response examples; HTTP tests inject
+fetch responses and make no backend requests. The user expects API unavailability;
+expanded auth capabilities and live integration remain pending.

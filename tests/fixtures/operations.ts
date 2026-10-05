@@ -1,4 +1,4 @@
-import type { CatalogOperations, DateRange } from "../../src/contracts/catalog";
+import type { CatalogOperations, DateBounds } from "../../src/contracts/catalog";
 import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from "../../src/contracts/failures";
 import type { NavigationOperations } from "../../src/contracts/navigation";
 import type { ObservationOperations } from "../../src/contracts/observations";
@@ -37,7 +37,7 @@ const success = <T,>(value: T): OperationResult<T> => ({ ok: true, value });
 const failure = (kind: OperationFailure["kind"]): { readonly ok: false; readonly failure: OperationFailure } => ({ ok: false, failure: { kind, message: `Synthetic fixture: ${kind}.` } });
 const positiveInteger = (value: number) => Number.isSafeInteger(value) && value > 0;
 /** Synthetic adapter checks syntax/order only; real calendar validation belongs to feature/live boundaries. */
-const validRange = (range: DateRange) => /^\d{4}-\d{2}-\d{2}$/.test(range.start) && /^\d{4}-\d{2}-\d{2}$/.test(range.end) && range.start <= range.end;
+const validRange = (range: DateBounds) => (range.start === undefined || /^\d{4}-\d{2}-\d{2}$/.test(range.start)) && (range.end === undefined || /^\d{4}-\d{2}-\d{2}$/.test(range.end)) && (range.start === undefined || range.end === undefined || range.start <= range.end);
 
 export function createFixtureOperations(options: FixtureOptions = {}) {
   const now = options.now ?? Date.now;
@@ -124,7 +124,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       if (denied) return denied;
       if (!validRange(range)) return failure("invalid-input");
       if (dataState === "unavailable") return failure("data-unavailable");
-      return success({ range, coverage: syntheticCatalog[0]?.coverage ?? { status: "unavailable" }, provenance: { source: "Synthetic fixture, not EIA observations", snapshotId: `synthetic-snapshot-${String(snapshot)}` }, observations: dataState === "empty" ? [] : syntheticObservations.filter((row) => row.date >= range.start && row.date <= range.end) });
+      return success({ range, coverage: syntheticCatalog[0]?.coverage ?? { status: "unavailable" }, provenance: { source: "Synthetic fixture, not EIA observations", snapshotId: `synthetic-snapshot-${String(snapshot)}` }, observations: dataState === "empty" ? [] : syntheticObservations.filter((row) => (!range.start || row.date >= range.start) && (!range.end || row.date <= range.end)) });
     }),
     startPreview: (context, selection) => invoke("startPreview", context, selection, () => {
       const denied = datasetFailure(selection.datasetId);
@@ -137,7 +137,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
         const date = row.cells[0];
         const facility = row.cells[5];
         const matchesFacility = !selection.filters.facilityId || (facility?.kind === "identifier" && facility.value === selection.filters.facilityId);
-        return matchesFacility && (!selection.filters.dates || (date?.kind === "date" && date.value >= selection.filters.dates.start && date.value <= selection.filters.dates.end));
+        return matchesFacility && (!selection.filters.dates || (date?.kind === "date" && (!selection.filters.dates.start || date.value >= selection.filters.dates.start) && (!selection.filters.dates.end || date.value <= selection.filters.dates.end)));
       }) };
       const sequence: PreviewSequence = { selection: structuredClone(selection), snapshotId: `synthetic-snapshot-${String(snapshot)}`, expiresAt: new Date(now() + syntheticSettings.previewLifetimeMs).toISOString() };
       return success(previewPage({ epoch, sequence, table, offset: 0 }));

@@ -11,6 +11,12 @@ export interface DateRange {
   readonly end: CalendarDate;
 }
 
+/** Optional inclusive request bounds; distinct from known catalog coverage. */
+export interface DateBounds {
+  readonly start?: CalendarDate;
+  readonly end?: CalendarDate;
+}
+
 export type DatasetCoverage =
   | { readonly status: "available"; readonly range: DateRange }
   | { readonly status: "unavailable" };
@@ -38,7 +44,7 @@ export interface DatasetSummary {
 }
 
 export interface DatasetSchemaColumn extends TableColumn {
-  /** Authorized backend SQL type label, separate from the normalized cell display kind. */
+  /** Display label from the backend type descriptor; not necessarily a raw engine type. */
   readonly sqlType: string;
 }
 

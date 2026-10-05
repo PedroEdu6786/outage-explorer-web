@@ -1,11 +1,11 @@
 # Tasks: Outage Explorer web client
-> Status: draft · Slug: web-client · Plan: ./plan.md · Spec: ./spec.md
+> Status: fixture milestone complete; local data adaptation verified; auth and live integration pending · Slug: web-client · Plan: ./plan.md · Spec: ./spec.md
 
 ## Overview
 
-- **78 tasks across 7 phases; 24 tasks marked parallelizable [P].** Hybrid layout: this manifest plus one granular file per phase. Phase 1 implementation/checks have run; completion and evidence are recorded below and in the execution ledger.
+- **78 tasks across 7 phases; 21 tasks marked parallelizable [P].** Hybrid layout: this manifest plus one granular file per phase. Phases 1–4 and fixture page assembly are accepted; local data adapters are prepared. Completion and evidence are recorded below and in the execution ledger.
 - Source: [plan](plan.md), [spec](spec.md), [design inventory](design-inventory.md) and [council decisions](council/03-decisions.md). V/S/A/M/O/T references are inventory IDs; FR/TR/AC references belong to the spec.
-- Initial repository inspection found documentation only. Phase 1 paths are now implemented; later application/component paths remain **exact planned additions**, not claims that they exist. `README.md`, this manifest and the phase files are existing documents to update where named. Later tasks may update files created by predecessors. Do not create placeholder application files during planning.
+- Initial inspection was documentation-only; the fixture application and local data adapters now exist. Phase files distinguish implemented paths from planned additions. Reuse existing modules and preserve uncommitted work; do not recreate superseded adapter filenames.
 - The first milestone is synthetic fixture demos; live integration is required before release. Product routes remain live-only and fail closed; fixture page demonstrations use separate test/story roots or browser test boundaries. No runtime production adapter selector may import fixtures.
 - Use native semantic text, headings, labels and separators directly where wrappers add no reusable contract. Component names prescribe ownership, not a mandate for an exhaustive library.
 
@@ -15,8 +15,8 @@
 - [x] **Phase 2: Tokens and atoms** — [7 tasks](tasks/phase-2.md); status: accepted; [verification](verification/phase-2.md).
 - [x] **Phase 3: Molecules, shared organisms and templates** — [13 tasks](tasks/phase-3.md); status: accepted; [verification](verification/phase-3.md).
 - [x] **Phase 4: Parallel feature compositions** — [20 tasks](tasks/phase-4.md); status: accepted; [verification](verification/phase-4.md).
-- [ ] **Phase 5: Integration seams and gated live adapters** — [11 tasks](tasks/phase-5.md); status: fixture T5.1/T5.2/T5.H accepted; live T5.3–T5.L blocked on Q2/Q3; [verification](verification/phase-5.md).
-- [ ] **Phase 6: Individual pages last** — [8 tasks](tasks/phase-6.md); status: fixture T6.1–T6.6/T6.C accepted; T6.L blocked on Q2/Q3; [verification](verification/phase-6.md).
+- [ ] **Phase 5: Integration seams and gated live adapters** — [11 tasks](tasks/phase-5.md); status: fixture T5.1/T5.2/T5.H accepted; local data preparation verified; revised auth DTO, target configuration and live acceptance pending; [verification](verification/phase-5.md).
+- [ ] **Phase 6: Individual pages last** — [8 tasks](tasks/phase-6.md); status: fixture T6.1–T6.6/T6.C accepted; T6.L pending completed auth/composition and configured target; [verification](verification/phase-6.md).
 - [ ] **Phase 7: Release verification** — [7 tasks](tasks/phase-7.md); status: not started.
 
 ## Dependency graph and start rules
@@ -34,7 +34,7 @@ request that includes those phases; planning does not start execution.
 - **Page gate:** `T4.AC + T4.OC + T4.EC + T4.QC → T5.1 → T5.2 → T5.H → T6.1`. After single-owner shared layout/navigation wiring `T6.1`, dispatch `T6.2`, `T6.3`, `T6.4`, `T6.5` concurrently; then `T6.6 → T6.C`. This gate deliberately requires all four features and the composed fixture harness.
 - **Independent live branch:** `T1.9 → T5.3` per-operation Auth/Catalog-Preview/Metric/SQL subgates. Auth transport readiness plus exact-path task expansion permits `T5.4`; agreed operation subgates independently enable `T5.5`–`T5.8`. A subgate can pass while others remain blocked. `T5.L` requires all adapters. Phase-6 pages **do not depend on phase 5 as a whole or on T5.L**.
 - **Production registration gate:** `T6.1 + T6.C + T5.5 + T5.6 + T5.7 + T5.8 → T6.L`. The Page-integration owner connects approved live factories in `src/composition/production-operations.ts` and reruns affected page checks under this separate checkpoint. `T6.L` is not a predecessor of fixture milestone `T6.C`; no completed task must be reopened. Until registration, missing live operations return unavailable with protected content withheld, never synthetic identities or invented transport.
-- Live release checks and the final production build require `T6.C + T6.L + T5.L` and their explicit external inputs; `T7.C` requires all listed verification evidence. Live checks remain incomplete while Q2/Q3 are unresolved. Phase 7 contains verification only; fixes return to owning implementation tasks.
+- Live release checks and the final production build require `T6.C + T6.L + T5.L` and their explicit external inputs; `T7.C` requires all listed verification evidence. Live checks remain incomplete until auth/configuration and actual backend prerequisites are satisfied; SQL contract values are supplied. Phase 7 contains verification only; fixes return to owning implementation tasks.
 
 ## Ownership and parallel dispatch
 
@@ -43,14 +43,14 @@ request that includes those phases; planning does not start execution.
 - **Shared UI lanes:** atoms/molecules/table/shell/template tasks list disjoint exact files. A lane can start only after its named predecessors. No shared barrel file is introduced; use named module imports. Shell tasks serialize within their owner.
 - **Auth, Overview, Explorer, Queries:** each owns its entire respective `src/features/auth`, `src/features/overview`, `src/features/explorer`, or `src/features/queries` subtree, including public entry, organisms, hooks/service, tests and stories. Their concrete files appear in phase 4. Each agent receives that lane's tasks and required contracts only; do not ask a sibling to produce an undeclared dependency.
 - **Page-integration:** exclusively owns shared layouts/providers/navigation/production composition and route registration. Individual page owners receive only their exact page/story/test paths (three files per lane), never shared layout or barrels. Wait for `T6.1` before dispatching page work; serialize later live registration in `T6.L` under this same owner.
-- **Live adapter lanes:** auth, catalog/preview, national metric and query files are disjoint. `T5.3` is a serialized amendment owned by Integration; it must add exact callback/bridge/server file tasks after the transport decision and before dependent coding, with ownership and dependencies. Do not guess credential route paths now.
+- **Live adapter ownership:** auth has its own files; current catalog/preview/metric/query modules share schemas and mappings, so remaining data changes are serialized under Integration. `T5.3` is a serialized amendment owned by Integration; it must add exact callback/bridge/server file tasks after the transport decision and before dependent coding, with ownership and dependencies. Do not guess credential route paths now.
 - **Release-QA:** run independent evidence checks with distinct output files. Shared browser sessions, backend publication controls and seeded fixtures may require scheduling; `[P]` does not authorize conflicting external mutation or secret exposure.
 - To dispatch: select a task whose `Depends` are satisfied; give the worker its exact files and acceptance criteria; state that others are working and must not be reverted; return evidence to the readiness checkpoint. `[P]` marks safe initial/disjoint opportunities, while unmarked tasks inside different established lanes can still overlap when their explicit dependencies and ownership permit it.
 
 ## Open inputs and scope guards
 
-- **Q2:** backend integration person, environment/version, payloads/errors/encoding and session credential exchange/storage/transport/callback/logout. Blocks affected live tasks and release. T5.3 documents the decision before adding exact transport-dependent file tasks.
-- **Q3:** SQL default/maximum page size, TTL, delivery mode, out-of-range and unknown-outcome semantics. Blocks the live SQL subgate and live SQL evidence; fixture scenarios must label their synthetic settings.
+- **Q2:** auth endpoint/cookie/CSRF/backend callback contracts are supplied. Await revised backend-controlled capability DTO, target environment/version/origins/return paths, integration ownership and live evidence. The client sends no role/capability claims and does not require role in the response.
+- **Q3:** contract values supplied: synchronous SQL, default100/max500, fixed15-minute result lifetime, 1,000 rows/1 MiB and explicit GET recovery. User-owned artifact corrections and actual backend runtime verification remain; do not reopen supplied settings as missing inputs.
 - **Q4:** browser/viewport matrix. Proposed current Chromium/Firefox/WebKit at inspected 1440/390 and 1000/760/480 boundary widths; agreement precedes final visual sign-off, not component work.
 - **Asset gate:** actual visible vector icons/logo and licensed font sources must be retained with provenance. Unread Make PNG files have no assumed purpose; missing required source blocks affected visual implementation only.
 - No Admin refresh screen, new-data notification card, deployment, saved history, generic grid/chart platform or new domain capability is included.
@@ -69,4 +69,6 @@ request that includes those phases; planning does not start execution.
 
 ## Next step
 
-- Run /implement when ready.
+- Follow the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5): revised auth DTO/configuration → composition/session adapter → reuse data adapters → production registration and live scenarios → actual live/release verification.
+- Date-only optional bounds and backend-only authorization ownership are accepted. Never infer capability flags from roles or accept client permission claims.
+- Local preparation evidence does not close live checkboxes. Existing P1–P4 preparation is recorded in [Phase 5](tasks/phase-5.md); no additional task IDs or completed live tasks are implied.

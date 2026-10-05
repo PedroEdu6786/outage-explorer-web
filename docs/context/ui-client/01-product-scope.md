@@ -33,15 +33,20 @@ apply when configured; no tenant model, facility assignment or hidden-column
 policy has been selected. Use server-provided capabilities when the contract
 exists, and handle denied requests even after a screen was initially allowed.
 
+The persona table describes backend policy, not a client-side permission map.
+The frontend never sends or assigns roles/capabilities and does not require a
+role in the session response. Backend-returned effective capabilities guide UI
+visibility; the backend authorizes every request. The user explicitly confirmed
+this boundary on October 5; see the [auth contract](../../specs/web-client/contracts/auth.md).
+
 ## Expected initial web capabilities
 
 1. Sign in through Cognito managed login, display session state and sign out.
 2. Discover only permitted datasets and inspect their available schema.
 3. Preview authorized records using backend pagination. The original UI scope
-   included date and applicable facility filters; the October 5 backend v1
-   contract selects date-only filtering. This scope difference is recorded as
-   [F1](../../specs/web-client/contracts/contract-review.md) for reconciliation
-   before live implementation.
+   included date and applicable facility filters; the user accepted date-only
+   v1 on October 5. Start/end dates are independently optional; valid ranges
+   outside coverage may return no rows. See the [accepted adaptation](../../specs/web-client/contracts/frontend-adaptation.md).
 4. Present the ready-made national daily offline-capacity metric within the
    relevant Figma screen. A separate dashboard/chart page is not mandated.
 5. Compose and run read-only SQL, then inspect column metadata and numbered

@@ -69,16 +69,20 @@ describe("Overview exact observation behavior", () => {
     act(() => { runtime.invalidate(); });
     expect(screen.queryByRole("table")).not.toBeInTheDocument(); view.unmount(); runtime.dispose();
   });
-  it("uses backend coverage and rejects out-of-coverage requests", async () => {
+  it("starts with backend coverage and permits open or out-of-coverage bounds", async () => {
     const { runtime, fixture } = setup();
     const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
     await screen.findByRole("table", { name: "Daily national observations" });
-    expect(screen.getByLabelText("Start date")).toHaveAttribute("min", "2026-09-01");
+    expect(screen.getByLabelText("Start date")).toHaveValue("2026-09-01");
+    expect(screen.getByLabelText("Start date")).not.toHaveAttribute("min");
     const before = fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries").length;
     fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-08-31" } });
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
-    expect(screen.getByText(/within dataset coverage/)).toBeVisible();
-    expect(fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries")).toHaveLength(before);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries")).toHaveLength(before + 1);
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "" } });
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries").at(-1)?.input).toEqual({ end: "2026-09-04" });
     view.unmount(); runtime.dispose();
   });
   it("withholds protected content and requests for capability denial", () => {

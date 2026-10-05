@@ -13,7 +13,7 @@ export function DatasetSchema({ schema }: { readonly schema: Schema }) {
     rows: schema.columns.map((column, position) => ({ position, cells: [
       { kind: "text", value: column.label }, { kind: "text", value: column.sqlType },
       column.unit === null ? { kind: "null" } : { kind: "text", value: column.unit },
-      { kind: "boolean", value: column.nullable },
+      column.nullable === null ? { kind: "text", value: "Unknown" } : { kind: "boolean", value: column.nullable },
     ] })),
   };
   return <DataTable data={table} caption="Authorized dataset schema" emptyTitle="No schema columns available" />;

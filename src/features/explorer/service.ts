@@ -37,7 +37,7 @@ export function createExplorerController({ operations, runtime, now = Date.now, 
     && runtime.isCurrent(context) && runtime.getSnapshot().status === "authenticated";
   function reject(failure: OperationFailure) {
     if (failure.kind === "unauthenticated") { runtime.invalidate("unauthenticated"); return; }
-    if (failure.kind === "forbidden") {
+    if (failure.kind === "forbidden" || failure.code === "dataset_unavailable") {
       clear();
       publish({ catalogStatus: "error", failure });
       return;

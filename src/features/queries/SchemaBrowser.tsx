@@ -17,7 +17,7 @@ export function SchemaBrowser({ state, onSelect, onReload }: { readonly state: Q
     {matches.map((dataset) => <div key={dataset.id}><button type="button" aria-expanded={state.selectedDataset === dataset.id} onClick={() => { onSelect(dataset.id); }} className="flex min-h-[36px] w-full items-center gap-2 border-b border-border px-3 text-left font-mono text-[11px] hover:bg-surface-muted"><span aria-hidden="true">{state.selectedDataset === dataset.id ? "⌄" : "›"}</span>{dataset.sqlName}</button>
       {state.selectedDataset === dataset.id && <div className="bg-surface-muted p-3">
         {state.schemaPending && <StatusMessage title="Loading schema" pending />}
-        {state.schema?.columns.map((column) => <div key={column.id} className="flex flex-wrap justify-between gap-2 py-2 text-[11px]"><span>{column.label}</span><span className="font-mono text-text-muted">{column.sqlType}{column.nullable ? " · nullable" : ""}</span></div>)}
+        {state.schema?.columns.map((column) => <div key={column.id} className="flex flex-wrap justify-between gap-2 py-2 text-[11px]"><span>{column.label}</span><span className="font-mono text-text-muted">{column.sqlType}{column.nullable === null ? " · nullability unknown" : column.nullable ? " · nullable" : ""}</span></div>)}
         <p className="mt-2 text-[11px] text-text-muted">Schema labels are a reference; no SQL is inserted or run.</p>
       </div>}
     </div>)}

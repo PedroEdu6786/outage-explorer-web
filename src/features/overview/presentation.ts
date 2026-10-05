@@ -1,9 +1,9 @@
 import type { NationalObservation } from "../../contracts/observations";
-import type { DecimalValue, TableCell, TableData } from "../../contracts/table";
+import type { PercentageValue, TableCell, TableData } from "../../contracts/table";
 
 /** Exact/display values remain untouched; Number conversion is confined to SVG coordinates. */
 export function observationTable(observations: readonly NationalObservation[]): TableData {
-  const decimal = (value: DecimalValue | null): TableCell => value === null ? { kind: "null" } : { kind: "decimal", ...value };
+  const decimal = (value: PercentageValue | null): TableCell => value === null ? { kind: "null" } : "numerator" in value ? { kind: "rational", ...value } : { kind: "decimal", ...value };
   return {
     columns: [
       { id: "date", label: "Date", kind: "date", unit: null, nullable: false },
@@ -18,7 +18,7 @@ export function observationTable(observations: readonly NationalObservation[]): 
     ] })),
   };
 }
-export function percentageLabel(value: DecimalValue | null): string {
+export function percentageLabel(value: PercentageValue | null): string {
   return value === null ? "Unavailable" : `${value.display}%`;
 }
 export function dayCoordinate(date: string): number {
@@ -29,7 +29,7 @@ export function plotSegments(observations: readonly NationalObservation[], key: 
   let current: { date: string; value: number; label: string }[] = [];
   for (const row of observations) {
     const value = row.status === "available" ? row[key] : null;
-    const coordinate = value === null ? NaN : Number(value.exact);
+    const coordinate = value === null ? NaN : "numerator" in value ? Number(value.numerator) / Number(value.denominator) : Number(value.exact);
     const previous = current.at(-1);
     if (previous && dayCoordinate(row.date) !== dayCoordinate(previous.date) + 1) {
       segments.push(current); current = [];

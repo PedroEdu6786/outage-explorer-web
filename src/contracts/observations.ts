@@ -1,7 +1,7 @@
-import type { DatasetCoverage, DateRange } from "./catalog";
+import type { DatasetCoverage, DateBounds } from "./catalog";
 import type { OperationResult } from "./failures";
 import type { OperationContext } from "./session";
-import type { CalendarDate, DecimalValue } from "./table";
+import type { CalendarDate, DecimalValue, PercentageValue } from "./table";
 
 /** Proposed national observation models; metrics are supplied by the backend. */
 export type NationalObservation =
@@ -12,7 +12,7 @@ export type NationalObservation =
       readonly capacityMw: DecimalValue | null;
       readonly outageMw: DecimalValue | null;
       readonly reportedPercentage: DecimalValue | null;
-      readonly calculatedPercentage: DecimalValue | null;
+      readonly calculatedPercentage: PercentageValue | null;
     };
 
 export interface ObservationProvenance {
@@ -21,7 +21,7 @@ export interface ObservationProvenance {
 }
 
 export interface NationalSeries {
-  readonly range: DateRange;
+  readonly range: DateBounds;
   readonly coverage: DatasetCoverage;
   readonly provenance: ObservationProvenance;
   /** Missing dates remain gaps; no interpolation or facility-average reconstruction. */
@@ -29,5 +29,5 @@ export interface NationalSeries {
 }
 
 export interface ObservationOperations {
-  readNationalSeries(context: OperationContext, range: DateRange): Promise<OperationResult<NationalSeries>>;
+  readNationalSeries(context: OperationContext, range: DateBounds): Promise<OperationResult<NationalSeries>>;
 }

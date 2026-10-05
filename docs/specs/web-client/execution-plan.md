@@ -4,6 +4,22 @@
 > is recorded in [execution state](execution-state.md); this runbook does not add
 > product scope or replace task acceptance criteria.
 
+## Current integration amendment — October 5, 2026
+
+Use the [remaining sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)
+and current [Phase 5 paths](tasks/phase-5.md) for outstanding work. Fixtures and
+page assembly are accepted; local data modules are already implemented/tested.
+Auth awaits the revised backend-controlled capability response and target
+configuration. The client sends no role/capability claims and needs no role field.
+Flask owns PKCE and callback; local development uses the same-origin `/api` proxy.
+
+T5.6–T5.8 share implemented modules and must be serialized under Integration;
+the original parallel data-lane schedule below is historical for those tasks.
+Do not create the former separate catalog/preview/metric/query adapter filenames.
+Controlled preparation is authorized without API responses; actual T5.L/T6.L
+and release acceptance still require their stated evidence. SQL contract settings
+are supplied, not an unresolved configuration-design question.
+
 ## Authority and operating model
 
 Read the [specification](spec.md), [architecture plan](plan.md),

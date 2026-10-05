@@ -36,10 +36,9 @@ export function validateSelection(dataset: DatasetSummary, selection: PreviewSel
   if (!Number.isInteger(selection.pageSize) || selection.pageSize < 1 || selection.pageSize > 500) return "Rows per page must be between 1 and 500.";
   const { dates, facilityId } = selection.filters;
   if (dates) {
-    if (!dataset.filters.dates || !isCalendarDate(dates.start) || !isCalendarDate(dates.end) || dates.start > dates.end) return "Enter valid calendar dates with the start on or before the end.";
-    if (dataset.coverage.status === "available" && (dates.start < dataset.coverage.range.start || dates.end > dataset.coverage.range.end)) return "Choose dates within the published coverage.";
+    if (!dataset.filters.dates || (dates.start !== undefined && !isCalendarDate(dates.start)) || (dates.end !== undefined && !isCalendarDate(dates.end)) || (dates.start !== undefined && dates.end !== undefined && dates.start > dates.end)) return "Enter valid calendar dates with the start on or before the end.";
   }
-  if (facilityId !== undefined && !dataset.filters.facilities.some((option) => option.id === facilityId)) return "Choose an authorized facility.";
+  if (facilityId !== undefined) return "Facility filtering is not available in this version. Use date filters.";
   return null;
 }
 

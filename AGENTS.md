@@ -59,6 +59,10 @@ decisions with their rationale. Revalidate historical findings.
 
 ## Conversation devlog before commits
 
+Commit each completed repository update, including documentation changes, as
+requested by the user on October 5, 2026. This is standing authorization for local
+commits; pushing and deployment require their own authorization.
+
 Preserve the append-only journal in `docs/devlog/YYYY-MM-DD.md`. Repo-local
 Codex hooks in `.codex/hooks.json` buffer completed-turn assistant summaries
 and append pending summaries before literal `git commit` tool calls. See

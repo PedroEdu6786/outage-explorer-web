@@ -9,7 +9,7 @@ first, parallel feature work and individual pages last, then confirmed:
 | --- | --- |
 | [Specification](spec.md) | 21 functional requirements, 10 technical constraints and 21 acceptance criteria |
 | [Design inventory](design-inventory.md) | Observed views, component mapping, tokens, responsive evidence and required prototype corrections |
-| [Implementation plan](plan.md) | Boundaries, contracts, seven delivery phases and verification strategy |
+| [Implementation plan](plan.md) | Boundaries, current remaining integration sequence, seven delivery phases and verification strategy |
 | [Auth HTTP contract](contracts/auth.md) | October 5 backend handoff: endpoints, session/CSRF, local proxy, frontend mapping gaps and pending live checks |
 | [Data API v1](contracts/data-api.md) | Service contracts, OpenAPI/fixture snapshots and source provenance |
 | [Contract comparison](contracts/contract-review.md) | Frontend differences, new behavior and backend artifact issues |
@@ -99,3 +99,19 @@ closure round. Its full record is [anchor](council/00-problem.md),
 [interrogation](council/01-interrogation.md), [proposals](council/02-proposals.md),
 [decisions](council/03-decisions.md), [debate](council/04-debate.md) and
 [risks](council/05-risks-and-tests.md).
+
+## Frontend contract adaptation — October 5, 2026
+
+The user accepted date-only filters and independently optional start/end bounds;
+valid ranges outside coverage show empty results. The backend will add auth
+capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+injected operations, complete national preview assembly, exact fractions, richer
+tables and explicit SQL recovery are prepared; production remains unavailable.
+See the [expected-versus-available proposal and implementation record](contracts/frontend-adaptation.md).
+Controlled tests do not establish live readiness; no backend responses are
+expected yet. Earlier fixture milestones remain historical evidence.
+
+The main plan and task manifest now reflect the latest backend-controlled auth
+boundary and supplied SQL settings. Follow the [remaining integration sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)
+and current Phase 5 paths; prepared data modules are reused, and live checkboxes
+remain open. Earlier run outcomes remain historical evidence.

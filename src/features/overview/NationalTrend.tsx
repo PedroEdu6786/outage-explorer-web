@@ -16,8 +16,10 @@ export function NationalTrend({ series }: { readonly series: NationalSeries }) {
   const points = [...calculated.flat(), ...(compare ? reported.flat() : [])];
   const max = Math.max(1, ...points.map((point) => point.value));
   const min = Math.min(0, ...points.map((point) => point.value));
-  const start = dayCoordinate(series.range.start);
-  const span = Math.max(1, dayCoordinate(series.range.end) - start);
+  const startDate = series.range.start ?? rows[0]?.date ?? "";
+  const endDate = series.range.end ?? rows.at(-1)?.date ?? startDate;
+  const start = dayCoordinate(startDate);
+  const span = Math.max(1, dayCoordinate(endDate) - start);
   const x = (date: string) => 60 + (dayCoordinate(date) - start) / span * 810;
   const y = (value: number) => 250 - (value - min) / (max - min) * 185;
   const active = rows.find((row) => row.date === selected);
@@ -34,7 +36,7 @@ export function NationalTrend({ series }: { readonly series: NationalSeries }) {
         {([calculated, ...(compare ? [reported] : [])]).map((segments, seriesIndex) => <g key={seriesIndex} fill="none" stroke={seriesIndex === 0 ? "#087d82" : "#246b9e"} strokeWidth="2" data-series={seriesIndex === 0 ? "calculated" : "reported"}>
           {segments.map((segment, index) => <g key={index}><polyline data-segment="observed" points={segment.map((point) => `${String(x(point.date))},${String(y(point.value))}`).join(" ")} />{segment.map((point) => <circle key={point.date} cx={x(point.date)} cy={y(point.value)} r="4" fill="white" onMouseEnter={() => { setSelected(point.date); }}><title>{point.date}: {seriesIndex === 0 ? "Calculated" : "EIA reported"} {point.label}</title></circle>)}</g>)}
         </g>)}
-        <text x="60" y="285" fontSize="11" fill="#5f707a">{series.range.start}</text><text x="870" y="285" textAnchor="end" fontSize="11" fill="#5f707a">{series.range.end}</text>
+        <text x="60" y="285" fontSize="11" fill="#5f707a">{startDate}</text><text x="870" y="285" textAnchor="end" fontSize="11" fill="#5f707a">{endDate}</text>
       </svg>
       </div>
       <p className="text-[11px] text-text-muted">Calculated offline %{compare && " · EIA reported %"} · Observation unavailable: a gap, never zero. Plot coordinates are approximate; labels preserve supplied decimal precision.</p>
