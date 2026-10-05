@@ -43,3 +43,33 @@
 T5.H fixture-only acceptance is recorded in [integration-fixture.md](../verification/integration-fixture.md) and the [Phase 5 summary](../verification/phase-5.md). Test discovery configuration transfers belong to Integration for T5.2: Playwright discovers `tests/browser/**`; Vitest excludes that browser root. No feature public contract or product route changed.
 
 T5.3 remains blocked: all four per-operation subgates in [live-readiness.md](../contracts/live-readiness.md) lack external Q2 agreement; SQL additionally lacks Q3. T5.4–T5.9 and T5.L cannot start without those predecessors. No callback/bridge paths or transport settings were invented. T5.H independently unlocks Phase 6 fixture page assembly in a subsequent authorized run.
+
+## Contract intake — October 5, 2026
+
+The user requested documentation before implementation and supplied auth only.
+[Auth](../contracts/auth.md) now records endpoints, cookie/CSRF transport and
+backend callback ownership, with source revision/digest and frontend mapping
+gaps. [Readiness revision 2](../contracts/live-readiness.md) supersedes the lack
+of auth transport information above. T5.3 remains incomplete: target configuration,
+owner, identity/capability mapping and pending/confirmed logout handling remain;
+service contracts/Q3 are awaited. No task checkbox or implementation acceptance
+changes. Exact proxy/configuration paths must be assigned before transport coding;
+the frontend does not own an OAuth callback or code exchange.
+
+## Service contract intake — October 5, 2026
+
+The subsequent user handoff supplies [Data API v1](../contracts/data-api.md),
+with local OpenAPI/fixture snapshots and separate [catalog/preview](../contracts/catalog-preview.md),
+[metric](../contracts/metric.md), [SQL](../contracts/sql.md) and
+[refresh](../contracts/refresh.md) records. Q3 contract values are now supplied.
+[Readiness revision 3](../contracts/live-readiness.md) supersedes the missing
+service-contract inputs above; all data/refresh runtime endpoints remain pending.
+
+Before implementation, resolve the [comparison findings](../contracts/contract-review.md):
+T5.5 session/catalog capability composition and logout handling; T5.6 date-only
+scope, date bounds, embedded schemas, cursor and richer table mappings; T5.7
+multi-page national preview and exact fractions; T5.8 result types, errors and
+owned out-of-range recovery. Shared-seam changes require explicit ownership and
+consumer revalidation. Request source corrections B1–B3 before treating those
+fixtures as conformance proof. No task checkbox is completed by this intake;
+Admin UI scope and all live/release gates remain unchanged.

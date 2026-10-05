@@ -45,8 +45,8 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 
 ## Inputs & Outputs
 - Input: [supplied Figma Make prototype](https://www.figma.com/make/9k3dy9IWG5UavJ0VgaZJ1G/Outage-Explorer-Prototype) and user-supplied [published preview](https://apply-less-42002887.figma.site/). The Make resource reader failed, but the published HTML, application bundle, stylesheet and rendered screens were inspected. Four main views are Sign in, Overview, Dataset Explorer (Preview/Schema tabs) and SQL Workspace. See [design evidence](design-inventory.md); Q1 access is resolved for planning, without claiming editable Figma node inspection.
-- Input: backend identity, capabilities, expiry, permitted catalog/schema, coverage, preview rows/cursor/snapshot, national metric, SQL result columns/rows/query ID and failures. [NEEDS CLARIFICATION: Q2 — Agree backend version, routes, DTOs, encoding, errors, session exchange/storage/transport and integration owner.]
-- Input: dataset selection, calendar-date/facility filters, opaque preview cursor, user SQL, positive `page`/`page_size` and opaque `query_id`. [NEEDS CLARIFICATION: Q3 — Agree SQL default/maximum page size, result TTL, out-of-range handling and synchronous/asynchronous execution delivery.]
+- Input: backend identity, capabilities, expiry, permitted catalog/schema, coverage, preview rows/cursor/snapshot, national metric, SQL result columns/rows/query ID and failures. [NEEDS CLARIFICATION: Q2 — Auth routes, DTO/errors and cookie/CSRF transport are documented in the October 5 [auth handoff](contracts/auth.md); reconcile its role-only response with frontend capabilities. Data API v1 [contracts and comparison](contracts/data-api.md) are now received. Reconcile mappings/source issues and agree target version/environment and integration owner.]
+- Input: dataset selection, calendar-date filters, opaque preview cursor, user SQL, positive `page`/`page_size` and opaque `query_id`. The earlier facility-filter expectation conflicts with date-only v1 and is tracked as [F1](contracts/contract-review.md). Q3 contract values are supplied: SQL default100/max500, fixed15-minute lifetime from completion, synchronous POST and GET/out-of-range recovery; runtime and mapping verification remain pending.
 - Output: permitted accessible views, precise data presentation and deliberate recovery actions; no inferred outage causes/durations, synthetic findings or invented totals.
 - Output: requirement-linked component/feature acceptance evidence, followed by individual page and live integration evidence.
 - [NEEDS CLARIFICATION: Q4 — Confirm target viewports/browser support and any responsive states absent from the supplied design.]
@@ -97,6 +97,6 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 
 ## Open Clarifications
 - **Q1 resolved for planning:** Published prototype inspected; editable Make source and the four PNG roles remain unverified. Do not claim Figma node mappings or reuse unread assets.
-- **Q2:** Versioned live API/session contract and integration owner; blocks real adapters and live authorization/session acceptance, not fixture feature work.
-- **Q3:** SQL size limits/TTL/delivery/errors; blocks final live SQL controls and transport, not synthetic lifecycle scenarios.
+- **Q2:** Auth source contract recorded with revision/digest; Data API v1 is also recorded. Frontend mapping/source discrepancies, target configuration, backend runtime and integration owner remain pending. Blocks affected real adapters and live authorization/session acceptance, not fixture feature work.
+- **Q3:** SQL size/TTL/delivery/error contract supplied in [sql.md](contracts/sql.md); remaining source corrections, runtime and frontend reconciliation gate live SQL acceptance.
 - **Q4:** Viewport/browser matrix and missing responsive states; blocks final visual sign-off, not accessible semantic component work.

@@ -92,9 +92,9 @@ or successful compilation.
 | Application setup in `outage-explorer-web` (repository established; documentation only) | Scaffolding and tooling |
 | Figma URL, relevant nodes, assets and access | Visual inventory and fidelity |
 | Backend environment and version | Live integration |
-| Agreed routes, DTOs, errors, SQL names and data encoding | HTTP adapter |
-| Cognito callback/client configuration and session transport | Real login/logout integration |
-| SQL page defaults/maxima, TTL, retry/error details | Final SQL controls and messages |
+| Auth and [Data API v1](../../specs/web-client/contracts/data-api.md) contracts received; frontend/source discrepancies and backend runtime pending | Service adapter mappings, capability composition and live evidence |
+| Exact Cognito callback/client, origins and local proxy configuration; cookie/CSRF transport documented in auth handoff | Real login/logout integration and live verification |
+| SQL default100/max500, 15-minute TTL, synchronous delivery and errors supplied; recovery/type mapping still pending | Final SQL controls, decoding and live verification |
 | Inclusion of Admin UI and any optional charts/findings | Scope beyond the core workflows |
 | Target viewports and any additional accessibility/browser requirements | Design extensions and verification matrix |
 | Frontend hosting, domain and release configuration | Deployment; independent of UI implementation |
@@ -111,11 +111,13 @@ Consult newer contracts if the backend has progressed beyond this snapshot.
 | `docs/specs/outage-explorer-backend/spec.md` | Product requirements; still a draft with historical/open sections |
 | `docs/adr/0039-separate-ui-client-atomic-design.md` | User-selected separate UI repo, stack and component hierarchy |
 | ADR-0014, ADR-0016, ADR-0017, ADR-0018 | Session experience, application-owned permissions and Cognito OAuth2; ADR-0017 removes required OIDC |
+| `docs/specs/user-access/http-contract.md` | October 5 auth update: endpoint/cookie/CSRF reference; source revision and draft integration status in the web [auth record](../../specs/web-client/contracts/auth.md) |
 | ADR-0015 | Preview cursors, defaults and expiry |
 | ADR-0012, ADR-0013, ADR-0020, ADR-0021, ADR-0022 | Broad read-only SQL, baseline limits, one-execution numbered pages and ephemeral state |
 | ADR-0006, ADR-0027, ADR-0031, ADR-0035 | National metric, required values, percentage presentation and meaning |
 | ADR-0003, ADR-0025, ADR-0026, ADR-0037 | Refresh activation, visible quality accounting and retained-data policies |
 | ADR-0030, ADR-0032, ADR-0038 | Current Flask structure, PostgreSQL/RDS and EC2 deployment |
+| `docs/specs/data-api/client-handoff.md`, `openapi.json`, `fixtures.json` | October 5 service intake; [snapshots, hashes and supplemental references](../../specs/web-client/contracts/data-api.md) |
 | `docs/specs/national-data-verification/contract.md` | Bounded national schema, units, precision and evidence limits |
 | `docs/specs/facility-generator-verification/contract.md` | Detail keys/identifiers and source-completeness caveats |
 | `src/outage_explorer/entrypoints/http/app.py` and `routes/health.py` | Currently registered HTTP behavior |

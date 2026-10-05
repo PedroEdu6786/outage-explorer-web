@@ -37,6 +37,14 @@ Keep state in feature React controllers/reducers. The common session runtime coo
 
 These are feature-facing responsibilities, not invented endpoint paths. The integration owner controls shared changes and affected consumer tests. (TR7–TR8)
 
+October 5 update: the [auth handoff](contracts/auth.md) now supplies endpoint,
+cookie/CSRF and backend callback contracts. Its role-only session response and
+confirmed-logout behavior require frontend seam reconciliation. This documents
+inputs only. The subsequent [Data API v1 intake](contracts/data-api.md) now
+supplies service contracts/Q3 values; [differences and artifact issues](contracts/contract-review.md),
+backend runtime, target configuration and live evidence remain pending under
+[readiness revision 3](contracts/live-readiness.md).
+
 | Operation | Input → output / behavior | Trace |
 | --- | --- | --- |
 | Resolve session / begin login / logout | Resolve backend identity/capabilities/expiry; begin selected code/PKCE flow; invalidate current application session | FR2–FR6 |
@@ -121,7 +129,7 @@ The numbered phases describe delivery layers, not a blanket prohibition on start
 
 ## Open decisions
 
-- **Q2:** Backend integration owner/person, environment/version, operation DTO/error/encoding and session transport agreement. Blocks affected phase 5 live tasks and release, not fixtures.
-- **Q3:** SQL page defaults/maxima, TTL, delivery mode and out-of-range/outcome contract. Blocks live SQL adapter/acceptance, not bounded fixture scenarios.
+- **Q2:** Auth transport/routes/payloads are documented in the [auth handoff](contracts/auth.md). Backend integration owner/person, target environment/version, frontend identity/capability/logout mapping and [data-contract reconciliation](contracts/contract-review.md) remain pending; v1 service DTO/error/encoding artifacts are now received. Blocks affected phase 5 live tasks and release, not fixtures.
+- **Q3:** [SQL v1 contract](contracts/sql.md) now supplies default100/max500, fixed15-minute expiry, synchronous delivery and out-of-range recovery. Source fixture corrections, frontend reconciliation and backend runtime/live evidence remain pending.
 - **Q4:** Browser/viewport acceptance beyond inspected references. Proposed baseline includes current Chromium/Firefox/WebKit, 1440/390 widths and observed breakpoint boundaries; confirm before final visual/browser sign-off.
 - **Asset gate:** Resolve font/icon/logo provenance and usable authoritative assets during phase 1. The unread Make PNGs are not assumed necessary; if a visible asset cannot be sourced faithfully, block only its visual implementation and record the missing item.

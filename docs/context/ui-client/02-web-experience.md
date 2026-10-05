@@ -47,6 +47,11 @@ Render schema-driven tables; arbitrary SQL output must not be forced into a
 national-record shape. Dates, identifiers, numbers, units and nulls should be
 distinguishable. Render source strings as text, never trusted HTML.
 
+The October 5 [preview contract](../../specs/web-client/contracts/catalog-preview.md)
+selects date-only filters, independently optional inclusive bounds and page revisit
+cursors. Current frontend facility/date validation differs; see
+[comparison F1/F2](../../specs/web-client/contracts/contract-review.md).
+
 Preview filters are applied by the backend. Validate date input and ranges
 before requesting data, then respect backend validation. Changes to dataset,
 filters or page size start a new browsing sequence. Ignore stale responses
@@ -78,7 +83,8 @@ SQL pagination is different from previews:
 - Subsequent requests select a page using the opaque `query_id`, without
   resubmitting SQL. Revisiting pages uses the same execution and fixed size.
 - Changing the SQL page size requires an explicit new execution; communicate
-  that consequence before starting it. SQL defaults/maxima remain undecided.
+  that consequence before starting it. Data API v1 now specifies default100/max500
+  and fixed 15-minute result expiry from completion; see the [SQL contract](../../specs/web-client/contracts/sql.md).
 - Do not inject `ORDER BY`, `LIMIT` or `OFFSET`, deduplicate result rows, or
   sort just the visible page as if the entire query result were sorted.
 - Without explicit SQL ordering, the sequence is stable within that execution,

@@ -37,8 +37,11 @@ exists, and handle denied requests even after a screen was initially allowed.
 
 1. Sign in through Cognito managed login, display session state and sign out.
 2. Discover only permitted datasets and inspect their available schema.
-3. Preview authorized records with date filters and facility filters where
-   applicable, using backend pagination.
+3. Preview authorized records using backend pagination. The original UI scope
+   included date and applicable facility filters; the October 5 backend v1
+   contract selects date-only filtering. This scope difference is recorded as
+   [F1](../../specs/web-client/contracts/contract-review.md) for reconciliation
+   before live implementation.
 4. Present the ready-made national daily offline-capacity metric within the
    relevant Figma screen. A separate dashboard/chart page is not mandated.
 5. Compose and run read-only SQL, then inspect column metadata and numbered

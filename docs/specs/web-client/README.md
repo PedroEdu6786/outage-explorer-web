@@ -10,6 +10,10 @@ first, parallel feature work and individual pages last, then confirmed:
 | [Specification](spec.md) | 21 functional requirements, 10 technical constraints and 21 acceptance criteria |
 | [Design inventory](design-inventory.md) | Observed views, component mapping, tokens, responsive evidence and required prototype corrections |
 | [Implementation plan](plan.md) | Boundaries, contracts, seven delivery phases and verification strategy |
+| [Auth HTTP contract](contracts/auth.md) | October 5 backend handoff: endpoints, session/CSRF, local proxy, frontend mapping gaps and pending live checks |
+| [Data API v1](contracts/data-api.md) | Service contracts, OpenAPI/fixture snapshots and source provenance |
+| [Contract comparison](contracts/contract-review.md) | Frontend differences, new behavior and backend artifact issues |
+| [Live readiness](contracts/live-readiness.md) | Per-operation contract inputs and remaining integration gates |
 | [Task manifest](tasks.md) | Executable tasks, predecessors, owners, parallel lanes and phase checkpoints |
 | [Technical execution plan](execution-plan.md) | Exact phase triggers, three-worker schedule, architecture rules, agent handoffs and Figma acceptance |
 | [Execution state](execution-state.md) | Coordinator-owned assignments, evidence and external gates; Phases 1–4 and Phase 5 fixture branch implemented |
@@ -70,8 +74,12 @@ Admin refresh controls and the deferred new-data card remain excluded.
 
 ## Remaining inputs
 
-- Versioned backend/session contracts and the responsible integration person.
-- SQL page limits, TTL, delivery and error/outcome semantics.
+- Auth handoff is documented with source revision/digest; target environment,
+  responsible integration person and frontend mapping remain pending. Data API v1
+  service contracts are now received; backend runtime and contract reconciliation
+  remain pending.
+- SQL contract defaults/TTL/delivery are supplied; source fixture corrections,
+  typed result/recovery mapping and live validation remain.
 - Final browser/viewport acceptance and usable asset/font provenance.
 
 Foundation, tokens/atoms and shared molecules/organisms/templates are implemented; see the
@@ -83,8 +91,8 @@ accepted; see [Phase 4 verification](verification/phase-4.md). The Phase 5 compo
 fixture harness is accepted; see [Phase 5 verification](verification/phase-5.md).
 The four fixture page compositions are accepted; see [Phase 6 verification](verification/phase-6.md). Live adapters and T6.L registration remain blocked on Q2/Q3; production routes show explicit unavailability until live registration.
 
-These are named gates in the plan and tasks. No backend contract, production
-deployment or completed runtime/visual acceptance is implied by this handoff.
+These are named gates in the plan and tasks. The documented auth source contract
+does not establish production deployment or completed live/visual acceptance.
 
 The council converged after one critique/author-response round and one focused
 closure round. Its full record is [anchor](council/00-problem.md),

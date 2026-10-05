@@ -74,13 +74,20 @@ against the backend version used for integration.
 
 Next.js App Router is now used by the minimal bootstrap. Exact compatible
 versions and their official compatibility evidence are recorded in the
-[toolchain documentation](docs/development/toolchain.md). Session
-transport and frontend hosting remain open. The supplied published Figma
-prototype has been inspected; implementation still needs agreed backend routes,
-payloads and error contracts, plus asset provenance; see
+[toolchain documentation](docs/development/toolchain.md). The October 5
+[auth HTTP handoff](docs/specs/web-client/contracts/auth.md) documents Flask-owned
+Cognito login/callback, HttpOnly cookie sessions, CSRF logout and a same-origin
+local proxy. Frontend mapping, environment configuration and live verification
+remain pending. The subsequent [Data API v1 handoff](docs/specs/web-client/contracts/data-api.md)
+now documents catalog/preview, prepared national metrics, SQL and refresh, with
+local OpenAPI/fixture snapshots and a [comparison report](docs/specs/web-client/contracts/contract-review.md).
+Backend data endpoints remain pending implementation; frontend hosting remains open.
+The supplied published Figma
+prototype has been inspected; live integration still needs contract reconciliation,
+backend runtime/environment and mapping verification, plus asset provenance; see
 the [remaining inputs](docs/context/ui-client/05-delivery-and-acceptance.md#inputs-still-needed-for-implementation).
-Explicit synthetic fixtures support independent UI work while those contracts
-are pending. They are isolated from production and do not establish EIA findings.
+Explicit synthetic fixtures support independent UI work while live integration
+is pending. They are isolated from production and do not establish EIA findings.
 
 ## Local development and checks
 

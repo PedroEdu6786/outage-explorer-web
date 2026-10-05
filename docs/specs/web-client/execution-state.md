@@ -6,6 +6,14 @@
 
 ## Current run
 
+- October 5 latest scope: document auth plus the supplied Data API v1 OpenAPI,
+  handoff and fixtures before implementation; [comparison](contracts/contract-review.md)
+  records discrepancies. Readiness revision 3 supplies service/Q3 contract inputs
+  without accepting runtime, code changes or live tasks.
+- Earlier October 5 scope: document the supplied auth contract before implementation.
+  [Auth handoff](contracts/auth.md) and readiness revision 2 record transport and
+  endpoint details, plus remaining mapping/environment gaps. No new implementation
+  or live task is accepted; the implementation scope below is historical.
 - Authorized implementation scope: user requested implementation of the execution plan on October 4, 2026; the user successively authorized Phases 1, 2 and 3, all accepted, requested continuation of Phase 4, then invoked /implement for Phase 5 and requested Phase 6 implementation.
 - Coordinator: root Codex agent.
 - Capacity: current runtime supports four concurrent agents; reserve one for
@@ -30,8 +38,8 @@ No running assignments or retained mutable resources. Phase 6 Page-integration o
 
 | Gate | State | Scope of blockage | Evidence to attach |
 | --- | --- | --- | --- |
-| Q2 Auth/session and operation contracts | unresolved | Affected live composition/adapters and release | Responsible person, version/environment, transport and operation agreement |
-| Q3 SQL settings/outcomes | unresolved | Live SQL adapter and release evidence | Defaults/maxima, TTL, delivery and error/outcome semantics |
+| Q2 Auth/session and operation contracts | auth and data source artifacts documented; reconciliation/runtime pending | Affected live composition/adapters and release | [Data intake](contracts/data-api.md), [comparison](contracts/contract-review.md); owner, target configuration, mappings and live evidence pending |
+| Q3 SQL settings/outcomes | contract supplied; source issues/runtime/mappings pending | Live SQL adapter and release evidence | [SQL v1](contracts/sql.md): default100/max500, fixed15-minute expiry, synchronous POST/GET recovery; no live acceptance |
 | Q4 browser/viewport agreement | unresolved | Final visual/browser sign-off | Agreed matrix and review result |
 | T1.3 visible asset/font provenance | source documentation and local Inter650 runtime evidence accepted | Dependent visual work as specified by task graph | Source/license/export and documented deviations |
 

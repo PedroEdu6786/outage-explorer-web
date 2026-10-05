@@ -4,9 +4,23 @@ The UI consumes the Outage Explorer backend. This document captures required
 semantics, not a complete OpenAPI specification. Revalidate availability against
 the backend version used for integration.
 
+## Auth handoff update — October 5, 2026
+
+The user supplied auth endpoints and the full backend reference was read locally.
+The [auth HTTP contract](../../specs/web-client/contracts/auth.md) now records
+backend-owned Cognito login/callback, HttpOnly cookie sessions, session identity/
+role/expiry/CSRF, confirmed logout, errors and same-origin local proxy behavior.
+Its source revision/digest and remaining frontend mapping decisions are included.
+This supersedes the auth-transport gaps in the original snapshot below. The
+subsequent [Data API v1 intake](../../specs/web-client/contracts/data-api.md) supplies
+service contracts and snapshots. All seven data/refresh operations are still
+pending backend implementation; no live verification or web transport is implied.
+See the [comparison report](../../specs/web-client/contracts/contract-review.md)
+for date-only filter scope, mapping differences and source artifact issues.
+
 ## Verified implementation status on October 4 2026
 
-The Flask application currently registers only `GET /health`. It returns
+At the October 4 handoff, the Flask application registered only `GET /health`. It returns
 `status`, `service` and `checked_at` and sets `Cache-Control: no-store`.
 It is unauthenticated liveness; it does not prove data, auth or SQL readiness.
 
@@ -28,18 +42,18 @@ or finalized method/type declarations.
 
 | Operation | Semantics/information needed | Still open |
 | --- | --- | --- |
-| Resolve session | Authenticated identity, current capabilities and expiry | Transport, endpoint and exact shape |
-| Login/callback/logout | Cognito code flow, session establishment, current-session invalidation | Code-exchange owner, callback URLs, session/token mapping |
-| List datasets/schema | Only permitted datasets, columns/types and applicable filters/coverage | Dataset IDs/SQL names, routes and payloads |
-| Preview records | Dataset and filters; bounded rows, ordering, snapshot and opaque continuation cursor | Request/response schema, cursor transport, previous-page navigation |
-| Read fleet metric | National date, source MW and reported/calculated percentages with precision | Catalog dataset versus dedicated route; encoding |
-| Execute SQL | SQL, positive `page`/`page_size`; columns, rows, query ID, snapshot and truncation information | Route, response encoding, sync/async delivery and SQL page limits |
-| Read query page | `query_id`, requested page and same effective page size; same execution | Route, TTL, out-of-range/error representation |
-| Start/check refresh | Admin-only background run, outcome, publication and quality accounting | Routes, status schema and polling mechanism; UI inclusion |
+| Resolve session | `GET /api/auth/session`: identity, role, expiry and CSRF | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; capability/view-model mapping and live evidence pending |
+| Login/callback/logout | Flask owns Cognito flow/callback and cookie sessions; CSRF-protected logout | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; exact environment/proxy settings and live evidence pending |
+| List datasets/schema | GET datasets embeds authorized columns/coverage and stable national/facilities/generators SQL names | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); metadata/capability mapping and runtime pending |
+| Preview records | Date-only optional bounds; current/next cursors, fixed snapshot/size/15-minute expiry | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); facility-filter scope and date-validation reconciliation pending |
+| Read fleet metric | Prepared columns of national through preview/SQL; no separate endpoint | [Contract supplied](../../specs/web-client/contracts/metric.md); full-series assembly and exact-fraction mapping pending |
+| Execute SQL | POST query, SQL-only body, URL page/size; synchronous result | [Contract supplied](../../specs/web-client/contracts/sql.md); source issues, model/error mapping and runtime pending |
+| Read query page | GET query with ID/page/fixed size; 15-minute lifetime from completion | [Contract supplied](../../specs/web-client/contracts/sql.md); runtime and live verification pending |
+| Start/check refresh | Admin POST admission, GET latest/by-ID, idempotency and publication states | [Contract supplied](../../specs/web-client/contracts/refresh.md); runtime pending, UI still conditional |
 
 Do not copy proposed `/api/...` paths from an earlier design and treat them as
-implemented. Likewise, `fleet_offline_share_daily` is a proposed prepared SQL
-dataset name; obtain stable names from the agreed catalog contract.
+implemented. The earlier proposed `fleet_offline_share_daily` name is superseded
+by the v1 prepared metric columns in `national`; no such extra dataset is exposed.
 
 ## Authentication integration boundary
 
@@ -48,13 +62,14 @@ Seeded accounts are sufficient and public registration is disabled. Application
 permissions belong to PostgreSQL, and the backend must enforce them on every
 operation, including subsequent preview/result pages.
 
-Choose browser-to-Flask versus a thin Next.js server-side bridge together with
-the session integration. Define code exchange, credential storage, cookie/token
-forwarding, CORS, CSRF protection where applicable, allowed callbacks and logout
-behavior before connecting protected screens. Do not assume an opaque cookie,
-bearer-only session, ID-token API access or refresh-token renewal is already
-approved. Do not store credentials in browser localStorage by default. No
-backend/AWS secrets may enter client bundles or public environment variables.
+The October 5 handoff supplies browser-to-Flask authentication through a
+same-origin local `/api` proxy. Flask owns code exchange and callback, sets an
+HttpOnly session cookie, and returns an in-memory CSRF token for logout. Provider
+tokens never reach the web client. Record exact proxy/origin/callback settings
+and reconcile the existing frontend session/capability/logout seams before
+connecting protected screens; see the [auth contract](../../specs/web-client/contracts/auth.md).
+Do not store credentials in browser storage. No backend/AWS secrets may enter
+client bundles or public environment variables. Production hosting remains open.
 
 The one-hour application session, provider token lifetime and Cognito SSO session
 are different concepts. Sign-out must invalidate the current application session
@@ -68,23 +83,23 @@ codes or error identifiers before the contract exists. Distinguish unauthenticat
 forbidden, invalid input, unsupported SQL, execution busy, execution timeout,
 unavailable data, expired preview, lost/expired query result and service failure.
 
-For SQL, include column order/types, duplicate column-label handling, nulls,
-numeric precision and date encoding in the contract. Rows may contain arbitrary
-projection/aggregate results and duplicates. A simplistic object keyed solely
-by a column name can lose duplicate labels; agree an unambiguous representation.
+The [v1 serialization contract](../../specs/web-client/contracts/data-api.md) now
+supplies ordered columns, positional rows, exact numeric strings and recursive
+types. Frontend decoding/view models need reconciliation before integration.
+A simplistic object keyed solely by column name loses duplicate SQL labels.
 
 Preserve the separate pagination contracts:
 
 | Property | Dataset preview | SQL result |
 | --- | --- | --- |
-| Selection | Opaque continuation cursor | Numbered `page` by opaque `query_id` |
+| Selection | Opaque current-page/revisit or next cursor | Numbered `page` by opaque `query_id` |
 | Stability | Original snapshot, filters and ordering | One execution's sequence and multiplicity |
-| Size | Default 100; initial configurable maximum 500 | Fixed within execution; default/maximum open |
-| Expiry | 15 minutes from first page | Fixed lifetime required; numeric TTL open |
+| Size | Default 100; initial configurable maximum 500 | Fixed within execution; independently selected default100/max500 |
+| Expiry | 15 minutes from first page | Fixed 15 minutes from execution completion |
 | Recovery | Explicit restart of browsing | Explicit rerun, new ID |
 | Total output | Backend-paginated browsing | Baseline 1,000 rows or 1 MiB for the entire execution |
 
-Do not reuse preview defaults/expiry as SQL settings. A backend restart can lose
+Preview and SQL settings are independently specified, even though v1 values match. A backend restart can lose
 SQL pagination metadata. Cache keys and UI state must distinguish a page of the
 same execution from a newly submitted query, even when the SQL text is identical.
 

@@ -97,8 +97,11 @@ animation/time make captures reviewable. Record accessibility extensions and
 required prototype corrections. A tooling story screenshot is not a product
 fidelity result.
 
-Live contracts remain unresolved. Do not select credential transport, invent
-API paths/settings or substitute fixtures after failures. Production registration,
+The [auth handoff](../specs/web-client/contracts/auth.md) now documents credential
+transport and auth paths; target configuration, frontend mapping and live checks
+remain pending. [Data API v1](../specs/web-client/contracts/data-api.md) now supplies
+service contracts; backend runtime and documented discrepancies remain pending. Do not invent API paths/settings
+or substitute fixtures after failures. Production registration,
 failure behavior, live session/permission/pagination checks and the final release
 checkpoint are later gates. Fixture-page acceptance does not accept a release.
 

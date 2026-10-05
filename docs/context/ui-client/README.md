@@ -36,8 +36,12 @@ handoff time; it is not a released API contract or a live status check.
 The destination repository and council planning documents are now established.
 Phase 1 application scaffolding, frontend contracts, session runtime and isolated
 fixture tooling are implemented; see the
-[Phase 1 evidence](../../specs/web-client/verification/phase-1.md). Live API/session
-contracts remain pending. Published prototype asset sources and font licenses are
+[Phase 1 evidence](../../specs/web-client/verification/phase-1.md). The October 5
+[auth handoff](../../specs/web-client/contracts/auth.md) now documents session
+transport and endpoints; frontend mapping, target configuration and live checks
+remain pending. The subsequent [Data API v1 handoff](../../specs/web-client/contracts/data-api.md)
+now supplies service contracts, with [frontend/source differences](../../specs/web-client/contracts/contract-review.md);
+backend runtime remains pending. Published prototype asset sources and font licenses are
 recorded in the [asset ledger](../../specs/web-client/assets.md); local licensed fonts and actual loaded-weight evidence are now recorded in the
 [token map](../../specs/web-client/token-map.md) and
 [Phase 2 verification](../../specs/web-client/verification/phase-2.md). Shared
