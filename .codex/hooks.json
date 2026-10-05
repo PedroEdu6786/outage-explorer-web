@@ -1,0 +1,30 @@
+{
+  "description": "Buffer final turn summaries and update the project devlog before Codex commits.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/devlog_hook.py\"",
+            "timeout": 3,
+            "statusMessage": "Saving devlog summary"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/devlog_hook.py\"",
+            "timeout": 3,
+            "statusMessage": "Updating devlog before commit"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+# Tasks: Evidence, toolchain and cross-lane contracts
+> Status: complete; fixture foundation checkpoint accepted · Slug: web-client · Plan phase: 1 · Manifest: ../tasks.md · Spec: ../spec.md
+
+- 12 tasks; accepted implementation work is checked below. Checkpoint evidence is recorded in ../verification/phase-1.md. Paths are repository-relative implementation files.
+- Dependencies name completed tasks or explicit external readiness subgates. `[P]` permits concurrency only with disjoint ready work; it never waives predecessors.
+
+- [x] **T1.1** Pin compatible runtime and tool versions after checking current official compatibility — `package.json`, `package-lock.json`, `.nvmrc`, `docs/development/toolchain.md` (TR1, TR9)
+  - Owner: **Foundation**. Depends: **None**.
+  - Acceptance: Select supported Node, npm, React, Next.js, TypeScript, Tailwind, Storybook, Vitest, RTL, Playwright and Zod versions; record rationale and reproducible commands. Do not infer versions from the prototype.
+- [x] **T1.2** Create minimal framework bootstrap and strict compiler/style configuration — `next.config.ts`, `next-env.d.ts`, `tsconfig.json`, `postcss.config.mjs`, `eslint.config.mjs`, `src/app/layout.tsx`, `src/app/globals.css` (TR1, TR2, TR6)
+  - Owner: **Foundation**. Depends: **T1.1**.
+  - Acceptance: Bootstrap builds without implementing any product page; establish focused client boundaries and server-only configuration. Framework bootstrap is the explicit pages-last exception.
+- [x] **T1.3** [P] Record authoritative asset sources and observed visual deviations — `docs/specs/web-client/assets.md`, `docs/specs/web-client/design-deviations.md` (FR1, TR10)
+  - Owner: **Design**. Depends: **None**.
+  - Acceptance: Map V1–V4, S1, A1–A3 and C1–C11 to inspected evidence; identify actual inline logo/icons and licensed font sources. Unknown Make PNGs remain unread/unassigned; missing assets block only affected visual work.
+- [x] **T1.4** Configure isolated component and behavior test roots — `.storybook/main.ts`, `.storybook/preview.tsx`, `vitest.config.ts`, `playwright.config.ts`, `tests/setup.ts` (FR18, FR19, TR1, TR9)
+  - Owner: **Foundation**. Depends: **T1.2**.
+  - Acceptance: Storybook runs independently of product routes; Vitest/RTL and Playwright smoke checks execute; preview-only modules stay outside production composition.
+- [x] **T1.5** Define shared feature-facing operation and value contracts — `src/contracts/session.ts`, `src/contracts/catalog.ts`, `src/contracts/observations.ts`, `src/contracts/preview.ts`, `src/contracts/query.ts`, `src/contracts/failures.ts`, `src/contracts/navigation.ts`, `src/contracts/table.ts` (FR2, FR3, FR4, FR5, FR6, FR7, FR8, FR9, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR20, FR21, TR4, TR5, TR7)
+  - Owner: **Integration**. Depends: **T1.1**.
+  - Acceptance: Publish proposed frontend models only: generation-aware session; authorized catalog/schema; exact/display values; positional columns/rows; distinct preview and query operations; typed unknown outcome; safe intents. Query-page operation cannot accept SQL. No invented HTTP paths/statuses, TTL or credential transport.
+- [x] **T1.6** Implement shared session generation and guarded operation runtime — `src/session/session-runtime.ts`, `src/session/SessionProvider.tsx`, `src/session/guard-operation.ts` (FR3, FR4, FR5, FR6, FR19, FR21, TR6)
+  - Owner: **Integration**. Depends: **T1.2, T1.5**.
+  - Acceptance: Executable shared runtime invalidates on logout, identity/access changes and expiry; consumers register cleanup. Guard successes, metadata, errors and intents before state/global side effects; stale unauthorized errors cannot invalidate a newer session. This runtime is completed before features, not delegated to the Auth sibling.
+- [x] **T1.7** Verify session generation and shared operation contracts — `src/session/session-runtime.test.ts`, `src/session/guard-operation.test.ts`, `tests/contracts/feature-contracts.test.ts` (FR3, FR4, FR5, FR6, FR13, FR15, FR21, TR6, TR7)
+  - Owner: **Integration**. Depends: **T1.4, T1.6**.
+  - Acceptance: Controlled promises prove logout → Viewer and access reduction discard old data/errors/metadata/intents; validate positional duplicates, opaque identifiers and forbidden SQL argument on query-page calls.
+- [x] **T1.8** Add shared synthetic adapters, adversarial scenarios and observable call logs — `tests/fixtures/operations.ts`, `tests/fixtures/scenarios.ts`, `tests/fixtures/call-log.ts`, `tests/fixtures/FixtureProvider.tsx` (FR6, FR7, FR8, FR9, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR18, FR19, FR20, TR4, TR5, TR6)
+  - Owner: **Integration**. Depends: **T1.5, T1.6**.
+  - Acceptance: Provide all operation seams and role/state scenarios before consumers fork. Include decimal ties, zero/null/missing dates, identifiers, duplicate columns/rows, preview expiry/publication and lost execute response; synthetic-only SQL limits clearly labeled. All stories visibly label synthetic data; no authoritative EIA findings.
+- [x] **T1.9** Create versioned live-contract readiness ledger — `docs/specs/web-client/contracts/live-readiness.md` (FR2, FR3, FR4, FR6, FR7, FR9, FR13, FR16, TR3, TR5, TR7, TR9)
+  - Owner: **Integration**. Depends: **T1.5**.
+  - Acceptance: Record Q2/Q3 unresolved with named responsibility slot, required version/environment and per-operation evidence. Keep session transport and SQL settings unapproved; this task creates the ledger, not a claim of agreement.
+- [x] **T1.10** Establish import ownership and production fixture-exclusion checks — `scripts/check-boundaries.mjs`, `scripts/check-production-fixtures.mjs`, `tests/fixtures/sentinels.ts`, `docs/development/ownership.md` (FR18, FR19, TR2, TR3, TR6, TR8, TR9)
+  - Owner: **Foundation**. Depends: **T1.4, T1.5, T1.8**.
+  - Acceptance: Check transitive production imports as well as emitted artifact sentinels; forbid fixture/demo identity roots and direct storage/source access. Define public seams and one shared-file owner; avoid concurrent shared barrels. Checks can fail closed before live wiring exists.
+- [x] **T1.11** Document reproducible workflow and evidence separation — `README.md`, `docs/development/verification.md` (FR19, TR1, TR8, TR9)
+  - Owner: **Foundation**. Depends: **T1.4, T1.10**.
+  - Acceptance: Document installed build/type/lint/test/story commands, owner handoffs and distinct fixture/live/visual reports; no check result claimed until actually run.
+- [x] **T1.C** Checkpoint: accept executable shared contracts and bootstrap — `docs/specs/web-client/verification/phase-1.md` (FR4, FR5, FR6, FR18, FR19, TR1, TR6, TR7, TR8, TR9, AC5, AC18, AC19)
+  - Owner: **Integration**. Depends: **T1.7, T1.8, T1.9, T1.11**.
+  - Acceptance: Record passing shared race/contract checks and tool smoke results. This contract gate is required by feature-readiness checkpoints; atomic work may start earlier from its explicit task predecessors. It does not approve Q2/Q3 or asset sign-off. T1.3 remains a separate visual prerequisite.

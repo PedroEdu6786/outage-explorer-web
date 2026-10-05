@@ -1,0 +1,51 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { Button } from "../../src/components/atoms/Button";
+import { Surface } from "../../src/components/atoms/Surface";
+import { EmptyState } from "../../src/components/molecules/EmptyState";
+import { MetricValue } from "../../src/components/molecules/MetricValue";
+import { PanelHeader } from "../../src/components/molecules/PanelHeader";
+import { StatusMessage } from "../../src/components/molecules/StatusMessage";
+
+describe("shared displays", () => {
+  it("announces pending/status updates once, with recovery outside the live region", async () => {
+    const retry = vi.fn();
+    const user = userEvent.setup();
+    const { rerender } = render(<StatusMessage title="Loading" pending />);
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading");
+    rerender(<StatusMessage title="Unavailable" description="Input retained" announcement="assertive" actions={<Button onClick={retry}>Retry</Button>} />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Input retained");
+    expect(screen.getByRole("alert")).not.toContainElement(screen.getByRole("button"));
+    await user.tab();
+    await user.keyboard("{Enter}");
+    expect(retry).toHaveBeenCalledTimes(1);
+    rerender(<StatusMessage title="Ready" announcement="off" />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("preserves provided precision, calendar text, missing values and valid zero", () => {
+    const { rerender } = render(<MetricValue label="Capacity" value="1.005000" unit="MW" metadata="2026-10-01" />);
+    expect(screen.getByText("1.005000")).toBeInTheDocument();
+    expect(screen.getByText("2026-10-01")).toBeInTheDocument();
+    rerender(<MetricValue label="Percentage" value="0.00" unit="%" />);
+    expect(screen.getByText("0.00")).toBeInTheDocument();
+    rerender(<MetricValue label="Percentage" value={null} unit="%" />);
+    expect(screen.getByText("Unavailable")).toBeInTheDocument();
+    expect(screen.queryByText("0.00")).not.toBeInTheDocument();
+    expect(screen.queryByText("%")).not.toBeInTheDocument();
+  });
+
+  it("keeps panel naming and empty-state recovery caller-controlled", async () => {
+    const clear = vi.fn();
+    render(<Surface as="section" aria-labelledby="records-title"><PanelHeader title="Records" titleId="records-title" /><EmptyState headingLevel={3} title="No rows" actions={<Button onClick={clear}>Clear filters</Button>} /></Surface>);
+    expect(screen.getByRole("region", { name: "Records" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "No rows", level: 3 })).toBeInTheDocument();
+    expect(clear).not.toHaveBeenCalled();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(clear).toHaveBeenCalledTimes(1);
+  });
+});

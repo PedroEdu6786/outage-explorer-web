@@ -1,0 +1,30 @@
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { fireEvent, within, waitFor } from "storybook/test";
+import { useState } from "react";
+import { FixtureProvider, useFixtureController } from "../../../tests/fixtures/FixtureProvider";
+import { AppShell } from "../../components/templates/AppShell";
+import { Badge } from "../../components/atoms/Badge";
+import type { QueryFailure } from "./query-state";
+import { QueriesFeature } from "./QueriesFeature";
+function Demo({ failure }: { readonly failure?: QueryFailure }) {
+  const { controller, runtime } = useFixtureController();
+  useState(() => { if (failure) controller.failNextExecution(failure); });
+  return <AppShell title="SQL Workspace" navigation={{ status: "ready", revision: "synthetic-queries", identity: { name: "Synthetic Viewer", initials: "S", roleLabel: "Viewer" }, destinations: [{ id: "queries", label: "SQL Workspace", href: "#queries", icon: "sql", active: true }] }} accessory={<Badge>Sample data</Badge>} onSignOut={() => { runtime.invalidate(); }}><QueriesFeature operations={controller.operations} runtime={runtime} initialPageSize={2} maximumPageSize={100} /></AppShell>;
+}
+const meta = { title: "Features/Queries", component: Demo, parameters: { layout: "fullscreen" }, render: () => <FixtureProvider options={{ persona: "viewer" }}><Demo /></FixtureProvider> } satisfies Meta<typeof Demo>;
+export default meta;
+type Story = StoryObj<typeof meta>;
+const execute: NonNullable<Story["play"]> = async ({ canvasElement }) => { const canvas = within(canvasElement); const editor = await canvas.findByRole("textbox", { name: "SQL statement" }); await fireEvent.change(editor, { target: { value: "SELECT * FROM synthetic_national" } }); await fireEvent.click(canvas.getByRole("button", { name: "Run query" })); await canvas.findByText("Query succeeded"); };
+export const Ready: Story = {};
+export const ResultsAndDuplicates: Story = { play: execute };
+export const ShortTruncatedPage: Story = { render: () => <FixtureProvider options={{ persona: "viewer", dataState: "truncated" }}><Demo /></FixtureProvider>, play: async (context) => { await execute(context); const canvas = within(context.canvasElement); await fireEvent.click(canvas.getByRole("button", { name: "Next" })); await waitFor(() => { if (!canvas.queryByText("Page 2 of 2 · Fixed 2 rows per page")) throw new Error("Waiting for retained page"); }); } };
+const executeFailure: NonNullable<Story["play"]> = async ({ canvasElement }) => { const canvas = within(canvasElement); await fireEvent.change(await canvas.findByRole("textbox", { name: "SQL statement" }), { target: { value: "SELECT * FROM synthetic_national" } }); await fireEvent.click(canvas.getByRole("button", { name: "Run query" })); };
+export const UnknownOutcome: Story = { render: () => <FixtureProvider options={{ persona: "viewer" }}><Demo failure={{ kind: "unknown-execution-outcome", message: "Synthetic lost response." }} /></FixtureProvider>, play: executeFailure };
+export const Busy: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "busy", message: "Synthetic engine busy. Retry deliberately." }} /></FixtureProvider>, play: executeFailure };
+export const Timeout: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "execution-timeout", message: "Synthetic deadline exceeded." }} /></FixtureProvider>, play: executeFailure };
+export const ResultExpired: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "result-expired", message: "Synthetic retained execution expired. Run explicitly." }} /></FixtureProvider>, play: executeFailure };
+export const ResultLost: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "result-lost", message: "Synthetic retained execution lost. Run explicitly." }} /></FixtureProvider>, play: executeFailure };
+export const Denied: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "forbidden", message: "Synthetic SQL access denied." }} /></FixtureProvider>, play: executeFailure };
+export const Unavailable: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "data-unavailable", message: "Synthetic data unavailable." }} /></FixtureProvider>, play: executeFailure };
+export const ServiceFailure: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "service-failure", message: "Synthetic service unavailable." }} /></FixtureProvider>, play: executeFailure };
+export const Empty: Story = { render: () => <FixtureProvider options={{ dataState: "empty" }}><Demo /></FixtureProvider>, play: execute };

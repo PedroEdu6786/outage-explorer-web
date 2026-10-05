@@ -1,0 +1,34 @@
+import { test, expect } from "@playwright/test";
+import { navigate, openPage } from "./support/page-boundary";
+test("mobile drawer supports keyboard, navigation, sign-out and access cleanup", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 1100 });
+  await openPage(page, "overview--ready");
+  const trigger = page.getByRole("button", { name: "Open navigation", exact: true });
+  await trigger.focus(); await trigger.press("Enter");
+  await expect(page.getByRole("dialog", { name: "Application navigation" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close navigation" })).toBeFocused();
+  await page.keyboard.press("Escape"); await expect(trigger).toBeFocused();
+  await navigate(page, "SQL Workspace");
+  await expect(page.getByTestId("route-path")).toHaveText("/query");
+  await page.getByRole("textbox", { name: "SQL statement" }).fill("SELECT 'protected draft'");
+  await page.getByRole("button", { name: "Run query", exact: true }).click();
+  await expect(page.getByText("Query succeeded", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Resolve synthetic Viewer" }).click();
+  await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+  await expect(page.getByRole("table")).toHaveCount(0);
+  await trigger.click(); await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Sign in to your workspace" })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);
+  await expect(page.getByRole("textbox", { name: "SQL statement", includeHidden: true })).toHaveCount(0);
+});
+test("pending protected page mounts no protected navigation, metadata or editor", async ({ page }) => {
+  await openPage(page, "overview--pending");
+  await expect(page.getByText("Checking session", { exact: true })).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Main navigation", includeHidden: true })).toHaveCount(0);
+  await expect(page.locator('[data-fixture-root="synthetic-only"]').getByRole("table", { includeHidden: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Release session", exact: true }).click();
+  await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
+  await page.getByRole("button", { name: "Withhold unresolved session" }).click();
+  await expect(page.locator('[data-fixture-root="synthetic-only"]').getByRole("table", { includeHidden: true })).toHaveCount(0);
+  await expect(page.getByRole("navigation", { name: "Main navigation", includeHidden: true })).toHaveCount(0);
+});

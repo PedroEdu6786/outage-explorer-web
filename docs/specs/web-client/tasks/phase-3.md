@@ -1,0 +1,45 @@
+# Tasks: Molecules, shared organisms and templates
+> Status: complete; shared presentation checkpoint accepted · Slug: web-client · Plan phase: 3 · Manifest: ../tasks.md · Spec: ../spec.md
+
+- 13 tasks; all accepted below. Paths are repository-relative planned additions unless noted in the manifest.
+- Dependencies name completed tasks or explicit external readiness subgates. `[P]` permits concurrency only with disjoint ready work; it never waives predecessors.
+
+- [x] **T3.1** [P] Compose labeled fields and controlled date/search inputs — `src/components/molecules/FormField.tsx`, `src/components/molecules/DateRangeField.tsx`, `src/components/molecules/SearchField.tsx`, `src/components/molecules/fields.stories.tsx` (FR1, FR17, TR2, TR10)
+  - Owner: **Molecules-input**. Depends: **T2.3, T1.4**.
+  - Acceptance: M1: domain-free values/errors/callbacks; no hardcoded coverage, validation policy, API or session behavior.
+- [x] **T3.2** [P] Compose status, empty-state and panel-value displays — `src/components/molecules/StatusMessage.tsx`, `src/components/molecules/EmptyState.tsx`, `src/components/molecules/MetricValue.tsx`, `src/components/molecules/PanelHeader.tsx`, `src/components/molecules/display.stories.tsx` (FR1, FR11, FR16, FR17, TR2)
+  - Owner: **Molecules-display**. Depends: **T2.2, T2.4, T1.4**.
+  - Acceptance: M2: meaningful status announcements and generic recovery slots; MetricValue displays provided precise text without recalculation or business thresholds.
+- [x] **T3.3** [P] Compose tabs, navigation entries and user summary — `src/components/molecules/Tabs.tsx`, `src/components/molecules/NavigationItem.tsx`, `src/components/molecules/UserSummary.tsx`, `src/components/molecules/navigation.stories.tsx` (FR1, FR17, TR2)
+  - Owner: **Molecules-nav**. Depends: **T2.2, T2.4, T1.4**.
+  - Acceptance: M3: accessible keyboard tab behavior and controlled selection; display authorized props only, never fetch permissions.
+- [x] **T3.4** [P] Compose generic pagination actions without lifecycle semantics — `src/components/molecules/PaginationControls.tsx`, `src/components/molecules/PaginationControls.stories.tsx` (FR9, FR13, FR17, TR2, TR10)
+  - Owner: **Molecules-pagination**. Depends: **T2.2, T2.3, T1.4**.
+  - Acceptance: M2: controlled action/label props support cursor controls or numbered pages without a universal pagination controller, invented totals or query knowledge.
+- [x] **T3.5** Build positional data table organism — `src/components/organisms/DataTable.tsx`, `src/components/organisms/DataTable.stories.tsx`, `tests/components/data-table.test.tsx` (FR1, FR11, FR15, FR17, TR2)
+  - Owner: **Shared-table**. Depends: **T1.5, T2.4, T3.2**.
+  - Acceptance: O1: preserve column order/duplicate labels/duplicate rows/null versus zero; accept formatted typed cells with stable positional keys and accessible horizontal overflow.
+- [x] **T3.6** Build shell navigation and header organisms — `src/components/organisms/AppNavigation.tsx`, `src/components/organisms/AppHeader.tsx`, `src/components/organisms/shell.stories.tsx`, `tests/components/shell.test.tsx` (FR1, FR5, FR6, FR17, TR2)
+  - Owner: **Shared-shell**. Depends: **T2.5, T3.3**.
+  - Acceptance: S1/O1: props supply identity, allowed destinations, coverage and actions. Drawer traps/restores focus appropriately, closes on navigation and works at observed breakpoints; no persona selector.
+- [x] **T3.7** Build sign-in template independently of analytical templates — `src/components/templates/AuthTemplate.tsx`, `src/components/templates/AuthTemplate.stories.tsx` (FR1, FR17, FR19, TR2, TR10)
+  - Owner: **Shared-auth-layout**. Depends: **T2.1, T2.4, T2.5**.
+  - Acceptance: T1/V1: centered branded slot layout; no credentials form, fetching, protected routes or dependency on table/chart.
+- [x] **T3.8** Build reusable shell and analytical slot templates — `src/components/templates/AppShell.tsx`, `src/components/templates/OverviewTemplate.tsx`, `src/components/templates/ExplorerTemplate.tsx`, `src/components/templates/WorkspaceTemplate.tsx`, `src/components/templates/analytical.stories.tsx` (FR1, FR17, FR19, TR2)
+  - Owner: **Shared-shell**. Depends: **T3.6**.
+  - Acceptance: T1/V2–V4: shell and stacked/master-detail slots adapt at 1000/760/480px; no feature imports or product routes.
+- [x] **T3.A** Checkpoint: publish Auth lane readiness — `docs/specs/web-client/verification/readiness-auth.md` (FR2, FR5, FR17, FR19, TR8, AC5, AC17, AC19)
+  - Owner: **Foundation**. Depends: **T1.C, T2.2, T3.2, T3.7**.
+  - Acceptance: A1/A3/M2/O5/T1 consumers ready; record session-runtime and operation-fixture examples. Auth can start now without waiting for analytical tables/templates.
+- [x] **T3.O** Checkpoint: publish Overview lane readiness — `docs/specs/web-client/verification/readiness-overview.md` (FR10, FR11, FR17, FR19, FR20, TR8, AC11, AC17, AC19)
+  - Owner: **Foundation**. Depends: **T1.C, T3.1, T3.2, T3.5, T3.8**.
+  - Acceptance: A2/M1/M2/O1/T1 inputs, table, display primitives and exact-observation fixtures ready; no chart implementation prerequisite from another lane.
+- [x] **T3.E** Checkpoint: publish Explorer lane readiness — `docs/specs/web-client/verification/readiness-explorer.md` (FR7, FR8, FR9, FR17, FR19, TR8, AC7, AC17, AC19)
+  - Owner: **Foundation**. Depends: **T1.C, T3.1, T3.2, T3.3, T3.4, T3.5, T3.8**.
+  - Acceptance: Shared catalog/schema, cursor fixtures, controls/tabs/table and template ready; no private Query or Auth controller dependency.
+- [x] **T3.Q** Checkpoint: publish Queries lane readiness — `docs/specs/web-client/verification/readiness-queries.md` (FR12, FR13, FR15, FR17, FR19, TR8, AC15, AC17, AC19)
+  - Owner: **Foundation**. Depends: **T1.C, T3.1, T3.2, T3.4, T3.5, T3.8**.
+  - Acceptance: Shared catalog/schema and query lifecycle fixtures ready plus textarea/search/table/pagination/template; no Explorer service dependency.
+- [x] **T3.C** Checkpoint: accept composed shared presentation boundaries — `docs/specs/web-client/verification/phase-3.md` (FR1, FR11, FR15, FR17, FR19, TR2, TR8, TR10, AC1, AC11, AC15, AC17, AC19)
+  - Owner: **Foundation**. Depends: **T3.A, T3.O, T3.E, T3.Q**.
+  - Acceptance: Record shared interaction/story checks and no-domain/no-network imports; individual lane readiness gates remain sufficient to start phase 4 before this summary.

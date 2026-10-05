@@ -1,0 +1,66 @@
+# Tasks: Parallel feature compositions
+> Status: complete; four fixture feature checkpoints accepted · Slug: web-client · Plan phase: 4 · Manifest: ../tasks.md · Spec: ../spec.md
+
+- 20 tasks; all tasks accepted below. Paths are repository-relative planned additions unless noted in the manifest.
+- Dependencies name completed tasks or explicit external readiness subgates. `[P]` permits concurrency only with disjoint ready work; it never waives predecessors.
+
+- [x] **T4.A1** [P] Create Auth feature service and session controller — `src/features/auth/service.ts`, `src/features/auth/useAuth.ts` (FR2, FR3, FR4, FR5, FR6, FR16, TR2, TR6)
+  - Owner: **Auth**. Depends: **T3.A**.
+  - Acceptance: Use completed shared session runtime and injected operations; explicit sign-in, one-hour expiry and current-session logout semantics. Fixture state never claims real Cognito enforcement.
+- [x] **T4.A2** Compose sign-in and session-boundary organisms — `src/features/auth/SignInPanel.tsx`, `src/features/auth/SessionBoundary.tsx` (FR1, FR2, FR3, FR4, FR5, FR16, FR17, TR2)
+  - Owner: **Auth**. Depends: **T4.A1**.
+  - Acceptance: V1/O5: branded managed-login CTA; no local password/persona controls in product feature; pending, denied, expired and failure states with deliberate recovery.
+- [x] **T4.A3** Expose Auth entry and isolated stories — `src/features/auth/index.ts`, `src/features/auth/AuthFeature.tsx`, `src/features/auth/AuthFeature.stories.tsx` (FR18, FR19, TR2, TR6, TR8)
+  - Owner: **Auth**. Depends: **T4.A2**.
+  - Acceptance: Public entry accepts shared operations/runtime; story imports test-only provider and labels synthetic session. Entry has no transitive story/fixture import.
+- [x] **T4.A4** Verify Auth observable lifecycle with adversarial fixtures — `src/features/auth/auth.test.tsx` (FR2, FR3, FR4, FR5, FR6, FR16, TR6)
+  - Owner: **Auth**. Depends: **T4.A3**.
+  - Acceptance: Test no protected flash, explicit login after expiry, logout invalidation and guarded stale outcomes; shared generation runtime remains the single authority.
+- [x] **T4.AC** Checkpoint: accept Auth fixture feature — `docs/specs/web-client/verification/feature-auth.md` (FR2, FR3, FR4, FR5, FR6, FR16, FR19, AC2, AC3, AC4, AC5, AC6, AC16, AC19)
+  - Owner: **Auth**. Depends: **T4.A4**.
+  - Acceptance: Record fixture lifecycle evidence and public contract; AC2–AC6 live portions remain unverified, with no simulated provider pass.
+- [x] **T4.O1** [P] Create Overview service, exact presentation and series controller — `src/features/overview/service.ts`, `src/features/overview/useOverview.ts`, `src/features/overview/presentation.ts` (FR10, FR11, FR16, FR20, TR2, TR6)
+  - Owner: **Overview**. Depends: **T3.O**.
+  - Acceptance: Consume shared national operations and generation; keep calendar dates and exact/display decimal values distinct from chart coordinates; date changes update one authorized observation set.
+- [x] **T4.O2** Compose national metric, trend and observation organisms — `src/features/overview/NationalMetricCards.tsx`, `src/features/overview/NationalTrend.tsx`, `src/features/overview/DailyObservations.tsx` (FR1, FR10, FR11, FR17, FR20, TR2, TR10)
+  - Owner: **Overview**. Depends: **T4.O1**.
+  - Acceptance: V2/O2: MW and both two-decimal percentages; bounded SVG chart with missing-day gaps, keyboard compare toggle and exact tooltip/table labels; no mismatch flags or average-derived national metric.
+- [x] **T4.O3** Expose Overview entry, safe dataset action and stories — `src/features/overview/index.ts`, `src/features/overview/OverviewFeature.tsx`, `src/features/overview/OverviewFeature.stories.tsx` (FR18, FR19, FR20, FR21, TR6, TR8)
+  - Owner: **Overview**. Depends: **T4.O2**.
+  - Acceptance: Emit authorized generation-bound dataset/filter intent through public callback. Isolated fixture stories cover loading, no observations, null, zero and denied states without importing production composition.
+- [x] **T4.O4** Verify metric precision, missing days and date interactions — `src/features/overview/overview.test.tsx` (FR10, FR11, FR16, FR17, FR20, FR21, TR6)
+  - Owner: **Overview**. Depends: **T4.O3**.
+  - Acceptance: Assert half-up ties in card/table/tooltip, zero 0.00%, timezone-stable dates, no interpolation, accessible comparison and ignored stale series/intent.
+- [x] **T4.OC** Checkpoint: accept Overview fixture feature — `docs/specs/web-client/verification/feature-overview.md` (FR10, FR11, FR16, FR17, FR19, FR20, FR21, AC10, AC11, AC16, AC17, AC19, AC20, AC21)
+  - Owner: **Overview**. Depends: **T4.O4**.
+  - Acceptance: Record fixture assertions, V2 design comparison and exact-label evidence; distinguish plotting approximation from display precision.
+- [x] **T4.E1** [P] Create Explorer preview service and selection controller — `src/features/explorer/service.ts`, `src/features/explorer/useExplorer.ts`, `src/features/explorer/preview-state.ts` (FR6, FR7, FR8, FR9, FR16, TR2, TR4, TR6)
+  - Owner: **Explorer**. Depends: **T3.E**.
+  - Acceptance: Consume completed shared catalog/schema operation; reset sequence on dataset/filter/size changes, bind cursor/snapshot/fixed expiry, reject stale selection/session outcomes. Default 100, initial max 500, original 15-minute expiry.
+- [x] **T4.E2** Compose dataset catalog, schema, filters and preview organisms — `src/features/explorer/DatasetCatalog.tsx`, `src/features/explorer/DatasetHeader.tsx`, `src/features/explorer/DatasetSchema.tsx`, `src/features/explorer/PreviewFilters.tsx`, `src/features/explorer/DatasetPreview.tsx` (FR1, FR6, FR7, FR8, FR9, FR11, FR16, FR17, TR2)
+  - Owner: **Explorer**. Depends: **T4.E1**.
+  - Acceptance: V3/O3: Preview/Schema tabs; allowed filters/coverage from metadata; cursor continuation and deliberate restart; previous only when valid cached/backend support exists, no fabricated totals or numbered jumps.
+- [x] **T4.E3** Expose Explorer entry, SQL handoff and stories — `src/features/explorer/index.ts`, `src/features/explorer/ExplorerFeature.tsx`, `src/features/explorer/ExplorerFeature.stories.tsx` (FR18, FR19, FR21, TR6, TR8)
+  - Owner: **Explorer**. Depends: **T4.E2**.
+  - Acceptance: SQL action emits only authorized selection intent, not URL SQL or execute call; fixtures illustrate all grains only within explicit role scenarios and remain test-only.
+- [x] **T4.E4** Verify permission, reset, snapshot and expiry behavior — `src/features/explorer/explorer.test.tsx` (FR6, FR7, FR8, FR9, FR11, FR16, FR21, TR4, TR6)
+  - Owner: **Explorer**. Depends: **T4.E3**.
+  - Acceptance: Assert national-only Viewer metadata, dynamic coverage, out-of-order selection, publication mid-cursor, original expiry/restart and string identifiers; late forbidden responses cannot affect a newer identity.
+- [x] **T4.EC** Checkpoint: accept Explorer fixture feature — `docs/specs/web-client/verification/feature-explorer.md` (FR6, FR7, FR8, FR9, FR11, FR16, FR19, FR21, AC6, AC7, AC8, AC9, AC11, AC16, AC19, AC21)
+  - Owner: **Explorer**. Depends: **T4.E4**.
+  - Acceptance: Record preview request log and V3 state comparisons; backend denial/live snapshot semantics remain separate outstanding proof.
+- [x] **T4.Q1** [P] Create query service and draft/execution/page controller — `src/features/queries/service.ts`, `src/features/queries/useQueries.ts`, `src/features/queries/query-state.ts` (FR6, FR12, FR13, FR14, FR15, FR16, FR21, TR2, TR5, TR6)
+  - Owner: **Queries**. Depends: **T3.Q**.
+  - Acceptance: Use shared authorized catalog/schema; capture unchanged submission separately from draft and retained result. Explicit Run only; page calls carry query ID and fixed size, never SQL. Represent unknown outcome without invented cancellation or safe replay.
+- [x] **T4.Q2** Compose schema browser, editor, status and result organisms — `src/features/queries/SchemaBrowser.tsx`, `src/features/queries/SqlEditorPanel.tsx`, `src/features/queries/QueryStatus.tsx`, `src/features/queries/QueryResults.tsx` (FR1, FR6, FR11, FR12, FR13, FR14, FR15, FR16, FR17, TR2, TR5)
+  - Owner: **Queries**. Depends: **T4.Q1**.
+  - Acceptance: V4/O4: searchable authorized schema, textarea/line numbers, Copy and single-submit shortcut; arbitrary positional results, whole-result truncation and numbered retained pages. Distinguish busy/timeout/unknown/lost/expired; no auto-retry/focus execution.
+- [x] **T4.Q3** Expose Queries entry, deliberate handoff policy and stories — `src/features/queries/index.ts`, `src/features/queries/QueriesFeature.tsx`, `src/features/queries/QueriesFeature.stories.tsx` (FR14, FR16, FR18, FR19, FR21, TR6, TR8)
+  - Owner: **Queries**. Depends: **T4.Q2**.
+  - Acceptance: Generation-bound selection proposes an unsent draft; explicit confirmation replaces an edited draft. Stories visibly synthetic, including fixed-size paging, duplicates, short truncated page and unknown outcome; no saved/history feature.
+- [x] **T4.Q4** Verify complete execute and paging call traces — `src/features/queries/queries.test.tsx` (FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR21, TR5, TR6)
+  - Owner: **Queries**. Depends: **T4.Q3**.
+  - Acceptance: Run → edit → next/previous → focus/reconnect → expiry → explicit rerun shows exactly one execute until deliberate rerun. Check immutable ID/size, duplicates, page-size change, lost response, no silent page-1 reset, denied metadata and safe handoff.
+- [x] **T4.QC** Checkpoint: accept Queries fixture feature — `docs/specs/web-client/verification/feature-queries.md` (FR11, FR12, FR13, FR14, FR15, FR16, FR17, FR19, FR21, AC11, AC12, AC13, AC14, AC15, AC16, AC17, AC19, AC21)
+  - Owner: **Queries**. Depends: **T4.Q4**.
+  - Acceptance: Attach synthetic request trace and V4 comparisons; Q3 synthetic settings never pass live SQL acceptance.

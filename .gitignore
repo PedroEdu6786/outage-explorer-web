@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+.vitest/
+*.tsbuildinfo
+.env*
+!.env.example
+.DS_Store
+npm-debug.log*
+.devlog-state/
+__pycache__/

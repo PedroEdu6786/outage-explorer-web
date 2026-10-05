@@ -1,0 +1,96 @@
+/* Published prototype: index-DHmpQo6U.css. See token-map.md for consumers. */
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/inter/InterVariable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/jetbrains-mono/JetBrainsMono-Medium.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --color-background: #f5f7f8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafb;
+  --color-surface-active: #eef7f7;
+  --color-border: #dce3e7;
+  --color-border-strong: #c8d2d8;
+  --color-text: #16252d;
+  --color-text-muted: #5f707a;
+  --color-text-faint: #81919a;
+  --color-accent: #087d82;
+  --color-accent-dark: #05666a;
+  --color-accent-light: #dff2f2;
+  --color-info: #246b9e;
+  --color-info-light: #eaf3f9;
+  --color-success: #24774f;
+  --color-success-light: #e8f5ee;
+  --color-warning: #98671b;
+  --color-warning-light: #fff7df;
+  --color-error: #ad3d3d;
+  --color-error-light: #fff0ef;
+  --color-badge: #576973;
+  --color-badge-light: #eef2f4;
+  --color-sidebar: #12272f;
+  --color-editor: #172830;
+  --color-editor-toolbar: #1d333d;
+  --radius-control: 5px;
+  --radius-badge: 4px;
+  --radius-brand: 6px;
+  --radius-panel: 8px;
+  --radius-auth: 9px;
+  --shadow-panel: 0 1px 2px #12262e0d, 0 1px 5px #12262e06;
+  --shadow-auth: 0 8px 30px #192f3814;
+  --text-action: 11px;
+  --text-action--font-weight: 600;
+  --text-badge: 9px;
+  --text-badge--font-weight: 650;
+  --text-page-title: 25px;
+  --text-page-title--font-weight: 650;
+  --text-page-title--line-height: 1.25;
+  --text-page-title--letter-spacing: -0.025em;
+  --text-panel-title: 16px;
+  --text-panel-title--font-weight: 650;
+  --text-panel-title--line-height: 1.3;
+}
+
+:root {
+  --control-height: 32px;
+  --action-padding-block: 7px;
+  --action-padding-inline: 11px;
+  --action-gap: 6px;
+  --control-padding-block: 6px;
+  --control-padding-inline: 8px;
+  --badge-padding-block: 3px;
+  --badge-padding-inline: 6px;
+  --badge-gap: 4px;
+  --sidebar-width: 232px;
+  --topbar-height: 50px;
+  --brand-header-height: 66px;
+  --explorer-catalog-width: 275px;
+  --sql-browser-width: 250px;
+  --compact-browser-width: 220px;
+  --page-max-width: 1450px;
+  --page-padding-block: 28px;
+  --page-padding-inline: 32px;
+  --panel-gap: 16px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+}

@@ -1,0 +1,270 @@
+{
+  "scope": "source/test/script/config/font assets; excludes docs, evidence and generated outputs",
+  "aggregateSha256": "973cd73f04165b4f9140775b151d3d31d08c4084b7c35ca985f3d661cf2dd3f8",
+  "files": [
+    {
+      "path": ".nvmrc",
+      "sha256": "55075b5ec4e8b31936cbbc282b8829116d1fd48f2f2f1856dee592a6650700ce"
+    },
+    {
+      "path": ".storybook/main.ts",
+      "sha256": "96aba4824878407410473a1956c2ea31f0d9f74c72668403165aa38809591e3c"
+    },
+    {
+      "path": ".storybook/preview.tsx",
+      "sha256": "e3b0c0ec869b3981c7d83e22e43f4b9cfa5ca4c1f2fabd069aaac708ed518657"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "sha256": "6cc3c21119996ca1b342caa60003849aae19e8c96aee677bc56d45c393c533e9"
+    },
+    {
+      "path": "next.config.ts",
+      "sha256": "e205831cf592ab340d9ccf24fbc1f768e6c9f6b6d010bba69ec6df76f7cebb60"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "cd833105817878571f85af230778dd231c6e208c110fafcee52df1b861998f76"
+    },
+    {
+      "path": "package.json",
+      "sha256": "5d5ed933e38b8a8382a63105460c6f4a272ce88271769fdaacdb1cffda64c86b"
+    },
+    {
+      "path": "playwright.config.ts",
+      "sha256": "cbbaacf5e49b9898a330bf7c3f66a27a39dc9c0b17dab965123d780a729bb12f"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "sha256": "5b0bc4c78be977cd81f947fb5563aaa7cc6d451e6f1c53a3260b7656a7144d20"
+    },
+    {
+      "path": "public/fonts/inter/InterVariable.woff2",
+      "sha256": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3"
+    },
+    {
+      "path": "public/fonts/inter/LICENSE.txt",
+      "sha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    },
+    {
+      "path": "public/fonts/jetbrains-mono/JetBrainsMono-Medium.woff2",
+      "sha256": "086c48dfbea9ddaff1320f7e09399b8e2924e88ce67453721255db3bdbb5a353"
+    },
+    {
+      "path": "public/fonts/jetbrains-mono/JetBrainsMono-Regular.woff2",
+      "sha256": "a9cb1cd82332b23a47e3a1239d25d13c86d16c4220695e34b243effa999f45f2"
+    },
+    {
+      "path": "public/fonts/jetbrains-mono/OFL.txt",
+      "sha256": "30f0c136e3c88e422d0791acd97238870f9054a9729bc34cf2ff0d4ed8cac4ad"
+    },
+    {
+      "path": "scripts/boundary-checks.test.mjs",
+      "sha256": "1bc5aabb620992a9c51aad419a7e2f7aefa4cf44cec1ce896111feda3f631930"
+    },
+    {
+      "path": "scripts/check-boundaries.mjs",
+      "sha256": "4dcfd8147fdc4d47a89e7a7ab53b35c19f4cc90fb3f4e20410ba9e58286e7f79"
+    },
+    {
+      "path": "scripts/check-production-fixtures.mjs",
+      "sha256": "0f26306c42a1ed5ac92448d7c754798865746fb9385ac92e273865b19516b8b7"
+    },
+    {
+      "path": "src/app/globals.css",
+      "sha256": "6d0c9337588985aa6b6a497b7e328e24ef03c09a7a4a84a9236b03e54d98574e"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "sha256": "c7a1375eb220462718a6f654618ae314251c9f3558a1467f87b561b32dcd6361"
+    },
+    {
+      "path": "src/components/atoms/Badge.tsx",
+      "sha256": "3ad549e712ea53f7875dae37a697e69bfba2788c8c41ee5fe476ff9c15887dc9"
+    },
+    {
+      "path": "src/components/atoms/BrandMark.tsx",
+      "sha256": "2456af97b79c4b67582ec1aebdecf76afe82a14f9a9933b648f6effc9ef21984"
+    },
+    {
+      "path": "src/components/atoms/Button.tsx",
+      "sha256": "b7ee3baf60cd64fb03f4374b9fce16873b1b7e7446ea0eda78769b173998a627"
+    },
+    {
+      "path": "src/components/atoms/Checkbox.tsx",
+      "sha256": "1d5cb8590d2d787049390d2cee5e53f5b69bc9aa4ceb6a8e4ddac495772bfbce"
+    },
+    {
+      "path": "src/components/atoms/Icon.tsx",
+      "sha256": "20af895c2e0b4638a273fde4311665bc63124fcdb153cb56ed888e623d36806b"
+    },
+    {
+      "path": "src/components/atoms/IconButton.tsx",
+      "sha256": "45e8db8497c15f581e765e438d935bd183a9f28f8329808c772750e0ca57c5da"
+    },
+    {
+      "path": "src/components/atoms/Input.tsx",
+      "sha256": "fc225b5611ec5c54c29c7d52e63d2015aac4ad94a0dfc7565ad636a8be590e5c"
+    },
+    {
+      "path": "src/components/atoms/Link.tsx",
+      "sha256": "c236040e285412773140e183f98562e5b450e1e47b3d5f7a3f1746aee70146ef"
+    },
+    {
+      "path": "src/components/atoms/Select.tsx",
+      "sha256": "66d1cbd48f192f16d181c1d52c115af4a27f40e1acd3efcdab5d5967aea29fb5"
+    },
+    {
+      "path": "src/components/atoms/Spinner.tsx",
+      "sha256": "41525303e6373e469add10a45b098e60e62e3da72c57e83104443136856acf91"
+    },
+    {
+      "path": "src/components/atoms/Surface.tsx",
+      "sha256": "15c847ab25b0faf8800ebfcf4857fb5ed4b219dbbb6bdb9f3ab71acfe3eee2f6"
+    },
+    {
+      "path": "src/components/atoms/Textarea.tsx",
+      "sha256": "461c7190cbe3a81cb5fdf883cc59f837eb1515091fd13a282242cdc056db822d"
+    },
+    {
+      "path": "src/components/atoms/actions.stories.tsx",
+      "sha256": "283c9d276299793b4acec2314c699249b6ec7e86e54d95d6df9d739e07c8f2dd"
+    },
+    {
+      "path": "src/components/atoms/brand.stories.tsx",
+      "sha256": "f0c747ce45d1756cd08857f677626b68cdbbb8dc0446cc21048d41a2ac9cf53b"
+    },
+    {
+      "path": "src/components/atoms/controls.stories.tsx",
+      "sha256": "98f43797bf949aa0f0624f64cd46e3ef82e35f949ef9c7d923cbc2b0b167e863"
+    },
+    {
+      "path": "src/components/atoms/status.stories.tsx",
+      "sha256": "293ca6057548fdf90234ff7eb8c29c0a3fa4d8953096749809b8b7543988dc10"
+    },
+    {
+      "path": "src/contracts/catalog.ts",
+      "sha256": "c5cba105816fac97645a222419a74e3a0cc2e941969f359352389e62b52dffd9"
+    },
+    {
+      "path": "src/contracts/failures.ts",
+      "sha256": "443b7f80b922b8a69d0e138fe29c3a54d7100e498cf6f99ff32f7091949ad08e"
+    },
+    {
+      "path": "src/contracts/navigation.ts",
+      "sha256": "90ee053c69b31c00bfb4e9a3fdcc775153f9a48a61b1c46846943f2b0d274168"
+    },
+    {
+      "path": "src/contracts/observations.ts",
+      "sha256": "db672899f6e634cbe090f2dd1c439c7c142735dd2e5355b984987b1ebd701235"
+    },
+    {
+      "path": "src/contracts/preview.ts",
+      "sha256": "5751afb7405e70a0c3793ab5ffc7b2d056b1e3a27e2a0a5355339bf0c2879e48"
+    },
+    {
+      "path": "src/contracts/query.ts",
+      "sha256": "429fdb711998d8733017e5c01e60fb5f17ed7b064f466e1bf57aa1f4e4222dca"
+    },
+    {
+      "path": "src/contracts/session.ts",
+      "sha256": "f6e7debc283cd7f041da395303269787f9d7b2976e02c6918d4b028104a736f6"
+    },
+    {
+      "path": "src/contracts/table.ts",
+      "sha256": "2c7f48445024065f71da739c8ae23bf8f02b2e2ed2870a70c5d0ec4005b3779e"
+    },
+    {
+      "path": "src/session/SessionProvider.tsx",
+      "sha256": "7595b4759c24afc325f4f8514939ea3abf2a1059364b2f13b62836881f60c006"
+    },
+    {
+      "path": "src/session/guard-operation.test.ts",
+      "sha256": "36335493baf76f3824faa177cc901287ad960fc60944ebd38b110e8df0238770"
+    },
+    {
+      "path": "src/session/guard-operation.ts",
+      "sha256": "415940f6aa017ebd1caeb69b07fe901a7932c025e022d3b797bb5c5475f4fc02"
+    },
+    {
+      "path": "src/session/session-runtime.test.ts",
+      "sha256": "28800aebf3d2366133510139f4c647f4afe8aaa7cb495f3037066851193c99d2"
+    },
+    {
+      "path": "src/session/session-runtime.ts",
+      "sha256": "ae5538b0b0cc56c4fe509d9bceb75311bec992e7095fcab25bf0ecc48b5bb691"
+    },
+    {
+      "path": "src/styles/tokens.css",
+      "sha256": "ad48946194ae251a04fc14a304c41794f941472ba4646c9bd3f5fbef550e004f"
+    },
+    {
+      "path": "tests/components/atoms.test.tsx",
+      "sha256": "a7f8d38ad0ef0d22e182d3c17544c56927e6c42f66aa28d19484437426ec351e"
+    },
+    {
+      "path": "tests/contracts/feature-contracts.test.ts",
+      "sha256": "c2b7a354fdd84008d7274ed6cd2da787224bf8c5d020534920223e0b8c252413"
+    },
+    {
+      "path": "tests/contracts/fixture-operations.test.ts",
+      "sha256": "a8ab4c138bf3d02a1e1491b4f244d4dbd2684174be94bac9415138532493c8fb"
+    },
+    {
+      "path": "tests/e2e/tooling-smoke.spec.ts",
+      "sha256": "58b9028b5d68612479991a1f9cc75390374ce824594309a52240f94ec7c63bba"
+    },
+    {
+      "path": "tests/fixtures/FixtureProvider.tsx",
+      "sha256": "8d1631430604b104a70869cabbaedca6ccc6978e40c6730928089b3b54f2d10e"
+    },
+    {
+      "path": "tests/fixtures/call-log.ts",
+      "sha256": "2693f83e26dd2cc39bf404df8c1e0d09dc884feb95e0dcae9ecdba097b65c151"
+    },
+    {
+      "path": "tests/fixtures/operations.ts",
+      "sha256": "4836e5960c65cb8701127e5202e7da6f298db4f6478efcda747e207ee15d898f"
+    },
+    {
+      "path": "tests/fixtures/scenarios.ts",
+      "sha256": "adefb8a3b479683c133c21db6c28675fe54531e097c90dfc9497d9c793342808"
+    },
+    {
+      "path": "tests/fixtures/sentinels.ts",
+      "sha256": "5eae3a75ae626101b67fce6710459b25dddb0ac5fe2f2b55813aba38f661b7ed"
+    },
+    {
+      "path": "tests/setup.ts",
+      "sha256": "c2ccf2417a8183a91935356b3d91c9aefc75b23abe2e72e335e671c12654f65d"
+    },
+    {
+      "path": "tests/tooling/ToolingSmoke.stories.tsx",
+      "sha256": "eb42b924b3230ed846d7a717772f5c8fc0745f58c40dcdd25796164608a89c06"
+    },
+    {
+      "path": "tests/tooling/ToolingSmoke.test.tsx",
+      "sha256": "f06861002cab5f0ebad432f06b99e2c886624a24213918c1f6cc6c7d62a6beaa"
+    },
+    {
+      "path": "tests/tooling/ToolingSmoke.tsx",
+      "sha256": "23e85546adddf5cbd314a00f3d5539f913f5b14ab0818e3de4fa96a4bf7ecda7"
+    },
+    {
+      "path": "tests/tooling/serve-storybook.mjs",
+      "sha256": "005bca159240d8a3dc1d197ef9070a9b4f84c16032296aba3491fe163825b689"
+    },
+    {
+      "path": "tests/visual/atoms.spec.ts",
+      "sha256": "19d32d7d08c38cc8a28c3551c5551c29da931041d236739397ceaf08dadb9e61"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "a8cd44a8b2e80b7ec124e050743d5e9639a386ef544fb69206e763292aa27481"
+    },
+    {
+      "path": "vitest.config.ts",
+      "sha256": "0fd085288da38d94b0440ceb43f3a9b804d371b5937c52f59c0a54b3c2bf7101"
+    }
+  ]
+}
