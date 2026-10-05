@@ -39,11 +39,54 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
     expect(page.table.rows[0]?.cells[14]).toMatchObject({ kind: "struct", fields: [{ name: "label", value: { kind: "text", value: "é" } }, { name: "amount", value: { kind: "decimal", exact: "1.25" } }] });
     expect(page.table.rows[0]?.cells[15]).toMatchObject({ kind: "map", entries: [{ key: { value: "one" }, value: { exact: "1" } }, { key: { value: "two" }, value: { kind: "null" } }] });
   });
-  it("accepts declared successful query examples except the documented inconsistent row-limit fixture", () => {
+  it("accepts every corrected successful query example and retains the actual row cap", () => {
     for (const fixture of fixtures.fixtures.filter((item) => item.schema === "QueryResult")) {
-      if (fixture.name === "query_row_limit") expect(() => decodeQuery(fixture.body)).toThrow("Inconsistent row-limit");
-      else expect(() => decodeQuery(fixture.body)).not.toThrow();
+      expect(() => decodeQuery(fixture.body)).not.toThrow();
     }
+    const capped = decodeQuery(example("query_row_limit"));
+    expect(capped).toMatchObject({ execution: { retainedRowCount: 1000, totalPages: 1000, truncation: { truncated: true, reason: "row-limit" } }, table: { rows: [{ cells: [{ exact: "9007199254740993" }, { exact: "0.123456789012" }] }] } });
+    expect(() => decodeQuery({ ...example("query_row_limit"), retained_row_count: 2, total_pages: 2 })).toThrow("Inconsistent row-limit");
+    expect(decodeQuery(example("query_first")).table.columns.map((column) => column.label)).toEqual(["x", "x_copy"]);
+    expect(decodeQuery(example("query_duplicate_labels")).table.columns.map((column) => column.label)).toEqual(["x", "x"]);
+  });
+  it("retains null SQL generation through one unchanged POST and subsequent retained-only GET", async () => {
+    const first = example("query_reference_free");
+    const second = { ...example("query_second"), generation_id: null };
+    const backend = transport([first, second]);
+    const adapter = createDataAdapter(backend);
+    const sql = "  SELECT 1 AS expression\n";
+    const execution = await adapter.executeQuery(context, { sql, page: 1, pageSize: 1 });
+    expect(execution).toMatchObject({ ok: true, value: { execution: { queryId: "query-synthetic-1", snapshotId: null }, table: { rows: [{ cells: [{ exact: "9007199254740993" }, { exact: "0.123456789012" }] }] } } });
+    const page = await adapter.readQueryPage(context, { queryId: "query-synthetic-1", page: 2, pageSize: 1 });
+    expect(page).toMatchObject({ ok: true, value: { page: 2, execution: { snapshotId: null, pageSize: 1, expiresAt: "2026-10-05T12:15:00Z" } } });
+    expect(backend.request.mock.calls.map((call) => call.slice(1))).toEqual([
+      ["/api/query?page=1&page_size=1", { method: "POST", body: { sql } }],
+      ["/api/query?query_id=query-synthetic-1&page=2&page_size=1"],
+    ]);
+  });
+  it("rejects missing SQL generation and null or missing catalog/preview generations", () => {
+    const query = { ...example("query_reference_free"), generation_id: undefined };
+    expect(() => decodeQuery(query)).toThrow();
+    for (const generation_id of [null, undefined]) {
+      expect(() => decodeCatalog({ ...example("catalog_viewer"), generation_id })).toThrow();
+      expect(() => decodePreview({ ...previewExample(), page_size: 100, generation_id }, selection)).toThrow();
+    }
+  });
+  it("fails closed on malformed null-generation results without retrying or leaking diagnostics", async () => {
+    const malformed = { ...example("query_reference_free"), encoding_version: "internal-spool-version" };
+    const backend = transport([malformed, malformed]);
+    const adapter = createDataAdapter(backend);
+    expect(await adapter.executeQuery(context, { sql: "SELECT 1", page: 1, pageSize: 1 })).toMatchObject({ ok: false, failure: { kind: "unknown-execution-outcome" } });
+    expect(await adapter.readQueryPage(context, { queryId: "query-synthetic-1", page: 1, pageSize: 1 })).toMatchObject({ ok: false, failure: { kind: "service-failure" } });
+    expect(backend.request).toHaveBeenCalledTimes(2);
+  });
+  it("distinguishes successful empty output from empty whole-result byte truncation", () => {
+    const empty = decodeQuery(example("query_empty"));
+    const truncated = decodeQuery(example("query_oversized_first"));
+    expect(empty.table.rows).toEqual([]);
+    expect(empty.execution.truncation).toEqual({ truncated: false });
+    expect(truncated.table.rows).toEqual([]);
+    expect(truncated.execution).toMatchObject({ retainedRowCount: 0, truncation: { truncated: true, reason: "byte-limit" }, limits: { maxRows: 1000, maxBytes: 1048576 } });
   });
   it("rejects malformed rows, unsafe numeric coercion, wrong type encoding and paging counters", () => {
     const original = example("query_lossless_types");

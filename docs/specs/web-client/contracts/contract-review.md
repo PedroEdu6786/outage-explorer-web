@@ -20,7 +20,29 @@ and connected acceptance remain open. Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
-## Resolution after user feedback — October 5
+## Phase-1 reconciliation — October 5, 2026
+
+Current identified source snapshots are now imported; the historical B1–B3 table
+below describes the previous intake. API-D01–03 close those artifact issues:
+OpenAPI declares the promised 400 errors, projected names match the example SQL
+(with separate duplicate-label coverage), and the row-limit example retains 1,000
+rows with a complete one-row page. Runtime decoding still rejects inconsistent
+row-cap metadata rather than relaxing validation.
+
+API-D04 permits null SQL generation for reference-free expressions. The execution
+model, decoder, mapping and result header now preserve that value while requiring
+catalog/preview generation. Public query responses reject internal spool encoding
+fields. Controlled execute/page tests preserve unchanged POST and retained-ID GET
+behavior, exact positional values and safe malformed-response handling.
+
+See [current artifact hashes](data-api.md#current-frozen-contract-reconciliation--october-5-2026)
+and [phase-1 evidence](../../../../specs/backend-integration/verification/phase-1.md).
+This closes contract reconciliation only; production registration, protected
+lifecycle completion and connected/visual acceptance remain separate. Viewer
+product routes remain Overview-only. Older capability-only and pending-runtime
+notes below are retained as superseded intake history.
+
+## Historical resolution after user feedback — October 5
 
 - F1: user accepts date-only v1; facility selector removed, dataset access retained.
 - F2: user accepts API-compatible optional bounds and valid out-of-coverage empty results.

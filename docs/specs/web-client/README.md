@@ -42,8 +42,11 @@ turns the [integration spec](../../../specs/backend-integration/spec.md) into th
 remaining design strategy. It reuses the established component and adapter work;
 its scope supplements the original delivery plan and preserves existing live and
 page-assembly gates. The [state/security assessment](integration-assessment.md)
-records the supporting findings. Planning does not authorize implementation or
-close acceptance gates; generate the integration task list with `/tasks` next.
+records the supporting findings. The user authorized implementation on October 5. Follow the
+[integration task list](../../../specs/backend-integration/tasks.md), one phase
+per implementation run; [phase-1 evidence](../../../specs/backend-integration/verification/phase-1.md)
+records current contract reconciliation. Controlled phase completion does not
+close connected adapter, production registration, visual or release gates.
 
 ## Parallel delivery
 

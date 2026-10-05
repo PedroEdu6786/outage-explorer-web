@@ -27,7 +27,7 @@ export function decodePreview(raw: unknown, selection: PreviewSelection): Previe
 }
 export function decodeQuery(raw: unknown): QueryPage {
   const wire = querySchema.parse(raw);
-  // B3 is a compact, inconsistent source example; never relax runtime checks for it.
+  // A row-limit result must retain the whole documented row cap.
   if (wire.truncation_reason === "row_limit" && wire.retained_row_count !== wire.limits.max_rows) throw new Error("Inconsistent row-limit result");
   return {
     execution: {

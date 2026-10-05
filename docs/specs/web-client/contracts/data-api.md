@@ -20,7 +20,42 @@ and connected acceptance remain open. Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
-## Reference and provenance
+## Current frozen contract reconciliation — October 5, 2026
+
+Integration phase 1 imports byte-identical current OpenAPI and explicitly synthetic
+examples into the existing documentation paths. Read-only revalidation found
+backend HEAD `b59b8afdc85bf5bbbfdf7382fd373df254563dc6`; the artifact content
+matches the previously inspected `5feed0bf8c072c17bc7a31aed99a038fab60e41b`
+revision independently of the newer HEAD.
+
+| Current backend artifact | SHA-256 |
+| --- | --- |
+| `client-handoff.md` | `a3165feb5053959df7a4b5a0f46eee735a1fd1c7bae6a93a3f21fbd58dfb098d` |
+| `openapi.json` | `5c8489c57bb13047b8d813f4d1b0c7209a6d5ef90380e74c46d26e4f20fed5db` |
+| `fixtures.json` | `a4ec631f86c77329e4613c1c9c3987609ddf29d665392bb23fad077827e1f087` |
+| `http-contract.md` | `e79dd9a3585af5e059ac1a5c4dd952fa3649357f9196308afe75386932d8e3d5` |
+| `runtime-evidence.md` | `6ddf0eae5f90c63dfabce101d700bc30d102ae344e8427794450a864f364a1f1` |
+
+The current snapshots contain 62 named synthetic examples. API-D01 adds the
+missing catalog/latest-refresh 400 declarations; API-D02 aligns projection names
+and retains a separate duplicate-label example; API-D03 supplies a consistent
+1,000-row retained cap and one-row page. API-D04 accepts null `generation_id` for
+reference-free SQL and excludes internal spool encoding from public results.
+Catalog and preview generation identity remain required nonempty strings. A null
+SQL generation means a reference-free execution, displayed without a snapshot;
+it does not grant access or weaken retained query identity/expiry checks.
+
+These copies replace the earlier bytes at the existing snapshot paths. The intake
+hashes and issue descriptions below remain historical provenance, not the current
+copied artifact identity. Current controlled frontend evidence is recorded in
+[phase 1](../../../../specs/backend-integration/verification/phase-1.md).
+No live request, connected acceptance or visual sign-off is established here;
+production data operations remain unavailable and the observed backend data
+composition is disabled. Backend services are implemented and opt-in, superseding
+the historical pending-implementation statements below. Current auth/role and
+Admin refresh decisions are recorded in their own contracts.
+
+## Historical reference and provenance
 
 The user supplied these files in the backend repository at
 `/Users/PECRUZ/Projects/outage-explorer/docs/specs/data-api/`:
@@ -44,8 +79,8 @@ The three supplied files and runtime evidence were **untracked**; the supplement
 HTTP contract was modified. These hashes identify the working-tree handoff;
 that HEAD alone does not contain or version these artifacts.
 
-Byte-identical copies of [OpenAPI](data-api-v1/openapi.json) and
-[synthetic fixtures](data-api-v1/fixtures.json) are retained in this repository,
+At historical intake, byte-identical copies of [OpenAPI](data-api-v1/openapi.json) and
+[synthetic fixtures](data-api-v1/fixtures.json) were retained in this repository,
 as requested by the backend handoff. OpenAPI is 3.1.0, contract version 1.0.0;
 public schema/tabular encoding version is `1`. Keep these snapshots in docs,
 outside runtime imports and public assets. Do not edit them to conceal source

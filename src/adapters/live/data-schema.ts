@@ -48,7 +48,7 @@ export const previewSchema = z.object({
   page_cursor: opaqueSchema, next_cursor: opaqueSchema.nullable(), has_more: z.boolean(), expires_at: instantSchema,
 }).strict().refine((page) => page.has_more === (page.next_cursor !== null) && page.rows.length <= page.page_size && page.next_cursor !== page.page_cursor);
 export const querySchema = z.object({
-  ...tableFields, query_id: opaqueSchema, generation_id: opaqueSchema,
+  ...tableFields, query_id: opaqueSchema, generation_id: opaqueSchema.nullable(),
   page: z.number().int().positive(), page_size: z.number().int().min(1).max(500), retained_row_count: z.number().int().min(0).max(1000),
   total_pages: z.number().int().positive(), has_more: z.boolean(), truncated: z.boolean(), truncation_reason: z.enum(["row_limit", "byte_limit"]).nullable(),
   limits: z.object({ max_rows: z.literal(1000), max_bytes: z.literal(1048576) }).strict(), expires_at: instantSchema,

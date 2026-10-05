@@ -19,7 +19,8 @@ export type QueryTruncation =
 
 export interface QueryExecution {
   readonly queryId: QueryId;
-  readonly snapshotId: string;
+  /** Null identifies a reference-free SQL execution. Preview identity remains required. */
+  readonly snapshotId: string | null;
   readonly pageSize: number;
   readonly expiresAt: ExpiryInstant;
   /** Count retained in this execution, not total source matches. */

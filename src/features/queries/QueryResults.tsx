@@ -13,7 +13,7 @@ export function QueryResults({ state, onPage }: { readonly state: QueryState; re
   const first = Math.max(1, result.page - 2);
   const last = Math.min(count, result.page + 2);
   return <Surface as="section" aria-label="Retained query results" className="overflow-hidden">
-    <PanelHeader title="Results" description={<>Snapshot: {result.execution.snapshotId} · {result.execution.retainedRowCount} retained rows · Expires {result.execution.expiresAt}</>} />
+    <PanelHeader title="Results" description={<>{result.execution.snapshotId === null ? "Reference-free execution" : <>Snapshot: {result.execution.snapshotId}</>} · {result.execution.retainedRowCount} retained rows · Expires {result.execution.expiresAt}</>} />
     {state.draft !== state.submitted && <StatusMessage title="Results belong to the last submitted statement" description="Your draft has changed. Run explicitly to replace these results." />}
     <details className="border-b border-border px-3 py-2 text-[11px]"><summary>Submitted statement</summary><pre className="mt-2 overflow-auto whitespace-pre-wrap">{state.submitted}</pre></details>
     {result.execution.truncation.truncated && <StatusMessage title="Whole execution truncated" tone="warning" description={`The retained result reached the ${result.execution.truncation.reason} cap. Retained row count is not total source matches.`} />}

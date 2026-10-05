@@ -4,6 +4,10 @@ import { createFixtureOperations } from "../../../tests/fixtures/operations";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { createQueriesController } from "./service";
 import { QueriesFeature } from "./QueriesFeature";
+import { QueryResults } from "./QueryResults";
+import { initialQueryState } from "./query-state";
+import { decodeQuery } from "../../adapters/live/data-mapping";
+import contractFixtures from "../../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 const cleanups: (() => void)[] = [];
 afterEach(() => { cleanups.splice(0).forEach((cleanup) => { cleanup(); }); });
 function setup(options: Parameters<typeof createFixtureOperations>[0] = {}) {
@@ -17,6 +21,44 @@ function setup(options: Parameters<typeof createFixtureOperations>[0] = {}) {
 }
 const sql = "  WITH x AS (SELECT * FROM synthetic_national)\nSELECT * FROM x;\n";
 describe("Queries explicit execution lifecycle", () => {
+  it.each([null, "<img src=x onerror=alert(1)>"])("renders generation %s honestly as inert result header text", (generationId) => {
+    const example = contractFixtures.fixtures.find((fixture) => fixture.name === "query_reference_free");
+    if (!example) throw new Error("Missing reference-free contract example");
+    const result = decodeQuery({ ...example.body, generation_id: generationId });
+    const { container } = render(<QueryResults state={{ ...initialQueryState(1), result, activity: "success", submitted: "SELECT 1", draft: "SELECT 1" }} onPage={() => { /* no interaction in header assertion */ }} />);
+    const expected = generationId === null ? "Reference-free execution" : `Snapshot: ${generationId}`;
+    expect(screen.getByText((_, element) => element?.textContent === `${expected} · 2 retained rows · Expires 2026-10-05T12:15:00Z`)).toBeVisible();
+    expect(container.querySelector("img, script")).toBeNull();
+    if (generationId === null) expect(container.textContent).not.toContain("Snapshot:");
+  });
+
+  it("preserves null generation across retained pages and rejects a changed generation without replay", async () => {
+    const fixture = createFixtureOperations();
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    let changedGeneration = false;
+    const operations = {
+      ...fixture.operations,
+      executeQuery: async (...args: Parameters<typeof fixture.operations.executeQuery>) => {
+        const result = await fixture.operations.executeQuery(...args);
+        return result.ok ? { ok: true as const, value: { ...result.value, execution: { ...result.value.execution, snapshotId: null } } } : result;
+      },
+      readQueryPage: async (...args: Parameters<typeof fixture.operations.readQueryPage>) => {
+        const result = await fixture.operations.readQueryPage(...args);
+        return result.ok ? { ok: true as const, value: { ...result.value, execution: { ...result.value.execution, snapshotId: changedGeneration ? "unexpected-generation" : null } } } : result;
+      },
+    };
+    const controller = createQueriesController({ runtime, operations, initialPageSize: 2, maximumPageSize: 100 });
+    controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+    controller.editDraft(sql); await controller.run();
+    const retained = controller.getSnapshot().result?.execution;
+    await controller.readPage(2);
+    expect(controller.getSnapshot().result?.execution).toEqual(retained);
+    expect(retained?.snapshotId).toBeNull();
+    changedGeneration = true;
+    await controller.readPage(1);
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-lost" } });
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+  });
   it("keeps unchanged submission and fixed ID/size across edit, pages, focus/reconnect, expiry and explicit rerun", async () => {
     let now = Date.now();
     const { controller, fixture } = setup({ now: () => now });
