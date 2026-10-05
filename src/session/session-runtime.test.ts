@@ -4,7 +4,7 @@ import { createSessionRuntime } from "./session-runtime";
 
 const session = (datasets: readonly string[] = ["national", "facility"], lifetime = 1000): SessionResolution => ({
   status: "authenticated",
-  session: { identity: { subject: "test-subject", displayName: "Test" }, capabilities: { datasetIds: datasets, canReadNationalSeries: true, canExploreDatasets: true, canExecuteQuery: true }, expiresAt: new Date(Date.now() + lifetime).toISOString() },
+  session: { identity: { subject: "test-subject", displayName: "Test" }, capabilities: { datasetIds: datasets, canReadNationalSeries: true, canRefreshDatasets: false, canExploreDatasets: true, canExecuteQuery: true }, expiresAt: new Date(Date.now() + lifetime).toISOString() },
 });
 
 afterEach(() => { vi.useRealTimers(); });
@@ -70,7 +70,7 @@ describe("session invalidation", () => {
   it("checks expiry before dispatch even when a scheduled callback has not fired", () => {
     let now = 0;
     const runtime = createSessionRuntime({ now: () => now, schedule: () => () => undefined });
-    runtime.setResolution({ ...session(), status: "authenticated", session: { identity: { subject: "test", displayName: "Test" }, capabilities: { datasetIds: ["national"], canReadNationalSeries: true, canExploreDatasets: true, canExecuteQuery: true }, expiresAt: new Date(100).toISOString() } });
+    runtime.setResolution({ ...session(), status: "authenticated", session: { identity: { subject: "test", displayName: "Test" }, capabilities: { datasetIds: ["national"], canReadNationalSeries: true, canRefreshDatasets: false, canExploreDatasets: true, canExecuteQuery: true }, expiresAt: new Date(100).toISOString() } });
     const context = runtime.capture();
     now = 100;
     expect(runtime.isCurrent(context)).toBe(false);

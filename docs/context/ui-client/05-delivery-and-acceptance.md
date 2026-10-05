@@ -165,3 +165,13 @@ production auth and scoped CSRF lifecycle are implemented; see
 Backend authorization, full authenticated browser acceptance, data registration
 and release checks remain distinct. Earlier missing-capability notes describe
 the previous intake, not a current auth implementation prerequisite.
+
+## Admin refresh scope update — October 5, 2026
+
+The user now requests the refresh endpoint button on Overview for Admin users.
+This enables that scoped control, superseding earlier statements that refresh
+controls were deferred. The existing Overview composition uses shared button
+and status atoms/molecules; no separate Admin page or deferred new-data card is
+added. See the [refresh implementation contract](../../specs/web-client/contracts/refresh.md) for admission/status,
+idempotency and access-change behavior. Connected refresh acceptance remains
+separate from controlled frontend tests.

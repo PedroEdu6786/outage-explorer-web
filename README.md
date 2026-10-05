@@ -200,3 +200,12 @@ These cover signed-out resolution, login redirect/binding cookies and idempotent
 logout Origin handling. They do not prove authenticated Cognito completion,
 reload/reopen, backend role changes or independent-session logout; see the
 [evidence and remaining checks](docs/specs/web-client/verification/auth-integration.md).
+
+## Admin refresh on Overview — October 5, 2026
+
+Admin users now see **Refresh data** and **Check refresh status** on Overview.
+Configured auth connects these controls to `/api/refresh`, using the current
+session's CSRF token and an admission idempotency key. Retry uncertain admission
+with the offered retry button; status checks do not start another run. Viewer
+and Analyst users have no refresh controls. See the [refresh contract](docs/specs/web-client/contracts/refresh.md).
+Analytical data registration and live acceptance remain separate.

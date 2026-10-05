@@ -96,3 +96,12 @@ Many prototype metadata labels are 8–11px. Treat readable text, focus and touc
 ## Inspection is not acceptance
 
 The captures establish visual planning evidence. They do not verify backend security, accessible keyboard behavior, true query execution, exact decimal calculations or a finished implementation. Feature/visual/live verification must be recorded separately against the specification.
+
+## Authorized Overview refresh extension — October 5
+
+The user requests an Admin-only refresh button on Overview. The V2 desktop
+reference was inspected again; its date controls and heading remain intact.
+Refresh uses existing secondary/ghost button variants beneath the heading and
+shared status messages for admission/publication outcomes. This is a requested
+extension to the inspected prototype, not an existing Figma control or a new-data
+status card. No new visual-fidelity acceptance is claimed.

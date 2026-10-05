@@ -148,3 +148,13 @@ The main plan and task manifest now reflect the latest backend-controlled auth
 boundary and supplied SQL settings. Follow the [remaining integration sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)
 and current Phase 5 paths; prepared data modules are reused, and live checkboxes
 remain open. Earlier run outcomes remain historical evidence.
+
+## Admin refresh scope update — October 5, 2026
+
+The user now requests the refresh endpoint button on Overview for Admin users.
+This enables that scoped control, superseding earlier statements that refresh
+controls were deferred. The existing Overview composition uses shared button
+and status atoms/molecules; no separate Admin page or deferred new-data card is
+added. See the [refresh implementation contract](contracts/refresh.md) for admission/status,
+idempotency and access-change behavior. Connected refresh acceptance remains
+separate from controlled frontend tests.

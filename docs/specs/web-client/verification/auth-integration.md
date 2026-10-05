@@ -214,3 +214,35 @@ Verification on the updated working tree:
 These are controlled frontend checks. No live Cognito completion, backend
 permission-policy change, deployment, fresh production build or new visual
 comparison is claimed. Existing live/release gates remain open.
+
+## Admin Overview refresh — October 5, 2026
+
+The user requested the previously conditional Admin refresh control. Production
+composition now registers refresh admission/status alongside configured auth,
+using its in-memory CSRF token. Overview exposes controls only for Admin and
+checks current capabilities before transport. Admission uses `{}` and one
+idempotency key per attempt/retry sequence; status/latest GETs never start work.
+Confirmed publication reloads Overview observations once; SQL is untouched.
+
+Verification against the updated working tree:
+
+- `npm test -- --reporter=dot`: 213 tests across 24 files passed. New coverage
+  includes roles, CSRF/key validation, all run states, safe failures, stale
+  responses, duplicate-click prevention, same-key uncertain retries and denied
+  controls.
+- `npm run typecheck`, `npm run lint`, `npm run check:boundaries` and
+  `git diff --check`: passed. Boundaries covered 102 modules/15 roots.
+- Fresh `npm run build` and `npm run check:production-fixtures`: passed; the
+  emitted scan covered 272 files without fixture signatures.
+- Development Chromium project: 12 tests passed, including actual Overview
+  Admin refresh visibility, intercepted `503` then `202` admission with identical
+  key/body/CSRF, GET status completion, Viewer/Analyst absence and existing
+  role/navigation/logout regressions.
+
+The current sibling backend OpenAPI was rechecked: refresh schemas match the
+imported snapshot; operations are now marked implemented and latest adds `400`.
+See the [refresh contract](../contracts/refresh.md) for the source hash. The
+original Overview desktop reference was inspected; new controls reuse existing
+variants as a user-requested design extension. No new screenshot comparison or
+visual acceptance was performed. Browser responses were synthetic; no real
+refresh/ingestion or live Admin session acceptance was triggered here.

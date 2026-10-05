@@ -66,7 +66,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
     if (expiresAt <= now()) return { status: "expired" };
     return { status: "authenticated", session: {
       identity: { subject: `synthetic-${persona}-${String(epoch)}`, displayName: `Synthetic ${persona}` },
-      capabilities: { datasetIds: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => item.id), canReadNationalSeries: true, canExploreDatasets: persona !== "viewer", canExecuteQuery: persona !== "viewer" },
+      capabilities: { datasetIds: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => item.id), canReadNationalSeries: true, canRefreshDatasets: persona === "admin", canExploreDatasets: persona !== "viewer", canExecuteQuery: persona !== "viewer" },
       expiresAt: new Date(expiresAt).toISOString(),
     } };
   }

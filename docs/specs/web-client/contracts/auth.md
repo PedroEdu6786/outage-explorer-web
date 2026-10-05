@@ -367,3 +367,11 @@ expiry; keep CSRF in adapter memory, never shared presentation props/storage.
 Logout begins with protected-state removal, retains the token only for the
 current unresolved logout generation and original expiry, and confirms on `204`.
 Clear tokens on other identity/access transitions and reject stale responses.
+
+## Admin refresh presentation capability — October 5
+
+The latest user request enables the Overview refresh control for Admin.
+`canRefreshDatasets` is true only for the backend-assigned Admin role. The live
+refresh adapter uses auth-owned in-memory CSRF and independently checks the
+current session before admission/status requests; Flask remains authoritative.
+Viewer remains Overview-only and Analyst retains Explorer/SQL without refresh.

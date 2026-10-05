@@ -1,8 +1,39 @@
-# Refresh contract — Admin capability, UI conditional
+# Refresh contract — Admin Overview control
 
-Data API v1; [source snapshots and provenance](data-api.md). Runtime pending.
-This records the backend capability; it does not authorize an Admin screen or
-the deferred new-data status card.
+Data API v1; [source snapshots and provenance](data-api.md). The October 5
+user request authorizes an Admin-only refresh control on Overview. It supersedes
+the earlier deferred refresh-control scope; no separate Admin page or new-data
+status card is introduced.
+
+Current backend OpenAPI was rechecked at
+`/Users/PECRUZ/Projects/outage-explorer/docs/specs/data-api/openapi.json`, SHA-256
+`5c8489c57bb13047b8d813f4d1b0c7209a6d5ef90380e74c46d26e4f20fed5db`.
+Receipt/run/interval schemas match the imported snapshot. Refresh operations now
+say implemented; latest also documents a `400` response. This source check does
+not establish connected refresh execution acceptance.
+
+## Overview implementation — October 5
+
+Backend-assigned Admin role maps to `canRefreshDatasets`; Viewer/Analyst do not
+receive the controls and are blocked by the adapter before HTTP. With configured
+auth, the live composition exposes admission and status through the same-origin
+proxy and auth-owned in-memory CSRF token. Analytical data registration remains
+separate. Missing refresh configuration never substitutes fixture data.
+
+**Refresh data** explicitly submits the empty body and a new UUID idempotency
+key. Pending and active runs disable new admission. Uncertain admission offers
+**Retry refresh admission**, retaining the same key. **Check refresh status**
+reads the current run, or latest when no run is known; it never submits a POST.
+Status distinguishes accepted/running, published success, retained data,
+failure/interruption and nonterminal unknown publication. There is no automatic
+POST retry, implicit source interval selector or invented progress percentage.
+Confirmed publication asks Overview to reload its national observations once
+per run, without touching retained SQL executions.
+
+Refresh state and pending publications are discarded on unmount, logout,
+expiry or role change. A denied response removes run state and disables controls
+until a new authoritative session resolution. Closing the UI does not cancel
+backend work; latest lookup allows deliberate rediscovery after reload.
 
 ## Admission and idempotency
 

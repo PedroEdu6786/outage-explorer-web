@@ -1,3 +1,4 @@
+import type { RefreshOperations } from "../contracts/refresh";
 import type { CatalogOperations } from "../contracts/catalog";
 import type { NavigationOperations } from "../contracts/navigation";
 import type { ObservationOperations } from "../contracts/observations";
@@ -7,7 +8,7 @@ import type { SessionOperations } from "../contracts/session";
 import type { SessionRuntime } from "../session/session-runtime";
 import { createLiveComposition } from "../integration/live-composition";
 
-export type ApplicationOperations = SessionOperations & CatalogOperations & ObservationOperations & PreviewOperations & QueryOperations & NavigationOperations;
+export type ApplicationOperations = SessionOperations & CatalogOperations & ObservationOperations & PreviewOperations & QueryOperations & NavigationOperations & { readonly refresh?: RefreshOperations };
 export interface QuerySettings { readonly initialPageSize: number; readonly maximumPageSize: number }
 
 /** T6.L replaces these placeholders only after versioned live contracts are accepted. */

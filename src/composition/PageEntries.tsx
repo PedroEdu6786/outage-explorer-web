@@ -25,7 +25,7 @@ export function SignInEntry() {
 }
 export function OverviewEntry() {
   const app = useApplication();
-  return <OverviewFeature operations={app.operations} runtime={app.runtime} onNavigate={app.navigate} />;
+  return <OverviewFeature {...(app.operations.refresh ? { refreshOperations: app.operations.refresh } : {})} operations={app.operations} runtime={app.runtime} onNavigate={app.navigate} />;
 }
 export function ExplorerEntry() {
   const app = useApplication();
