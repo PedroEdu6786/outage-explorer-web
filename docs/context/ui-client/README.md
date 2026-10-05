@@ -49,7 +49,7 @@ molecules, table/navigation organisms and slot templates are implemented with
 per-feature readiness records in
 [Phase 3 verification](../../specs/web-client/verification/phase-3.md). Auth, Overview, Explorer and Queries fixture compositions are now accepted;
 see [Phase 4 verification](../../specs/web-client/verification/phase-4.md).
-The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 live adapters remain blocked on Q2/Q3; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Production routes fail closed until T6.L live registration.
+The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 auth integration is next, with backend auth confirmed ready; data live acceptance remains pending; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Production routes fail closed until T6.L live registration.
 See the
 [project README](../../../README.md) and [agent guidance](../../../AGENTS.md)
 for repository entry points. Keep accepted requirements separate from suggested
@@ -117,10 +117,12 @@ and visual comparison results.
 ## Frontend contract adaptation — October 5, 2026
 
 The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The backend will add auth
-capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+valid ranges outside coverage show empty results. The user now confirms backend
+auth works and is ready for frontend integration; confirm current capability
+fields during intake and implement the auth adapter next. Local data decoders,
 injected operations, complete national preview assembly, exact fractions, richer
 tables and explicit SQL recovery are prepared; production remains unavailable.
 See the [expected-versus-available proposal and implementation record](../../specs/web-client/contracts/frontend-adaptation.md).
-Controlled tests do not establish live readiness; no backend responses are
-expected yet. Earlier fixture milestones remain historical evidence.
+Controlled tests do not establish live acceptance. Backend auth is ready per the
+user; the earlier expectation of no API responses now applies to data services.
+Earlier fixture milestones remain historical evidence.

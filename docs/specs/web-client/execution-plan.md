@@ -9,8 +9,9 @@
 Use the [remaining sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)
 and current [Phase 5 paths](tasks/phase-5.md) for outstanding work. Fixtures and
 page assembly are accepted; local data modules are already implemented/tested.
-Auth awaits the revised backend-controlled capability response and target
-configuration. The client sends no role/capability claims and needs no role field.
+The user confirms backend auth works and is ready for frontend integration.
+Start T5.3 Auth intake of current capability fields/configuration, then T5.4/T5.5;
+data API availability does not block this sequence. The client sends no role/capability claims and needs no role field.
 Flask owns PKCE and callback; local development uses the same-origin `/api` proxy.
 
 T5.6–T5.8 share implemented modules and must be serialized under Integration;

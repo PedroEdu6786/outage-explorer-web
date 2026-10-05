@@ -22,7 +22,7 @@ first, parallel feature work and individual pages last, then confirmed:
 
 ## Parallel delivery
 
-The task manifest contains **78 tasks across seven phases**, with **24 marked
+The task manifest contains **78 tasks across seven phases**, with **21 marked
 parallelizable** and explicit file ownership, dependencies and acceptance checks.
 
 1. Establish the toolchain, public session/catalog contracts and fixture seams.
@@ -74,6 +74,12 @@ Admin refresh controls and the deferred new-data card remain excluded.
 
 ## Remaining inputs
 
+**Next: integrate the working backend auth.** The user confirmed backend auth is
+ready on October 5. Read the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5),
+then [Phase 5: T5.3 Auth → T5.4 → T5.5](tasks/phase-5.md#next-implementation-connect-working-backend-auth)
+and the [auth contract](contracts/auth.md). Current response/configuration intake
+starts the work; data endpoint availability does not block auth integration.
+
 - Auth handoff is documented with source revision/digest; target environment,
   responsible integration person and frontend mapping remain pending. Data API v1
   service contracts are now received; backend runtime and contract reconciliation
@@ -89,7 +95,7 @@ Foundation, tokens/atoms and shared molecules/organisms/templates are implemente
 and [execution ledger](execution-state.md). The Auth, Overview, Explorer and Queries fixture features are implemented and
 accepted; see [Phase 4 verification](verification/phase-4.md). The Phase 5 composed
 fixture harness is accepted; see [Phase 5 verification](verification/phase-5.md).
-The four fixture page compositions are accepted; see [Phase 6 verification](verification/phase-6.md). Live adapters and T6.L registration remain blocked on Q2/Q3; production routes show explicit unavailability until live registration.
+The four fixture page compositions are accepted; see [Phase 6 verification](verification/phase-6.md). Backend auth is ready for frontend integration. Full T6.L registration still requires completed adapters and their evidence; production routes show explicit unavailability until live registration.
 
 These are named gates in the plan and tasks. The documented auth source contract
 does not establish production deployment or completed live/visual acceptance.
@@ -103,13 +109,15 @@ closure round. Its full record is [anchor](council/00-problem.md),
 ## Frontend contract adaptation — October 5, 2026
 
 The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The backend will add auth
-capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+valid ranges outside coverage show empty results. The user now confirms backend
+auth works and is ready for frontend integration; confirm current capability
+fields during intake and implement the auth adapter next. Local data decoders,
 injected operations, complete national preview assembly, exact fractions, richer
 tables and explicit SQL recovery are prepared; production remains unavailable.
 See the [expected-versus-available proposal and implementation record](contracts/frontend-adaptation.md).
-Controlled tests do not establish live readiness; no backend responses are
-expected yet. Earlier fixture milestones remain historical evidence.
+Controlled tests do not establish live acceptance. Backend auth is ready per the
+user; the earlier expectation of no API responses now applies to data services.
+Earlier fixture milestones remain historical evidence.
 
 The main plan and task manifest now reflect the latest backend-controlled auth
 boundary and supplied SQL settings. Follow the [remaining integration sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)

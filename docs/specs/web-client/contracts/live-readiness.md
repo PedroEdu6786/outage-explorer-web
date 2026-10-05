@@ -1,17 +1,20 @@
 # Live contract readiness
 
-Ledger revision: **5**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
+Ledger revision: **6**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
 FR2–FR4, FR6–FR7, FR9, FR13, FR16; TR3, TR5, TR7, TR9.
 
-**Auth and Data API v1 contracts are documented; local data adaptations are prepared,
-but no live operation is ready.** User feedback accepts date-only optional bounds
+**Backend auth works and is ready for frontend integration, as confirmed by the
+user on October 5. Frontend live acceptance is still pending.** Start T5.3 Auth
+current response/configuration intake, then T5.4/T5.5; data API availability does
+not block this auth sequence. Data API v1 contracts and local adaptations are
+prepared; data runtime readiness remains unconfirmed. User feedback accepts date-only optional bounds
 and assigns capability additions to the backend. The [adaptation record](frontend-adaptation.md)
 and [controlled evidence](../verification/contract-adaptation.md) describe what is
 implemented without API availability. The client sends no role/capability claims and does not require a role field in
-the revised session response. Expanded auth capability DTO, production
-composition/proxy and actual live checks remain pending.
+the revised session response. Confirm current auth capability field names during
+intake; production composition/proxy and actual frontend live checks remain pending.
 The [data handoff](data-api.md) now supplies all seven service operations and
-resolves Q3 contract defaults/expiry/delivery. Backend runtime is pending and
+resolves Q3 contract defaults/expiry/delivery. Data backend runtime is pending and
 [frontend/source discrepancies](contract-review.md) require reconciliation.
 The earlier October 5 [auth handoff](auth.md) supplies routes, payloads, errors, backend
 callback ownership, HttpOnly session cookies, logout CSRF and a same-origin local
@@ -45,7 +48,9 @@ invented person. Do not place credentials, tokens or account secrets in this led
 
 ## Operation records
 
-Every row is **not live-ready**; auth and data now have documented source contracts.
+Every row still lacks **frontend live acceptance**. Backend auth is user-confirmed
+ready for implementation; data runtime readiness is separate. Both have documented
+source contracts.
 For each row, fill the contract
 version, implementation revision, target environment, decision owner, approved
 artifact and actual evidence before changing readiness. Required evidence includes
@@ -72,16 +77,18 @@ conditional and no refresh implementation task is added.
 Its dataset/filter authorization comes from the agreed session/catalog context;
 its generation guard and explicit edited-draft replacement remain frontend duties.
 
-## Auth subgate — Q2 partially documented, integration pending
+## Auth subgate — backend ready; frontend implementation next
 
 The [auth contract](auth.md) records the supplied browser-to-Flask flow: backend
 code exchange/callback, HttpOnly session cookie, in-memory CSRF token, fixed
 expiry, confirmed current-session logout and same-origin local proxy. It also
 records exact Origin/CORS rules and the distinction from provider SSO lifetimes.
-These transport details are no longer unspecified. The backend source still
-labels integration choices draft; target configuration and live proof are pending.
+These transport details are no longer unspecified. The user confirms backend
+auth works and is ready to integrate. The older local reference still labels
+integration choices draft and shows no capability fields; capture the current
+response/configuration during intake. This is not a wait for auth to be built.
 
-Remaining: expanded backend capability DTO (user-confirmed backend addition),
+Remaining frontend integration inputs/work: current backend capability DTO,
 responsible integration person, target version/environment, actual
 UI/public/callback origins and return paths, capability/identity mapping, and
 logout retry/token handling. The current fixture session requires capabilities
@@ -90,8 +97,9 @@ Do not fabricate capabilities or treat a failed logout as confirmed.
 
 Before implementation, record required proxy/configuration/adapter file paths and
 update the phase-5 tasks and dependency graph under the coordinator's ownership.
-No frontend callback/code exchange is required. This documentation-only handoff
-does not authorize transport implementation or complete T5.3.
+No frontend callback/code exchange is required. Paths are now recorded in Phase 5.
+This documentation update identifies the next implementation; it does not mark
+T5.3 or frontend live acceptance complete.
 
 ## Catalog/Preview and Metric subgates — contract received, mapping pending
 
@@ -143,3 +151,4 @@ allow independent fixture work to continue under the accepted execution plan.
 | 3 | 2026-10-05 | Received Data API v1; copied exact OpenAPI/58 fixtures, validated response schemas/headers/page structure, documented F1–F13 and source issues B1–B3. Q3 contract values supplied; no runtime, adapter or live acceptance. |
 | 4 | 2026-10-05 | User accepts date-only/optional bounds and backend capability additions; local data decoders, models, UI and injected transport prepared and tested. No production registration, auth mapping or live acceptance. |
 | 5 | 2026-10-05 | User confirms backend-only role assignment/capability control; no client permission claims or role-derived capabilities. Revised session response need not include role; illustrative capability names await backend contract. Documentation only. |
+| 6 | 2026-10-05 | User confirms backend auth works and is ready for frontend implementation. T5.3 Auth intake → T5.4 → T5.5 is next, independently of data API availability. Capture current DTO/configuration; frontend live acceptance remains unverified. Documentation only; no endpoint calls. |

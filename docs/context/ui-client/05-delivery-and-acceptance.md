@@ -92,7 +92,7 @@ or successful compilation.
 | Application setup in `outage-explorer-web` (repository established; documentation only) | Scaffolding and tooling |
 | Figma URL, relevant nodes, assets and access | Visual inventory and fidelity |
 | Backend environment and version | Live integration |
-| Auth and [Data API v1](../../specs/web-client/contracts/data-api.md) contracts received; frontend/source discrepancies and backend runtime pending | Service adapter mappings, capability composition and live evidence |
+| Auth and [Data API v1](../../specs/web-client/contracts/data-api.md) contracts received; backend auth confirmed ready for frontend integration; data runtime and source discrepancies pending | Service adapter mappings, capability composition and live evidence |
 | Exact Cognito callback/client, origins and local proxy configuration; cookie/CSRF transport documented in auth handoff | Real login/logout integration and live verification |
 | SQL default100/max500, 15-minute TTL, synchronous delivery and errors supplied; recovery/type mapping still pending | Final SQL controls, decoding and live verification |
 | Inclusion of Admin UI and any optional charts/findings | Scope beyond the core workflows |
@@ -131,10 +131,12 @@ govern the new TypeScript repository.
 ## Frontend contract adaptation — October 5, 2026
 
 The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The backend will add auth
-capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+valid ranges outside coverage show empty results. The user now confirms backend
+auth works and is ready for frontend integration; confirm current capability
+fields during intake and implement the auth adapter next. Local data decoders,
 injected operations, complete national preview assembly, exact fractions, richer
 tables and explicit SQL recovery are prepared; production remains unavailable.
 See the [expected-versus-available proposal and implementation record](../../specs/web-client/contracts/frontend-adaptation.md).
-Controlled tests do not establish live readiness; no backend responses are
-expected yet. Earlier fixture milestones remain historical evidence.
+Controlled tests do not establish live acceptance. Backend auth is ready per the
+user; the earlier expectation of no API responses now applies to data services.
+Earlier fixture milestones remain historical evidence.

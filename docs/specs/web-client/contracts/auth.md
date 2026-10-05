@@ -1,9 +1,25 @@
 # Authentication HTTP contract
 
-Status: **backend handoff documented; web implementation and live verification
-pending**. Received October 5, 2026. This document records the supplied auth
+Status: **backend authentication working and ready for frontend integration,
+user-confirmed October 5, 2026; web implementation and live verification pending**.
+Received October 5, 2026. This document records the supplied auth
 contract before implementation. The later [Data API v1 intake](data-api.md)
 supplies the service contracts and extends CSRF usage to SQL/refresh POST.
+
+## Backend readiness confirmation — October 5, 2026
+
+The user confirms auth already works and is ready to implement in the web client.
+Proceed with the [next implementation sequence](../plan.md#remaining-implementation-sequence--reconciled-october-5)
+and [Phase 5 auth tasks](../tasks/phase-5.md#next-implementation-connect-working-backend-auth).
+The remaining work is frontend integration: target/proxy configuration, login
+navigation, session mapping, memory-only CSRF, expiry and confirmed/retryable logout.
+Data endpoints need not be ready to implement and verify these auth flows.
+
+This is user-confirmed backend readiness, not frontend end-to-end test evidence.
+The locally available backend reference still shows the original role-bearing
+response without capabilities. Capture the current response/contract at intake
+before finalizing capability field mappings; the proposal below stays illustrative.
+Do not infer capabilities from roles or treat absent fields as permission grants.
 
 ## Accepted authorization boundary — October 5, 2026
 
@@ -278,7 +294,9 @@ handoff. Fixture acceptance remains separate from live auth acceptance.
 
 ## User decision after intake — October 5
 
-The backend will add capability fields. Preserve the existing frontend capability
-model and await the expanded response for validation/mapping. Do not infer
-capability flags from role as a substitute. No API responses are expected yet;
-auth transport/session integration remains pending. See [the adaptation record](frontend-adaptation.md).
+The backend owns capability fields. Preserve the existing frontend capability
+model and confirm the current response for validation/mapping during intake.
+The user subsequently confirmed auth works and is ready for frontend integration;
+the earlier expectation of no API responses now applies to data services.
+Do not infer capability flags from role as a substitute. Auth integration is next;
+see [the adaptation record](frontend-adaptation.md).

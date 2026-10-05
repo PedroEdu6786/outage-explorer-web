@@ -7,6 +7,9 @@ the backend version used for integration.
 ## Auth handoff update — October 5, 2026
 
 The user supplied auth endpoints and the full backend reference was read locally.
+The user now confirms backend auth works and is ready for frontend integration.
+Connect login/session/logout next; capture current capability fields and target
+configuration during intake, and record frontend live tests separately.
 The [auth HTTP contract](../../specs/web-client/contracts/auth.md) now records
 backend-owned Cognito login/callback, HttpOnly cookie sessions, session identity/
 role/expiry/CSRF, confirmed logout, errors and same-origin local proxy behavior.
@@ -131,10 +134,12 @@ that could be downloaded by a Viewer even when their screen is hidden.
 ## Frontend contract adaptation — October 5, 2026
 
 The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The backend will add auth
-capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+valid ranges outside coverage show empty results. The user now confirms backend
+auth works and is ready for frontend integration; confirm current capability
+fields during intake and implement the auth adapter next. Local data decoders,
 injected operations, complete national preview assembly, exact fractions, richer
 tables and explicit SQL recovery are prepared; production remains unavailable.
 See the [expected-versus-available proposal and implementation record](../../specs/web-client/contracts/frontend-adaptation.md).
-Controlled tests do not establish live readiness; no backend responses are
-expected yet. Earlier fixture milestones remain historical evidence.
+Controlled tests do not establish live acceptance. Backend auth is ready per the
+user; the earlier expectation of no API responses now applies to data services.
+Earlier fixture milestones remain historical evidence.

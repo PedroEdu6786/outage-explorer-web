@@ -2,8 +2,9 @@
 
 October 5, 2026. The user accepts date-only filtering for v1, owns backend
 documentation corrections B1–B3, and requests frontend adaptation without
-expecting API responses yet. This authorizes local preparation and controlled
-tests; it does not establish live readiness.
+expecting data API responses yet. The user subsequently confirmed backend auth
+works and is ready for frontend integration. Follow the [next auth tasks](../tasks/phase-5.md#next-implementation-connect-working-backend-auth);
+frontend connected verification remains required.
 
 ## Expected experience versus available contract
 
@@ -11,7 +12,7 @@ tests; it does not establish live readiness.
 | --- | --- | --- |
 | Dates and applicable facility filters | Dates only | Remove the facility selector; reject unsupported facility input rather than silently ignoring it. Analysts still browse facility/generator datasets. |
 | Paired dates within coverage | Independently optional inclusive start/end; out-of-coverage requests can be empty | Accepted and implemented: optional bounds in Explorer and Overview; coverage informs users rather than limiting valid inputs. Overview starts with catalog coverage. |
-| Session identity plus capability flags | ID, email, role, expiry, CSRF | User confirms the backend will add capability fields. Keep the existing frontend capability model; await the expanded response before auth mapping. No role-derived substitute. |
+| Session identity plus capability flags | ID, email, role, expiry, CSRF | User confirms the backend will add capability fields. Backend auth is now confirmed working; capture its current capability response during integration intake before mapping. No role-derived substitute. |
 | Separate schema request | Columns embedded in authorized catalog | Keep the feature operation; fulfill it from the catalog and preserve generation/session ownership. |
 | Complete national series endpoint | Paginated national preview | Collect one cursor sequence, validate consistency, sort dates ascending, then publish the complete series. Never run SQL implicitly. |
 | Exact decimal calculated percentage | Exact numerator/denominator plus rounded decimal/display | Preserve the fraction; use approximation only for chart coordinates, backend display for labels. |
@@ -30,7 +31,7 @@ no parallel assignments are made.
    revalidate affected `src/features/*`, table presentation and test fixtures.
 2. Prepare versioned decoders/mappings in `src/adapters/live/*` and controlled
    tests there. Backend artifact issues remain documented separately.
-3. Prepare `src/integration/data-http-client.ts` with injected fetch/current-session/CSRF providers. Auth composition remains pending the expanded response. No frontend OAuth callback.
+3. Prepare `src/integration/data-http-client.ts` with injected fetch/current-session/CSRF providers. Auth integration is next against the user-confirmed working backend; capture its current capability fields at intake. No frontend OAuth callback.
 4. Keep production registration unavailable pending target configuration and
    actual backend verification. T5.L/T6.L/release remain incomplete.
 
@@ -71,7 +72,7 @@ optional in legacy feature models but required by the v1 runtime decoder.
 Backend B2 remains an SQL-example issue; response mapping does not execute or
 prove that SQL projection. B3 is rejected by the decoder until corrected.
 
-## Auth handoff still needed
+## Auth integration inputs
 
 The frontend needs authorized dataset IDs, national-series visibility and SQL
 execution visibility, currently named `datasetIds`, `canReadNationalSeries` and

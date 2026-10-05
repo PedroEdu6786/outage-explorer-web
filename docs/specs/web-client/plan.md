@@ -1,5 +1,5 @@
 # Plan: Outage Explorer web client
-> Status: fixture milestone complete; data adapters prepared; revised auth DTO and live integration pending · Slug: web-client · Spec: ./spec.md
+> Status: backend auth working and ready for frontend integration (user-confirmed October 5); data adapters prepared; frontend integration and live acceptance pending · Slug: web-client · Spec: ./spec.md
 
 ## Approach
 
@@ -40,12 +40,14 @@ These are feature-facing responsibilities, not invented endpoint paths. The inte
 October 5 current agreement: cookie sessions, backend-owned Cognito callback and
 CSRF transport are documented. The backend assigns roles and controls effective
 capabilities; the frontend sends no permission claims, does not derive capabilities
-from role names, and does not require a role in the response. Await the revised
-session capability DTO before auth mapping. The [data contract](contracts/data-api.md)
+from role names, and does not require a role in the response. The user confirms
+backend auth works and is ready for frontend implementation. Confirm the current
+session capability fields during T5.3 intake; do not wait for backend auth to be
+built or for data endpoints to become available. The [data contract](contracts/data-api.md)
 and SQL settings are supplied; local data adaptations are implemented and tested
 with controlled responses. Backend source corrections are user-owned. See
 [auth authority](contracts/auth.md), [adaptation evidence](verification/contract-adaptation.md)
-and [readiness revision 5](contracts/live-readiness.md).
+and [readiness revision 6](contracts/live-readiness.md).
 
 | Operation | Input → output / behavior | Trace |
 | --- | --- | --- |
@@ -139,24 +141,33 @@ The numbered phases describe delivery layers, not a blanket prohibition on start
 ## Frontend contract adaptation — October 5, 2026
 
 The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The backend will add auth
-capability fields, so auth mapping awaits the expanded DTO. Local data decoders,
+valid ranges outside coverage show empty results. The user now confirms backend
+auth works and is ready for frontend integration; confirm current capability
+fields during intake and implement the auth adapter next. Local data decoders,
 injected operations, complete national preview assembly, exact fractions, richer
 tables and explicit SQL recovery are prepared; production remains unavailable.
 See the [expected-versus-available proposal and implementation record](contracts/frontend-adaptation.md).
-Controlled tests do not establish live readiness; no backend responses are
-expected yet. Earlier fixture milestones remain historical evidence.
+Controlled tests do not establish live acceptance. Backend auth is ready per the
+user; the earlier expectation of no API responses now applies to data services.
+Earlier fixture milestones remain historical evidence.
 
 ## Remaining implementation sequence — reconciled October 5
 
 This sequence governs the remaining work; earlier numbered phases retain their
 accepted fixture milestones. No new implementation is performed by this plan update.
 
+**Next implementation: backend authentication integration, T5.3 Auth → T5.4 →
+T5.5.** On October 5 the user confirmed that backend auth already works and is
+ready to implement in the web client. Record the current response/configuration
+as integration inputs, then connect login, session restoration and logout. Data
+API availability does not block this auth work. This confirmation establishes
+backend readiness; frontend end-to-end acceptance still needs connected tests.
+
 | Order / task | Work and completion criteria | Dependencies / current status |
 | --- | --- | --- |
-| 1 — T5.3 | Receive revised session capability DTO and user-owned source corrections; record target backend revision/origins/return paths and responsible integration owner. Distinguish effective permissions from data availability. | Auth field names and target configuration pending; data/SQL contracts already supplied. |
+| 1 — T5.3 Auth | Capture the working backend's current session DTO and target revision/origins/return paths. Confirm effective capability field names and integration ownership; retain user-owned data corrections in their separate subgates. | Backend auth ready per user; contract/configuration intake is the first integration step, not a wait for backend auth implementation. |
 | 2 — T5.4 | Finish fail-closed configuration and injected transport/composition seams. Reuse prepared data HTTP client; configure same-origin `/api` proxy from explicit backend target. Preserve redirects and cookies. | Configuration work follows agreed target; no frontend OAuth callback or provider exchange. |
-| 3 — T5.5 | Implement session decoding, browser login navigation, fixed expiry and memory-only CSRF. Clear protected state and reject stale completions; retain scoped logout retry context on `503`, confirm sign-out only on `204`. Handle `401`/`403`/network errors. | Revised capability DTO required. Use controlled responses while API unavailable. |
+| 3 — T5.5 | Implement session decoding, browser login navigation, fixed expiry and memory-only CSRF. Clear protected state and reject stale completions; retain scoped logout retry context on `503`, confirm sign-out only on `204`. Handle `401`/`403`/network errors. | Working backend auth is available for integration; map confirmed capability fields, use controlled failure cases and verify connected auth without waiting for data APIs. |
 | 4 — T5.6–T5.8 | Reuse and finish integration of existing catalog/preview/metric/query modules. Preserve date-only optional bounds, embedded schemas, exact fractions, complete preview series and GET-only SQL recovery. Revalidate affected consumers against corrected artifacts. | Local implementation already tested; remaining shared-module changes serialized under Integration. |
 | 5 — T6.L and T5.9/T5.L | Wire auth/data factories into production operations and author real-environment scenarios. Verify configuration failures without fixtures; exercise accepted adapters against the target when available. | Completed adapter contracts/composition; live checks also need backend/environment/accounts. |
 | 6 — Phase 7 | Verify real auth/permissions, snapshot/expiry, exact values, SQL request traces and failure isolation; complete agreed accessibility/visual review and release evidence. | T6.L/T5.L plus actual live and visual prerequisites. No release from mock responses. |

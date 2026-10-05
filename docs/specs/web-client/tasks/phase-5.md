@@ -1,8 +1,22 @@
 # Tasks: Integration seams and gated live adapters
-> Status: fixture and local data preparation verified; revised auth DTO/configuration/live acceptance pending · Slug: web-client · Plan phase: 5 · Manifest: ../tasks.md · Spec: ../spec.md
+> Status: backend auth working and ready for frontend integration (user-confirmed October 5); fixture/local data preparation verified; frontend integration and live acceptance pending · Slug: web-client · Plan phase: 5 · Manifest: ../tasks.md · Spec: ../spec.md
 
 - 11 tasks; T5.1, T5.2 and T5.H accepted; live tasks remain unchecked. Paths below identify existing modules to reuse and planned additions; no live checkbox is completed by local preparation.
 - Dependencies name completed tasks or explicit external readiness subgates. `[P]` permits concurrency only with disjoint ready work; it never waives predecessors.
+
+## Next implementation: connect working backend auth
+
+The user confirms backend authentication already works and is ready for frontend
+implementation. Start with **T5.3 Auth → T5.4 → T5.5**: capture the current session
+response and environment settings, configure the same-origin proxy/composition,
+then implement login navigation, session restoration, fixed expiry and CSRF logout.
+Keep roles and capabilities backend-controlled. Confirm capability field names
+from the current backend response; the linked response proposal is not a final DTO.
+Data API availability and source corrections do not block this auth sequence.
+Verify connected auth as soon as configured; combined T5.L/T6.L/release acceptance
+still requires all named operations. No checkbox is completed by this status update.
+
+## Task checklist
 
 - [x] **T5.1** Compose test-only cross-feature harness with shared session/catalog — `tests/integration/FeatureHarness.tsx`, `tests/integration/FeatureHarness.stories.tsx` (FR4, FR5, FR6, FR18, FR19, FR21, TR6, TR8)
   - Owner: **Integration**. Depends: **T4.AC, T4.OC, T4.EC, T4.QC**.
@@ -14,7 +28,7 @@
   - Owner: **Integration**. Depends: **T5.2**.
   - Acceptance: Record all four preceding feature gates and composed proof. This is the phase-6 predecessor; live tasks below may remain blocked and are never folded into this fixture pass.
 - [ ] **T5.3** Resolve per-operation backend and session contracts before transport coding — `docs/specs/web-client/contracts/live-readiness.md`, `docs/specs/web-client/contracts/auth.md`, `docs/specs/web-client/contracts/catalog-preview.md`, `docs/specs/web-client/contracts/metric.md`, `docs/specs/web-client/contracts/sql.md`, `docs/specs/web-client/tasks.md`, `docs/specs/web-client/tasks/phase-5.md` (FR2, FR3, FR4, FR6, FR7, FR9, FR13, FR16, TR3, TR5, TR7, TR9)
-  - Owner: **Integration**. Depends: **T1.9; revised auth DTO/target configuration; supplied data/SQL contracts**.
+  - Owner: **Integration**. Depends: **T1.9; user-confirmed working auth and current contract/configuration intake; supplied data/SQL contracts**.
   - Acceptance: Blocked for affected operations until responsible person, backend version/environment, request/response/error/encoding/authorization and credential transport are approved. Before dependent code, record exact callback/bridge/server file paths if required and update tasks/DAG; do not invent them now. SQL adds page size/TTL/delivery/outcome. Record separate Auth, Catalog/Preview, Metric and SQL readiness subgates so unrelated agreed operations can proceed.
 - [ ] **T5.4** Implement live-only adapter composition with fail-closed configuration — `src/integration/live-composition.ts`, `src/integration/config.ts`, `src/integration/data-http-client.ts`, `src/integration/data-http-client.test.ts`, `next.config.ts`, `.env.example`, `src/integration/live-composition.test.ts` (FR5, FR16, FR18, TR3, TR6, TR7)
   - Owner: **Integration**. Depends: **T5.3 Auth subgate; T1.10**.
@@ -105,7 +119,9 @@ or capability claims, derive capabilities from a local role matrix, or require a
 role field in the revised response. Session GET uses only the session cookie;
 backend checks remain authoritative on every service request. The [response
 proposal](../contracts/auth.md#backend-implementation-handoff) is not a request
-body or finalized wire schema. Await the updated backend DTO before auth mapping.
+body or finalized wire schema. Confirm the current backend DTO during auth intake
+before mapping capability fields. The newer readiness confirmation above replaces
+the earlier wait for backend auth implementation; it does not invent field names.
 
 ### Configuration/composition paths for remaining work
 

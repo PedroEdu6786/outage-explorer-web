@@ -1,6 +1,6 @@
 # Execution state
 
-> Phases 1–4 complete; Phase 5 composed fixture and Phase 6 fixture pages accepted; local data adaptation verified; revised auth DTO/configuration and live acceptance pending. Coordinator-owned dispatch ledger for the
+> Phases 1–4 complete; Phase 5 composed fixture and Phase 6 fixture pages accepted; local data adaptation verified; backend auth ready for frontend integration; frontend live acceptance pending. Coordinator-owned dispatch ledger for the
 > [technical execution plan](execution-plan.md). This file records runtime
 > scheduling; the [task files](tasks.md) remain authoritative for task completion.
 
@@ -8,20 +8,21 @@
 
 - Latest October 5 planning reconciliation: main plan, task manifest and Phase 5
   records now reflect prepared data modules, accepted date-only optional bounds
-  and backend-only authorization ownership. Revised auth capability DTO is pending;
+  and backend-only authorization ownership. User confirms backend auth works and
+  is ready for frontend integration; capture its current capability DTO at intake;
   client sends no permission claims, derives no capabilities from roles, and does
-  not require role in the response. See readiness revision 5.
+  not require role in the response. See readiness revision 6.
 - Earlier October 5 intake documented auth/data contracts; subsequent user-authorized
   adaptation implemented local data models/decoders/transport with controlled tests.
-  Those changes remain uncommitted. No auth connection or live acceptance claimed.
+  Those changes are committed in `bee4022`. No auth connection or live acceptance claimed.
 - Authorized implementation scope: user requested implementation of the execution plan on October 4, 2026; the user successively authorized Phases 1, 2 and 3, all accepted, requested continuation of Phase 4, then invoked /implement for Phase 5 and requested Phase 6 implementation.
 - Coordinator: root Codex agent.
 - Capacity: current runtime supports four concurrent agents; reserve one for
   coordination and at most three for workers/reviewers.
-- Current base: `3b0cbe3` on `main`, with uncommitted data adaptation and documentation. Preserve this work. Original Phase 1 evidence was recorded on `feat/web-client-foundation` at `d85410486de5055237a4f66cde197250555e9bd8`.
+- Current base: `bee4022` on `main`, with data adaptation and planning documentation committed. Original Phase 1 evidence was recorded on `feat/web-client-foundation` at `d85410486de5055237a4f66cde197250555e9bd8`.
 - Accepted implementation tasks: all Phase 1–4 tasks, including four isolated fixture feature checkpoints; Phase 5 T5.1, T5.2 and T5.H plus Phase 6 T6.1–T6.6/T6.C accepted.
 - Evidence: [Phase 1 verification](verification/phase-1.md) and [source digests](verification/phase-1-digests.json).
-- Next gate: revised auth DTO/configuration enables remaining composition/session work; T6.L requires accepted T5.5–T5.8 adapters. SQL contract values are supplied. Phase 6 fixture milestone is accepted; Phase 7 live work remains gated.
+- Next work: T5.3 Auth current DTO/configuration intake → T5.4 → T5.5 against the working backend auth; T6.L requires accepted T5.5–T5.8 adapters. SQL contract values are supplied. Phase 6 fixture milestone is accepted; Phase 7 live work remains gated.
 
 ## Assignments and acceptance
 
@@ -38,7 +39,7 @@ No running assignments or retained mutable resources. Phase 6 Page-integration o
 
 | Gate | State | Scope of blockage | Evidence to attach |
 | --- | --- | --- | --- |
-| Q2 Auth/session and operation contracts | auth and data source artifacts documented; reconciliation/runtime pending | Affected live composition/adapters and release | [Data intake](contracts/data-api.md), [comparison](contracts/contract-review.md); owner, target configuration, mappings and live evidence pending |
+| Q2 Auth/session and operation contracts | backend auth ready per user; current DTO/configuration intake and frontend integration next; data runtime pending | Affected mappings and live acceptance; data availability does not block auth work | [Data intake](contracts/data-api.md), [comparison](contracts/contract-review.md); owner, target configuration, mappings and live evidence pending |
 | Q3 SQL settings/outcomes | contract supplied; local mappings verified, user-owned source corrections/runtime checks pending | Live SQL adapter and release evidence | [SQL v1](contracts/sql.md): default100/max500, fixed15-minute expiry, synchronous POST/GET recovery; no live acceptance |
 | Q4 browser/viewport agreement | unresolved | Final visual/browser sign-off | Agreed matrix and review result |
 | T1.3 visible asset/font provenance | source documentation and local Inter650 runtime evidence accepted | Dependent visual work as specified by task graph | Source/license/export and documented deviations |
