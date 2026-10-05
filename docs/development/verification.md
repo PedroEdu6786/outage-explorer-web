@@ -16,7 +16,7 @@ official compatibility evidence and the supported webpack choice are in
 | Command | Purpose / prerequisite |
 | --- | --- |
 | `npm ci` | Install exact lockfile; network and cache-write access required |
-| `npm run dev` | Assembled Next routes; production operations unavailable until T6.L |
+| `npm run dev` | Assembled Next routes; configured production auth/data operations |
 | `npm run build` | Serialized webpack production build into `.next` |
 | `npm run start` | Serve an existing production build; requires local port access |
 | `npm run typecheck` | Generate Next route types, then strict TypeScript without emitting JS |
@@ -27,7 +27,7 @@ official compatibility evidence and the supported webpack choice are in
 | `npm run test:devlog` | Standalone Python 3 standard-library checks for the Codex journal; see [devlog setup](devlog.md) |
 | `npm run check:boundaries` | Transitive imports plus source layer/public-seam policy |
 | `npm run check:production-fixtures` | Source check plus emitted signature scan; requires a fresh production build |
-| `npm run check:release-boundaries` | Source/artifact checks with mandatory production registration; currently fails closed |
+| `npm run check:release-boundaries` | Source/artifact checks with mandatory structural production registration; no live acceptance inferred |
 | `npm run storybook` | Isolated Next/Vite previews on port 6006 |
 | `npm run build-storybook` | Serialize build into `storybook-static`; required before browser smoke |
 | `npm run test:e2e` | Chromium browser/visual fixture scenarios against static Storybook server on port 6007 |
@@ -209,3 +209,24 @@ session restoration under development Strict Mode, authenticated sign-in-page
 navigation and absence of browser runtime errors. No traces, videos or
 screenshots are recorded. Cold route compilation has a15-second assertion budget.
 The suite is separate from Storybook, production, live auth and Vitest discovery.
+
+## Backend-integration Phase 4 controlled production checks
+
+After a configured fresh `npm run build`, run:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npx playwright test --config playwright.controlled.config.ts --workers=1
+```
+
+This separate test-only project serves actual Next production routes on6009.
+Every API request is intercepted with synthetic responses; it verifies role
+presentation, data registration, independent sizes, handoffs, retained SQL and
+explicit failures without reaching backend analytical services. Its output is
+`playwright-report/controlled-results`; it closes no live/visual gate.
+
+For unconfigured production failure, build with `OUTAGE_API_ORIGIN='' npm run build`,
+then run the existing `playwright.production.config.ts` on6008. Rebuild with the
+intended configured environment afterward before serving the app. Serialize these
+builds and production servers; fresh output is required for fixture/release scans.
+The release-boundaries marker establishes registration and source/artifact
+isolation only. T5.L/T6.L still require named-target connected acceptance.

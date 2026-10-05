@@ -1,9 +1,15 @@
 import { expect, it, vi } from "vitest";
-import { readCognitoLogoutUrl, readLiveConfiguration } from "./config";
+import { readCognitoLogoutUrl, readLiveConfiguration, productionPreviewSettings, productionQuerySettings } from "./config";
 import { createLiveComposition } from "./live-composition";
 import { createSessionRuntime } from "../session/session-runtime";
 import { createAuthService } from "../features/auth/service";
 import fixtures from "../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
+
+it("supplies independent preview and SQL request settings", () => {
+  expect(productionPreviewSettings).toEqual({ initialPageSize: 100, maximumPageSize: 500 });
+  expect(productionQuerySettings).toEqual({ initialPageSize: 100, maximumPageSize: 500 });
+  expect(productionPreviewSettings).not.toBe(productionQuerySettings);
+});
 
 it("builds only public Cognito logout parameters with an explicit return URL", () => {
   const value = readCognitoLogoutUrl("https://synthetic.auth.example.invalid/", "public123", "http://localhost:3000/sign-in");

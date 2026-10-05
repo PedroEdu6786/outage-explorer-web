@@ -30,8 +30,8 @@ and [state/security assessment](integration-assessment.md) for current source ha
 state-management options and SQL-security recommendations.
 
 This update supersedes backend-pending statements below, which retain historical
-intake provenance. Prepared client adapters exist; production data registration
-and connected acceptance remain open. Backend analytical resources must be
+intake provenance. Production auth/data adapters are structurally registered;
+connected acceptance remains open. Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
@@ -58,6 +58,11 @@ from production registration, hardened transport publication guards and
 revalidated catalog/preview, complete national range and retained SQL seams.
 See [controlled adapter evidence](verification/integration-adapters.md).
 Production data registration is phase 4; connected acceptance is phase 5.
+
+Backend-integration phase 4 registers live data factories and independent
+preview/query settings in the existing pages. See [phase-4 evidence](../../../specs/backend-integration/verification/phase-4.md)
+for controlled page/browser checks and fresh build/fixture-boundary results.
+Original T5.L/T6.L connected acceptance and visual/release sign-off remain open.
 
 ## Parallel delivery
 

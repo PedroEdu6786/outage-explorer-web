@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+// Analytical failures stay inside this controlled browser root; never reach Flask.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/(?:datasets|query)(?:[/?]|$)/, (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "service_unavailable" }) }));
+});
+
 // Controlled HTTP/provider responses on actual Next routes. This does not prove
 // that a real Cognito browser session was cleared or that credentials are requested.
 for (const status of [204, 503] as const) {

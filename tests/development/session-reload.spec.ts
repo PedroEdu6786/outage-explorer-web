@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+// Analytical failures stay inside this controlled browser root; never reach Flask.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/(?:datasets|query)(?:[/?]|$)/, (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "service_unavailable" }) }));
+});
+
 for (const role of ["viewer", "analyst", "admin"] as const) {
   test(`${role} reload restores the existing cookie session without a login screen`, async ({ page, context }) => {
     // A controlled HttpOnly browser cookie and intercepted session endpoint;

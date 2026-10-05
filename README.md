@@ -58,8 +58,7 @@ and [state/security assessment](docs/specs/web-client/integration-assessment.md)
 state-management options and SQL-security recommendations.
 
 This update supersedes backend-pending statements below, which retain historical
-intake provenance. Prepared client adapters exist; production data registration
-and connected acceptance remain open. Backend analytical resources must be
+intake provenance. Production auth/data adapters are registered; connected acceptance remains open. Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
@@ -77,8 +76,8 @@ readiness records; see [Phase 3 verification](docs/specs/web-client/verification
 Auth, Overview, Explorer and Queries now expose injected feature entries,
 synthetic Storybook stories and adversarial lifecycle coverage; see
 [Phase 4 verification](docs/specs/web-client/verification/phase-4.md).
-The composed fixture harness is accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Auth now has opt-in live composition; pending data registration and full live acceptance still gate T6.L.
-Source-boundary and emitted-fixture checks are executable. Product routes build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Configured auth uses a same-origin Flask proxy; unconfigured auth and pending data operations fail closed. Fixture page demos remain in isolated Storybook roots. See the coordinator-owned
+The composed fixture harness is accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Auth and data now have opt-in production composition; full live acceptance still gates T6.L.
+Source-boundary and emitted-fixture checks are executable. Product routes build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Configured auth and data use a same-origin Flask proxy; missing configuration and backend failures fail closed. Fixture page demos remain in isolated Storybook roots. See the coordinator-owned
 [execution state](docs/specs/web-client/execution-state.md) for accepted tasks
 and the [Phase 1 verification record](docs/specs/web-client/verification/phase-1.md)
 for the integrated checkpoint evidence.
@@ -117,7 +116,7 @@ npm ci
 ```
 
 `npm run storybook` serves isolated previews on port 6006. `npm run dev` serves
-the assembled routes with configured live auth and explicit unavailable data operations. Both development
+the assembled routes with configured live auth and data operations. Both development
 and production framework builds explicitly use webpack because Turbopack's
 PostCSS worker port binding failed in this runtime.
 
@@ -138,9 +137,7 @@ The browser smoke test serves the built Storybook on port 6007. This workspace's
 downloaded browser uses a temporary cache; run
 `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npm run test:e2e`
 to use it. Alternatively install Chromium into Playwright's default cache as
-shown above. `npm run check:release-boundaries` remains expected to fail until
-production operation registration is explicitly ready under T6.L; passing bootstrap checks does not
-accept a release.
+shown above. `npm run check:release-boundaries` now checks structurally registered live operations and fixture exclusion; its pass does not accept T5.L/T6.L or a release.
 
 See [verification](docs/development/verification.md) for prerequisites, actual
 evidence, build freshness and separate fixture/live/visual reporting, and
@@ -188,7 +185,7 @@ the existing deliberate retry and never navigate to Cognito.
 The user confirmed the role-only response and supplied Viewer/Analyst/Admin
 presentation restrictions. Backend-assigned role now maps to UI capabilities;
 Flask still enforces every request. No capability expansion is required for this
-auth integration. Data adapters remain unregistered and do not use fixtures.
+auth integration. Data adapters are registered and do not use fixtures.
 
 After a configured fresh build, run the separate real-Flask smoke tests:
 
@@ -208,4 +205,21 @@ Configured auth connects these controls to `/api/refresh`, using the current
 session's CSRF token and an admission idempotency key. Retry uncertain admission
 with the offered retry button; status checks do not start another run. Viewer
 and Analyst users have no refresh controls. See the [refresh contract](docs/specs/web-client/contracts/refresh.md).
-Analytical data registration and live acceptance remain separate.
+Analytical data registration is complete; live acceptance remains separate.
+
+## Production data registration — October 5, 2026
+
+Backend-integration Phase 4 registers catalog, embedded schema, cursor previews,
+complete national metrics and retained SQL operations using the existing
+auth-owned session and memory-only CSRF transport. Preview and next-execution
+SQL settings are independent: default 100, maximum 500. Overview → Explorer →
+SQL handoffs stay in memory and prepare unsent SQL; edited drafts still require
+consent. Viewer routes remain Overview only.
+
+Configured actual Next browser checks intercept every API with explicitly
+synthetic responses; missing-configuration checks use an unconfigured fresh
+build without interception. These are controlled evidence, not named-target
+live acceptance or Figma sign-off. See [Phase 4 evidence](specs/backend-integration/verification/phase-4.md)
+and [verification commands](docs/development/verification.md). Phase 5 and original
+T5.L/T6.L remain open until named enabled backend resources and authorized
+persona/lifecycle scenarios are verified.

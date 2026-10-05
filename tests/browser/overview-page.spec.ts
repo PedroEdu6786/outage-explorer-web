@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { openPage } from "./support/page-boundary";
+import { calls, openPage } from "./support/page-boundary";
 test("Overview page preserves exact national values, date filtering and authorized handoff", async ({ page }) => {
   await openPage(page, "overview--ready");
   await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
@@ -12,4 +12,5 @@ test("Overview page preserves exact national values, date filtering and authoriz
   await page.getByRole("button", { name: "Explore dataset", exact: true }).click();
   await expect(page.getByTestId("route-path")).toHaveText("/datasets");
   await expect(page.getByLabel("End date", { exact: true })).toHaveValue("2026-09-03");
+  expect((await calls(page)).filter((call) => call.operation === "executeQuery")).toHaveLength(0);
 });

@@ -23,6 +23,7 @@ test("SQL page retains one execution and edited draft across real page compositi
   await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
   await navigate(page, "SQL Workspace");
   await expect(editor).toHaveValue("SELECT 'unsent revision'");
+  await expect(page.getByText("Page 1 of 2 · Fixed 2 rows per page", { exact: true })).toBeVisible();
   await expect(page.getByText("Replace edited draft?", { exact: true })).toHaveCount(0);
   const trace = await calls(page);
   expect(trace.filter((call) => call.operation === "executeQuery").map((call) => call.input)).toEqual([{ sql, page: 1, pageSize: 2 }]);

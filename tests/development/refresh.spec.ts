@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+// Analytical failures stay inside this controlled browser root; never reach Flask.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/(?:datasets|query)(?:[/?]|$)/, (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "service_unavailable" }) }));
+});
+
 const receipt = { run_id: "synthetic-refresh-run", status: "accepted", effective_interval: { start_date: "2026-04-02", end_date: "2026-10-01" }, status_url: "/api/refresh/synthetic-refresh-run" };
 for (const role of ["viewer", "analyst", "admin"] as const) {
   test(`${role} Overview refresh visibility and transport`, async ({ page }) => {

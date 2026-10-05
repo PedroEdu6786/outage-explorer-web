@@ -248,3 +248,20 @@ performed by this documentation update.
   digest manifest. Transient login503 after restart is recorded; no automatic
   application retry or credential-bearing trace. Full authenticated lifecycle,
   connected data and release evidence remain pending; no push/deployment.
+
+## Backend-integration Phase 4 — October 5, 2026
+
+- Worker `integration_phase4` owns T4.1–T4.C composition/config/navigation and
+  designated composition/browser tests, README, verification and this ledger
+  update. Coordinator owns git/devlog; no nested agents or backend writes.
+- Predecessors: original feature T4.AC/OC/EC/QC, T5.H/T6.C and integration
+  T1.C–T3.C controlled evidence. Historical blocks above retain dated provenance.
+- Production auth/refresh plus catalog/schema/preview/national/query operations
+  are explicitly registered, with independent preview/query100-default500-max
+  settings and guarded in-memory handoffs. No fixture fallback or catalog cache.
+- Controlled unit, fixture-page and actual Next production browser evidence is
+  recorded in `specs/backend-integration/verification/phase-4.md`. Structural
+  release-boundaries now passes. This does not accept original T5.L/T6.L:
+  named enabled backend resources/personas/lifecycle scenarios remain Phase5.
+- No visual comparison, live analytical request, real SQL, refresh admission,
+  resource provisioning, push or deployment was performed.

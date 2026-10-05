@@ -1,5 +1,10 @@
 import { test, expect } from "@playwright/test";
 
+// Analytical failures stay inside this controlled browser root; never reach Flask.
+test.beforeEach(async ({ page }) => {
+  await page.route(/\/api\/(?:datasets|query)(?:[/?]|$)/, (route) => route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({ error: "service_unavailable" }) }));
+});
+
 // Controlled browser regression, not live Cognito/session acceptance. Only the
 // session response is synthetic; actual Next routes and production composition run.
 for (const role of [null, "viewer", "analyst", "admin"] as const) {
@@ -23,7 +28,7 @@ for (const role of [null, "viewer", "analyst", "admin"] as const) {
       await expect(page).toHaveURL(path === "/sign-in" && !role ? /\/sign-in$/ : /\/overview$/);
       if (role) {
         await expect(page.getByRole("heading", { name: "U.S. Nuclear Outage Overview" })).toBeVisible();
-        await expect(page.getByText("Data services are not connected yet.", { exact: true })).toBeVisible();
+        await expect(page.getByText("The service is unavailable. Try again deliberately.", { exact: true })).toBeVisible();
         await expect(page.getByRole("button", { name: "Continue to sign in", exact: true })).toHaveCount(0);
       } else {
         // Signed-out /sign-in stays there; the root return lands on /overview.

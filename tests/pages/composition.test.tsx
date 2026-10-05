@@ -100,3 +100,25 @@ it.each(["/datasets", "/query"] as const)("removes mounted %s content immediatel
   expect(screen.queryByText("Restricted content")).toBeNull();
   expect(go).toHaveBeenCalledWith("/overview");
 });
+
+it("registers configured production data with current auth CSRF and independent settings", async () => {
+  const runtime = createSessionRuntime(); runtimes.push(runtime);
+  const fetch = vi.fn<typeof globalThis.fetch>(); vi.stubGlobal("fetch", fetch);
+  const operations = createProductionOperations({ runtime, authEnabled: true });
+  expect(await operations.listDatasets(runtime.capture())).toMatchObject({ ok: false, failure: { kind: "unauthenticated" } });
+  expect(fetch).not.toHaveBeenCalled();
+  fetch.mockResolvedValueOnce(new Response(JSON.stringify({ user: { id: "controlled", email: "controlled@example.invalid", role: "analyst" }, expires_at: new Date(Date.now() + 3600_000).toISOString(), csrf_token: "controlled-memory-token" }), { status: 200 }));
+  const resolved = await operations.resolveSession(runtime.capture());
+  if (!resolved.ok) throw new Error("Controlled auth resolution required");
+  runtime.setResolution(resolved.value);
+  fetch.mockResolvedValueOnce(new Response(JSON.stringify({ error: "service_unavailable" }), { status: 503 }));
+  expect(await operations.executeQuery(runtime.capture(), { sql: " SELECT 1\n", page: 1, pageSize: 100 })).toMatchObject({ ok: false });
+  expect(fetch.mock.calls[1]?.[1]).toMatchObject({ method: "POST", headers: { "X-CSRF-Token": "controlled-memory-token" }, body: '{"sql":" SELECT 1\\n"}' });
+  const intent = { target: "queries" as const, generation: runtime.getSnapshot().generation, datasetId: "national", filters: { dates: { start: "2026-09-01" } } };
+  expect(operations.consumeNavigationIntent(runtime.capture(), intent)).toEqual({ ok: true, value: { target: "queries", datasetId: "national", filters: intent.filters, proposedDraft: "SELECT * FROM national" } });
+  expect(operations.consumeNavigationIntent(runtime.capture(), { ...intent, target: "explorer" })).toMatchObject({ ok: true, value: { target: "explorer", filters: intent.filters } });
+  for (const invalid of [{ ...intent, datasetId: "toString" }, { ...intent, generation: intent.generation - 1 }, { ...intent, filters: { dates: { start: "2026-02-30" } } }, { ...intent, filters: { facilityId: "detail" } }]) expect(operations.consumeNavigationIntent(runtime.capture(), invalid).ok).toBe(false);
+  expect(fetch).toHaveBeenCalledTimes(2);
+  runtime.invalidate("pending");
+  expect(operations.consumeNavigationIntent(runtime.capture(), intent).ok).toBe(false);
+});
