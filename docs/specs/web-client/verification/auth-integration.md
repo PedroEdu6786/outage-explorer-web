@@ -133,3 +133,16 @@ typecheck, lint, webpack build, source boundaries (98 modules/15 roots) and
 production fixture exclusion (153 emitted files) passed. Initial typecheck saw
 stale generated types for the deleted root page; the fresh build regenerated them
 and the subsequent typecheck passed. No dependency upgrade or backend change.
+
+## User-confirmed live login — October 5
+
+After the runtime correction, the user confirmed both that the error was fixed
+and that they successfully logged in to the app. This records a successful live
+login as user-reported evidence, superseding the earlier absence of login
+completion evidence at that narrow scope. No credentials or session data were
+requested or captured, and no new automated live journey was run for this update.
+
+Authenticated reload/reopen, fixed expiry, permission enforcement/access
+reduction, authenticated CSRF logout and independent-session behavior remain
+unverified. This confirmation does not close T5.L, T6.L or Phase7. The next
+implementation remains data adapter integration T5.6–T5.8 and production wiring.

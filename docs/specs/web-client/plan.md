@@ -161,8 +161,9 @@ The user supplied the current role-bearing session response, role restrictions
 and Flask8000 target. Auth-only production composition, same-origin proxy,
 fixed expiry and scoped CSRF logout are verified; see
 [auth integration evidence](verification/auth-integration.md). This newer
-role presentation decision supersedes earlier capability-only notes. Full
-Cognito/authenticated lifecycle acceptance remains open; data operations are
+role presentation decision supersedes earlier capability-only notes.
+Login success is now user-confirmed after the runtime fix; the remaining
+authenticated lifecycle acceptance stays open. Data operations are
 not registered. Next implementation reuses T5.6–T5.8 after their own gates.
 
 | Order / task | Work and completion criteria | Dependencies / current status |
