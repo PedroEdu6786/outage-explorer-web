@@ -48,6 +48,11 @@ per implementation run; [phase-1 evidence](../../../specs/backend-integration/ve
 records current contract reconciliation. Controlled phase completion does not
 close connected adapter, production registration, visual or release gates.
 
+The backend-integration protected lifecycle phase is complete under controlled
+checks: same-generation denial revocation, original SQL expiry and UTF-8 submission
+bounds. See [phase 2 evidence](../../../specs/backend-integration/verification/phase-2.md).
+Connected operation registration and live acceptance remain open.
+
 ## Parallel delivery
 
 The task manifest contains **78 tasks across seven phases**, with **21 marked

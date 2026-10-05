@@ -88,7 +88,7 @@ export function createDataAdapter(transport: DataTransport): CatalogOperations &
       } catch { return malformed(); }
     },
     async executeQuery(context, input) {
-      if (!input.sql.trim() || !pageSizeValid(input.pageSize) || !Number.isSafeInteger(input.page) || input.page < 1) return invalid();
+      if (!input.sql.trim() || new TextEncoder().encode(input.sql).byteLength > 65_536 || !pageSizeValid(input.pageSize) || !Number.isSafeInteger(input.page) || input.page < 1) return invalid();
       if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
       try {
         const response = await transport.request(context, `/api/query?${new URLSearchParams({ page: String(input.page), page_size: String(input.pageSize) }).toString()}`, { method: "POST", body: { sql: input.sql } });

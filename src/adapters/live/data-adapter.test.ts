@@ -24,6 +24,18 @@ function transport(responses: unknown[]) {
 }
 
 describe("Data API v1 frontend adaptation (controlled responses only)", () => {
+  it.each(["a", "é", "😀"])("enforces UTF-8 SQL byte boundaries for %s without rewriting", async (character) => {
+    const byteSize = new TextEncoder().encode(character).byteLength;
+    const accepted = character.repeat(65_536 / byteSize);
+    const backend = transport([example("query_reference_free"), example("query_reference_free")]);
+    const adapter = createDataAdapter(backend);
+    expect((await adapter.executeQuery(context, { sql: accepted, page: 1, pageSize: 1 })).ok).toBe(true);
+    expect((await adapter.executeQuery(context, { sql: accepted.slice(0, -character.length) + "a".repeat(byteSize - 1), page: 1, pageSize: 1 })).ok).toBe(true);
+    expect(await adapter.executeQuery(context, { sql: accepted + "a", page: 1, pageSize: 1 })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
+    expect(backend.request).toHaveBeenCalledTimes(2);
+    expect(backend.request.mock.calls[0]?.[2]?.body.sql).toBe(accepted);
+  });
+
   it("maps every catalog and supports date-only schemas embedded in the catalog", () => {
     const viewer = decodeCatalog(example("catalog_viewer"));
     expect(viewer.datasets.map((dataset) => dataset.id)).toEqual(["national"]);

@@ -1,15 +1,16 @@
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createFixtureOperations } from "../../../tests/fixtures/operations";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { createQueriesController } from "./service";
 import { QueriesFeature } from "./QueriesFeature";
 import { QueryResults } from "./QueryResults";
 import { initialQueryState } from "./query-state";
+import { createDataAdapter } from "../../adapters/live/data-adapter";
 import { decodeQuery } from "../../adapters/live/data-mapping";
 import contractFixtures from "../../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 const cleanups: (() => void)[] = [];
-afterEach(() => { cleanups.splice(0).forEach((cleanup) => { cleanup(); }); });
+afterEach(() => { cleanups.splice(0).forEach((cleanup) => { cleanup(); }); vi.useRealTimers(); });
 function setup(options: Parameters<typeof createFixtureOperations>[0] = {}) {
   const fixture = createFixtureOperations(options);
   const runtime = createSessionRuntime();
@@ -21,6 +22,156 @@ function setup(options: Parameters<typeof createFixtureOperations>[0] = {}) {
 }
 const sql = "  WITH x AS (SELECT * FROM synthetic_national)\nSELECT * FROM x;\n";
 describe("Queries explicit execution lifecycle", () => {
+  it("revokes metadata when a delayed page denial crosses expiry before the timer", async () => {
+    vi.useFakeTimers(); const { fixture, runtime, controller } = setup();
+    await controller.loadCatalog(); await controller.selectDataset("synthetic-national");
+    controller.receiveIntent({ target: "queries", generation: runtime.getSnapshot().generation, datasetId: "synthetic-national", filters: {} });
+    controller.editDraft(sql); await controller.run();
+    const delayed = fixture.deferNext("readQueryPage"); fixture.failNext("readQueryPage", { kind: "forbidden", message: "Denied" });
+    const pending = controller.readPage(2); vi.setSystemTime(Date.now() + 60_001);
+    delayed.release(); await pending;
+    expect(controller.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, context: null, handoff: null, failure: { kind: "forbidden" } });
+    expect(runtime.getSnapshot().status).toBe("authenticated");
+  });
+
+  it("keeps byte-bound validation under explicit Run and preserves the exact draft", async () => {
+    const fixture = createFixtureOperations(); const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const request = vi.fn().mockResolvedValue({ ok: false, failure: { kind: "busy", message: "Busy" } });
+    const adapter = createDataAdapter({ request, isCurrent: () => true });
+    const controller = createQueriesController({ runtime, operations: { ...fixture.operations, executeQuery: (...args: Parameters<typeof adapter.executeQuery>) => adapter.executeQuery(...args) }, initialPageSize: 2, maximumPageSize: 100 });
+    controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+    const oversized = "😀".repeat(16_384) + "a";
+    controller.editDraft(oversized); await controller.run();
+    expect(request).not.toHaveBeenCalled();
+    expect(controller.getSnapshot()).toMatchObject({ draft: oversized, submitted: oversized, failure: { kind: "invalid-input" } });
+    const accepted = "😀".repeat(16_384);
+    controller.editDraft(accepted); expect(request).not.toHaveBeenCalled(); await controller.run();
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(request.mock.calls[0]?.[2]).toEqual({ method: "POST", body: { sql: accepted } });
+    window.dispatchEvent(new Event("online")); window.dispatchEvent(new Event("focus"));
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+  it.each([["failure", false], ["rejection", false], ["failure", true], ["rejection", true]] as const)("expires late GET %s (recovery=%s) before a throttled timer can run", async (outcome, recovery) => {
+    vi.useFakeTimers(); const fixture = createFixtureOperations(); const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    let release: () => void = () => { /* assigned on dispatch */ };
+    const operations = { ...fixture.operations, executeQuery: async (...args: Parameters<typeof fixture.operations.executeQuery>) => {
+      const response = await fixture.operations.executeQuery(...args);
+      if (!recovery || !response.ok) return response;
+      return { ok: false as const, failure: { kind: "invalid-input" as const, message: "Owned recovery", retainedQuery: { queryId: response.value.execution.queryId, expiresAt: response.value.execution.expiresAt, pageSize: 2 } } };
+    }, readQueryPage: () => new Promise<Awaited<ReturnType<typeof fixture.operations.readQueryPage>>>((resolve, reject) => {
+      release = () => { if (outcome === "rejection") reject(new Error("Lost GET")); else resolve({ ok: false, failure: { kind: "service-failure", message: "Unavailable" } }); };
+    }) };
+    const controller = createQueriesController({ runtime, operations, initialPageSize: 2, maximumPageSize: 100 }); controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+    controller.editDraft(sql); await controller.run(); const pending = recovery ? controller.recoverPage() : controller.readPage(2);
+    vi.setSystemTime(Date.now() + 60_001); release(); await pending;
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-expired" } });
+  });
+
+  it.each(["listDatasets", "readSchema"] as const)("rejects delayed %s success after query denial", async (operation) => {
+    const { fixture, controller, runtime } = setup(); await controller.loadCatalog();
+    const delayed = fixture.deferNext(operation);
+    const pending = operation === "listDatasets" ? controller.loadCatalog() : controller.selectDataset("synthetic-national");
+    controller.editDraft(sql); fixture.failNextExecution({ kind: "forbidden", message: "Denied" }); await controller.run();
+    delayed.release(); await pending;
+    expect(controller.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, schemaPending: false, catalogPending: false, submitted: null });
+    expect(runtime.getSnapshot().status).toBe("authenticated");
+  });
+  it("expires idle route-persistent results at the original deadline without SQL replay", async () => {
+    vi.useFakeTimers();
+    const { fixture, controller, runtime } = setup();
+    controller.editDraft(sql); await controller.run();
+    const first = controller.getSnapshot().result;
+    await vi.advanceTimersByTimeAsync(30_000); await controller.readPage(2);
+    expect(controller.getSnapshot().result?.execution.expiresAt).toBe(first?.execution.expiresAt);
+    const view = render(<QueriesFeature runtime={runtime} operations={fixture.operations} controller={controller} initialPageSize={2} maximumPageSize={100} />);
+    view.unmount();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(controller.getSnapshot()).toMatchObject({ result: null, activity: "failure", failure: { kind: "result-expired" }, draft: sql });
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+    render(<QueriesFeature runtime={runtime} operations={fixture.operations} controller={controller} initialPageSize={2} maximumPageSize={100} />);
+    expect(screen.getByRole("button", { name: "Run query" })).toBeEnabled();
+    expect(screen.queryByRole("table", { name: "SQL query results" })).not.toBeInTheDocument();
+  });
+  it("rejects delayed pages and checks absolute deadlines on browser resume", async () => {
+    vi.useFakeTimers();
+    const { controller, fixture } = setup(); controller.editDraft(sql); await controller.run();
+    const delayed = fixture.deferNext("readQueryPage"); const pending = controller.readPage(2);
+    vi.setSystemTime(Date.now() + 60_001);
+    delayed.release(); await pending;
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-expired" } });
+    await controller.run(); vi.setSystemTime(Date.now() + 60_001);
+    document.dispatchEvent(new Event("visibilitychange"));
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-expired" } });
+    window.dispatchEvent(new Event("focus")); window.dispatchEvent(new Event("online"));
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(2);
+    await controller.run(); vi.setSystemTime(Date.now() + 60_001);
+    window.dispatchEvent(new Event("pageshow"));
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-expired" } });
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(3);
+  });
+  it("cancels replaced and disposed deadlines", async () => {
+    vi.useFakeTimers(); const { controller, fixture } = setup();
+    controller.editDraft(sql); await controller.run();
+    await vi.advanceTimersByTimeAsync(30_000); await controller.run();
+    const replacement = controller.getSnapshot().result;
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(controller.getSnapshot().result).toBe(replacement);
+    expect(vi.getTimerCount()).toBe(2); // one session and one result deadline
+    controller.dispose(); expect(vi.getTimerCount()).toBe(1);
+    await vi.advanceTimersByTimeAsync(30_000);
+    window.dispatchEvent(new Event("focus"));
+    expect(controller.getSnapshot()).toEqual(initialQueryState(2));
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(2);
+  });
+  it("expires owned recovery and rejects recovery that arrives after its deadline", async () => {
+    vi.useFakeTimers();
+    const fixture = createFixtureOperations(); const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const operations = { ...fixture.operations, executeQuery: async (...args: Parameters<typeof fixture.operations.executeQuery>) => {
+      const response = await fixture.operations.executeQuery(...args);
+      if (!response.ok) return response;
+      return { ok: false as const, failure: { kind: "invalid-input" as const, message: "Owned recovery", retainedQuery: { queryId: response.value.execution.queryId, expiresAt: response.value.execution.expiresAt, pageSize: 2 } } };
+    } };
+    const controller = createQueriesController({ runtime, operations, initialPageSize: 2, maximumPageSize: 100 }); controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+    controller.editDraft(sql); await controller.run();
+    const delayed = fixture.deferNext("readQueryPage"); const pending = controller.recoverPage();
+    vi.setSystemTime(Date.now() + 60_001); delayed.release(); await pending;
+    expect(controller.getSnapshot()).toMatchObject({ result: null, failure: { kind: "result-expired" } });
+    expect(controller.getSnapshot().failure).not.toHaveProperty("retainedQuery");
+    await controller.run(); await vi.advanceTimersByTimeAsync(60_000);
+    expect(controller.getSnapshot().failure?.kind).toBe("result-expired");
+    await controller.recoverPage();
+    expect(fixture.callLog.read().filter((call) => call.operation === "readQueryPage")).toHaveLength(1);
+    expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(2);
+  });
+
+  it.each(["listDatasets", "readSchema"] as const)("revokes delayed Run/page/recovery publication after %s denial", async (metadataOperation) => {
+    for (const activity of ["run", "page", "recovery"] as const) {
+      const fixture = createFixtureOperations();
+      const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+      const operations = { ...fixture.operations, executeQuery: async (...args: Parameters<typeof fixture.operations.executeQuery>) => {
+        const response = await fixture.operations.executeQuery(...args);
+        if (activity !== "recovery" || !response.ok) return response;
+        return { ok: false as const, failure: { kind: "invalid-input" as const, message: "Owned recovery", retainedQuery: { queryId: response.value.execution.queryId, expiresAt: response.value.execution.expiresAt, pageSize: 2 } } };
+      } };
+      const controller = createQueriesController({ runtime, operations, initialPageSize: 2, maximumPageSize: 100 });
+      controller.attach(); cleanups.push(() => { controller.dispose(); runtime.dispose(); });
+      await controller.loadCatalog(); await controller.selectDataset("synthetic-national");
+      controller.receiveIntent({ target: "queries", generation: runtime.getSnapshot().generation, datasetId: "synthetic-national", filters: {} });
+      controller.editDraft(sql);
+      if (activity !== "run") await controller.run();
+      const delayed = fixture.deferNext(activity === "run" ? "executeQuery" : "readQueryPage");
+      const pending = activity === "run" ? controller.run() : activity === "page" ? controller.readPage(2) : controller.recoverPage();
+      fixture.failNext(metadataOperation, { kind: "forbidden", message: "Denied" });
+      await (metadataOperation === "listDatasets" ? controller.loadCatalog() : controller.selectDataset("synthetic-national"));
+      delayed.release(); await pending;
+      expect(controller.getSnapshot()).toMatchObject({ result: null, submitted: null, catalog: [], schema: null, context: null, handoff: null, draft: sql });
+      expect(controller.getSnapshot().failure).not.toHaveProperty("retainedQuery");
+      expect(controller.getSnapshot()).toMatchObject({ result: null, activity: "failure", failure: { kind: "forbidden" } });
+      expect(runtime.getSnapshot().status).toBe("authenticated");
+      expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+    }
+  });
+
   it.each([null, "<img src=x onerror=alert(1)>"])("renders generation %s honestly as inert result header text", (generationId) => {
     const example = contractFixtures.fixtures.find((fixture) => fixture.name === "query_reference_free");
     if (!example) throw new Error("Missing reference-free contract example");
