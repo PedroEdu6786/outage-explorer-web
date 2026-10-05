@@ -13,7 +13,7 @@ export function mapAuthSession(dto: z.infer<typeof authSessionSchema>): Authenti
   const detailAccess = dto.user.role === "analyst" || dto.user.role === "admin";
   return {
     identity: { subject: dto.user.id, displayName: dto.user.email },
-    capabilities: { datasetIds: detailAccess ? ["national", "facilities", "generators"] : ["national"], canReadNationalSeries: true, canExecuteQuery: true },
+    capabilities: { datasetIds: detailAccess ? ["national", "facilities", "generators"] : ["national"], canReadNationalSeries: true, canExploreDatasets: detailAccess, canExecuteQuery: detailAccess },
     expiresAt: dto.expires_at,
   };
 }

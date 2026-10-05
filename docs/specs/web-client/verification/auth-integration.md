@@ -185,3 +185,32 @@ No new automated live journey or individual HTTP/credential-prompt observations
 were captured in this update. Earlier controlled tests retain their stated scope.
 Reload/reopen, expiry, permission enforcement and independent-session checks,
 data integration and release acceptance remain separate.
+
+## Viewer Overview-only restriction — October 5, 2026
+
+The user clarified Viewer web access is Overview-only, superseding earlier
+national Explorer/SQL presentation access. Backend role mapping now retains
+national metadata for Overview while withholding Explorer and SQL capabilities.
+Navigation and handoffs use those restrictions. The protected layout returns
+blocked `/datasets` and `/query` visits to `/overview` before feature mount,
+and removes mounted content immediately on access reduction. Overview omits
+exploration actions for Viewer. Analyst/Admin keep both analytical pages.
+
+Verification on the updated working tree:
+
+- `npm test -- --reporter=dot`: 190 tests passed across 22 files, including
+  blocked direct entries, current handoffs, access reduction, preserved
+  Analyst/Admin access and cleared drafts/results after access restoration.
+- `npm run typecheck`, `npm run lint`, `npm run check:boundaries` and
+  `git diff --check`: passed; source check covered 98 modules/15 roots.
+- `npm run build-storybook`: passed, with existing module-directive warnings.
+- Development Chromium project: 9 tests passed, including actual Next routes
+  `/datasets` and `/query` for Viewer/Analyst/Admin, with synthetic intercepted
+  session responses. Login-return and logout regressions also passed.
+- Fixture Chromium suites `explorer-page`, `navigation`, `feature-harness`:
+  9 tests passed, including no schema/preview/execution calls on Viewer direct
+  Explorer entry and mobile access reduction returning to Overview.
+
+These are controlled frontend checks. No live Cognito completion, backend
+permission-policy change, deployment, fresh production build or new visual
+comparison is claimed. Existing live/release gates remain open.

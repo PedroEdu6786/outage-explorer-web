@@ -14,8 +14,8 @@ test("mobile drawer supports keyboard, navigation, sign-out and access cleanup",
   await page.getByRole("button", { name: "Run query", exact: true }).click();
   await expect(page.getByText("Query succeeded", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Resolve synthetic Viewer" }).click();
-  await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
-  await expect(page.getByRole("table")).toHaveCount(0);
+  await expect(page.getByTestId("route-path")).toHaveText("/overview");
+  await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveCount(0);
   await trigger.click(); await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Sign in to your workspace" })).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Main navigation" })).toHaveCount(0);

@@ -1,14 +1,14 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { ApplicationProvider, useApplication } from "../../src/composition/ApplicationProvider";
-import { QueryEntry, OverviewEntry } from "../../src/composition/PageEntries";
-import { acceptsIntent, navigationData } from "../../src/composition/navigation";
+import { QueryEntry, OverviewEntry, ProtectedLayout } from "../../src/composition/PageEntries";
+import { acceptsIntent, canAccessPath, navigationData } from "../../src/composition/navigation";
 import { createProductionOperations } from "../../src/composition/production-operations";
 import { createSessionRuntime, type SessionRuntime } from "../../src/session/session-runtime";
 import { createFixtureOperations } from "../fixtures/operations";
 
 const runtimes: SessionRuntime[] = [];
-afterEach(() => { runtimes.splice(0).forEach((runtime) => { runtime.dispose(); }); });
+afterEach(() => { runtimes.splice(0).forEach((runtime) => { runtime.dispose(); }); vi.unstubAllGlobals(); });
 function setup() {
   const fixture = createFixtureOperations(); const runtime = createSessionRuntime();
   runtime.setResolution(fixture.sessionResolution()); runtimes.push(runtime);
@@ -48,11 +48,15 @@ it("retained controller clears draft/results while SQL route is absent and disca
   act(() => { fixture.setPersona("viewer"); runtime.setResolution(fixture.sessionResolution()); });
   await act(async () => { delayed.release(); await Promise.resolve(); });
   view.rerender(<Root query />);
-  await screen.findByRole("button", { name: "synthetic_national" });
-  expect(screen.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+  await screen.findByText("Query access denied");
+  expect(screen.queryByRole("textbox", { name: "SQL statement" })).toBeNull();
   expect(screen.queryByRole("table")).toBeNull();
   expect(screen.queryByRole("button", { name: "synthetic_facility" })).toBeNull();
   expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+  act(() => { fixture.setPersona("analyst"); runtime.setResolution(fixture.sessionResolution()); });
+  await screen.findByRole("button", { name: "synthetic_national" });
+  expect(screen.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+  expect(screen.queryByRole("table")).toBeNull();
 });
 it("unmounting the composition aborts and resets its owned controller", async () => {
   const { fixture, runtime } = setup(); const owned: { controller: ReturnType<typeof useApplication>["queries"] } = { controller: null };
@@ -63,4 +67,36 @@ it("unmounting the composition aborts and resets its owned controller", async ()
   expect(controller.getSnapshot().draft).toBe("SELECT 'sensitive draft'");
   view.unmount(); expect(controller.getSnapshot().draft).toBe(""); expect(controller.getSnapshot().result).toBeNull();
   await Promise.resolve();
+});
+
+it.each(["/datasets", "/query"] as const)("blocks Viewer direct %s before mounting its content and rejects current handoffs", (path) => {
+  const { fixture, runtime } = setup();
+  fixture.setPersona("viewer"); runtime.setResolution(fixture.sessionResolution());
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+  const go = vi.fn(); const mounted = vi.fn();
+  function RestrictedContent() { mounted(); return <p>Restricted content</p>; }
+  render(<ApplicationProvider operations={fixture.operations} runtime={runtime} path={path} go={go} querySettings={null}><ProtectedLayout><RestrictedContent /></ProtectedLayout></ApplicationProvider>);
+  expect(mounted).not.toHaveBeenCalled();
+  expect(go).toHaveBeenCalledWith("/overview");
+  expect(screen.queryByRole("link", { name: "Dataset Explorer" })).toBeNull();
+  expect(screen.queryByRole("link", { name: "SQL Workspace" })).toBeNull();
+  expect(canAccessPath(runtime.getSnapshot(), "/overview")).toBe(true);
+  for (const target of ["explorer", "queries"] as const) expect(acceptsIntent(runtime, { target, generation: runtime.getSnapshot().generation, datasetId: "synthetic-national", filters: {} })).toBe(false);
+});
+it.each(["analyst", "admin"] as const)("preserves %s Explorer and SQL page access", (persona) => {
+  const { fixture, runtime } = setup();
+  fixture.setPersona(persona); runtime.setResolution(fixture.sessionResolution());
+  expect(canAccessPath(runtime.getSnapshot(), "/datasets")).toBe(true);
+  expect(canAccessPath(runtime.getSnapshot(), "/query")).toBe(true);
+  expect(navigationData(runtime.getSnapshot(), "/overview")).toMatchObject({ destinations: [{ href: "/overview" }, { href: "/datasets" }, { href: "/query" }] });
+});
+
+it.each(["/datasets", "/query"] as const)("removes mounted %s content immediately on access reduction", (path) => {
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+  const { fixture, runtime } = setup(); const go = vi.fn();
+  render(<ApplicationProvider operations={fixture.operations} runtime={runtime} path={path} go={go} querySettings={null}><ProtectedLayout><p>Restricted content</p></ProtectedLayout></ApplicationProvider>);
+  expect(screen.getByText("Restricted content")).toBeVisible();
+  act(() => { fixture.setPersona("viewer"); runtime.setResolution(fixture.sessionResolution()); });
+  expect(screen.queryByText("Restricted content")).toBeNull();
+  expect(go).toHaveBeenCalledWith("/overview");
 });

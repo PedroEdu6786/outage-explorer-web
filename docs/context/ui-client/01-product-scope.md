@@ -33,6 +33,14 @@ apply when configured; no tenant model, facility assignment or hidden-column
 policy has been selected. Use server-provided capabilities when the contract
 exists, and handle denied requests even after a screen was initially allowed.
 
+On October 5 the user further
+restricted Viewer web access to Overview only: Dataset Explorer and SQL Workspace
+are absent from navigation, and direct `/datasets` and `/query` visits redirect
+to `/overview` before restricted content mounts. National metadata remains
+available for Overview. Analyst/Admin retain both analytical pages. This frontend
+restriction supersedes the earlier Viewer national SQL UI scope; it does not
+change the backend authorization policy.
+
 The persona table describes backend policy. The frontend never sends or assigns
 roles. On October 5 the user confirmed the current role-only session response
 and supplied role restrictions, authorizing a presentation mapping into the

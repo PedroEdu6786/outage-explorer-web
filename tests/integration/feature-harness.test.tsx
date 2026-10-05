@@ -87,11 +87,12 @@ describe("four-feature fixture composition", () => {
     expect(screen.queryByText("synthetic_facility", { exact: true })).toBeNull();
     expect(explorer().queryByLabelText("Facility")).toBeNull();
     click("SQL view");
-    expect(queries().getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+    expect(queries().queryByRole("textbox", { name: "SQL statement" })).toBeNull();
+    expect(queries().getByText("Query access denied")).toBeVisible();
     expect(queries().queryByRole("table")).toBeNull();
     expect(screen.queryByText("Replace edited draft?")).toBeNull();
     expect(screen.queryByText("Dataset context prepared")).toBeNull();
-    expect(queries().getByRole("button", { name: "synthetic_national" })).toBeVisible();
+    expect(queries().queryByRole("button", { name: "synthetic_national" })).toBeNull();
     expect(queries().queryByRole("button", { name: "synthetic_facility" })).toBeNull();
   });
 
@@ -103,7 +104,8 @@ describe("four-feature fixture composition", () => {
     click("Open in SQL Workspace"); expect(screen.getByText("Replace edited draft?")).toBeVisible();
     click("Resolve synthetic Viewer");
     await waitFor(() => { expect(screen.queryByText("Replace edited draft?")).toBeNull(); });
-    expect(queries().getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+    expect(queries().queryByRole("textbox", { name: "SQL statement" })).toBeNull();
+    expect(queries().getByText("Query access denied")).toBeVisible();
     expect(queries().queryByRole("table")).toBeNull();
     expect(screen.queryByText("synthetic_facility", { exact: true })).toBeNull();
     click("Withhold unresolved session");

@@ -13,8 +13,8 @@ import { observationTable, plotSegments } from "./presentation";
 import { validCalendarDate, validRange } from "./service";
 import type { NavigationIntent } from "../../contracts/navigation";
 
-function setup() {
-  const fixture = createFixtureOperations({ persona: "viewer" });
+function setup(persona: "viewer" | "analyst" = "viewer") {
+  const fixture = createFixtureOperations({ persona });
   const runtime = createSessionRuntime();
   runtime.setResolution(fixture.sessionResolution());
   return { fixture, runtime };
@@ -55,7 +55,7 @@ describe("Overview exact observation behavior", () => {
     expect(screen.getByText("Calculated offline: 0.00%")).toBeVisible();
   });
   it("ignores earlier ranges and emits only current authorized intent", async () => {
-    const { runtime, fixture } = setup(); const user = userEvent.setup(); const intents: NavigationIntent[] = [];
+    const { runtime, fixture } = setup("analyst"); const user = userEvent.setup(); const intents: NavigationIntent[] = [];
     const deferred = fixture.deferNext("readNationalSeries");
     const view = render(<SessionProvider runtime={runtime}><OverviewFeature operations={fixture.operations} runtime={runtime} onNavigate={(intent) => { intents.push(intent); }} /></SessionProvider>);
     await waitFor(() => { expect(screen.getByLabelText("End date")).toHaveValue("2026-09-04"); });

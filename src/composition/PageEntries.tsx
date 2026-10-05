@@ -6,13 +6,17 @@ import { OverviewFeature } from "../features/overview";
 import { ExplorerFeature } from "../features/explorer";
 import { QueriesFeature } from "../features/queries";
 import { useApplication, useApplicationSession, useAuthControls } from "./ApplicationProvider";
-import { navigationData, routeTitles } from "./navigation";
+import { canAccessPath, navigationData, routeTitles } from "./navigation";
 
 export function ProtectedLayout({ children }: { readonly children: ReactNode }) {
   const app = useApplication();
   const session = useApplicationSession();
   const controls = useAuthControls();
-  return <AppShell title={routeTitles[app.path]} navigation={navigationData(session, app.path)} onSignOut={controls.signOut}>{children}</AppShell>;
+  const allowed = canAccessPath(session, app.path);
+  useEffect(() => {
+    if (session.status === "authenticated" && !allowed && app.path !== "/overview") app.go("/overview");
+  }, [session.status, allowed, app.path, app.go]);
+  return <AppShell title={routeTitles[app.path]} navigation={navigationData(session, app.path)} onSignOut={controls.signOut}>{allowed ? children : <StatusMessage title="Opening Overview" pending />}</AppShell>;
 }
 export function SignInEntry() {
   const { go } = useApplication();

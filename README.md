@@ -42,7 +42,8 @@ templates and thin route pages. Feature hooks/services own workflows; API
 adapters own transport and response validation.
 
 The separate Python/Flask backend owns authorization, data ingestion, metrics
-and SQL execution. Viewers have national-only access; Analysts have access to
+and SQL execution. Viewers have national-only Overview access; `/datasets` and `/query` are restricted
+to Analysts and Admins. Analysts have access to
 all analytical datasets; Admins additionally have backend refresh capability.
 A dedicated Admin UI is conditional. The client consumes authorized backend
 APIs and does not directly access EIA, S3, RDS or DuckDB.

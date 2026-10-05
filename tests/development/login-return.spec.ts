@@ -35,3 +35,27 @@ for (const role of [null, "viewer", "analyst", "admin"] as const) {
     }
   });
 }
+
+for (const role of ["viewer", "analyst", "admin"] as const) {
+  test(`${role} direct Explorer and SQL access follows page restrictions`, async ({ page }) => {
+    await page.route("**/api/auth/session", (route) => route.fulfill({
+      status: 200, contentType: "application/json", body: JSON.stringify({
+        user: { id: "synthetic-browser-user", email: "browser@example.invalid", role },
+        expires_at: new Date(Date.now() + 600_000).toISOString(), csrf_token: "synthetic-browser-regression-token",
+      }),
+    }));
+    for (const path of ["/datasets", "/query"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(role === "viewer" ? /\/overview$/ : new RegExp(`${path}$`));
+      if (role === "viewer") {
+        await expect(page.getByRole("heading", { name: "U.S. Nuclear Outage Overview" })).toBeVisible();
+        await expect(page.getByRole("link", { name: "Dataset Explorer", exact: true })).toHaveCount(0);
+        await expect(page.getByRole("link", { name: "SQL Workspace", exact: true })).toHaveCount(0);
+        await expect(page.getByRole("textbox", { name: "SQL statement", includeHidden: true })).toHaveCount(0);
+      } else {
+        await expect(page.getByRole("link", { name: "Dataset Explorer", exact: true })).toBeVisible();
+        await expect(page.getByRole("link", { name: "SQL Workspace", exact: true })).toBeVisible();
+      }
+    }
+  });
+}

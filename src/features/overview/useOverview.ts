@@ -66,7 +66,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     const currentSession = runtime.getSnapshot();
     if (!dataset || !series || !validRange(range) || session.status !== "authenticated" || !onNavigate
       || renderedSelection !== selection.current || session.generation !== context.generation || currentSession.status !== "authenticated"
-      || !currentSession.session.capabilities.canReadNationalSeries || !currentSession.session.capabilities.datasetIds.includes(dataset.id)) return;
+      || !currentSession.session.capabilities.canExploreDatasets || !currentSession.session.capabilities.canReadNationalSeries || !currentSession.session.capabilities.datasetIds.includes(dataset.id)) return;
     guardCurrent(runtime, context, () => { onNavigate({ target: "explorer", generation: context.generation, datasetId: dataset.id, filters: { dates: range } }); });
   }
   return { dataset, series, range, failure, loading, session, changeRange, explore, retry: () => { if (dataset) setRevision((value) => value + 1); else setCatalogRevision((value) => value + 1); }, invalidRange: !validRange(range) };

@@ -14,7 +14,7 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 - **FR3:** IF the one-hour application session expires THEN THE SYSTEM SHALL require explicit sign-in without automatic renewal.
 - **FR4:** WHEN a user signs out THE SYSTEM SHALL invalidate the current backend session and clear protected client state without invalidating independent sessions.
 - **FR5:** WHILE identity or capabilities are unresolved THE SYSTEM SHALL withhold protected data and navigation.
-- **FR6:** WHEN permissions resolve or change THE SYSTEM SHALL expose only backend-authorized datasets, schemas, filters and data, including national-only access for Viewers.
+- **FR6:** WHEN permissions resolve or change THE SYSTEM SHALL expose only backend-authorized datasets, schemas, filters and data, including national-only Overview access for Viewers. Viewer navigation excludes Dataset Explorer and SQL Workspace; direct `/datasets` and `/query` visits return to `/overview` before feature content mounts (October 5 user clarification).
 - **FR7:** WHEN a user selects an authorized dataset THE SYSTEM SHALL show its schema, applicable filters and available coverage metadata.
 - **FR8:** WHEN dataset, filters or preview page size change THE SYSTEM SHALL start a new browsing sequence and ignore obsolete responses.
 - **FR9:** WHEN a user continues a preview THE SYSTEM SHALL preserve its original snapshot and opaque cursor context; IF that sequence expires THEN THE SYSTEM SHALL offer an explicit restart.
@@ -78,7 +78,7 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 - [ ] **AC3:** Expired application sessions require explicit sign-in with no automatic renewal. (verifies FR3)
 - [ ] **AC4:** Current-session logout invalidates backend access and prevents cached or in-flight data restoration; an independent session continues according to backend policy. (verifies FR4)
 - [ ] **AC5:** Unresolved identity/capabilities never flash protected content. (verifies FR5)
-- [ ] **AC6:** Viewer navigation, schemas, filters, autocomplete, previews and SQL remain national-only; direct forbidden backend requests and later pages are denied, including after access reduction. (verifies FR6)
+- [ ] **AC6:** Viewer web access is Overview-only; sidebar links, Overview exploration actions and current handoffs cannot enter Explorer/SQL, and direct `/datasets` or `/query` visits redirect before content mounts; direct forbidden backend requests and later pages are denied, including after access reduction. (verifies FR6)
 - [ ] **AC7:** Catalog/schema/filter choices and date coverage come from the authorized contract, not source sample counts or hardcoded rolling windows. (verifies FR7)
 - [ ] **AC8:** Dataset/filter/size changes reset preview state and a delayed old response cannot overwrite the new selection. (verifies FR8)
 - [ ] **AC9:** Preview continuation retains one snapshot through publication; fixed expiry offers explicit restart and never fabricates numbered jumps/totals. (verifies FR9)

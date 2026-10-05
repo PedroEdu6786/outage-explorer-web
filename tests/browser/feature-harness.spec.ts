@@ -64,10 +64,11 @@ for (const outcome of ["success", "stale-denial"] as const) {
     await expect(page.getByText("Synthetic facility observations", { exact: true })).toHaveCount(0);
     await expect(page.getByLabel("Facility", { exact: true })).toHaveCount(0);
     await button(page, "SQL view").click();
-    await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+    await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveCount(0);
+  await expect(page.getByText("Query access denied", { exact: true })).toBeVisible();
     await expect(page.getByRole("table")).toHaveCount(0);
     await expect(button(page, "synthetic_facility")).toHaveCount(0);
-    await expect(button(page, "synthetic_national")).toBeVisible();
+    await expect(button(page, "synthetic_national")).toHaveCount(0);
     await expect(page.getByText("Dataset context prepared", { exact: true })).toHaveCount(0);
     const calls = await trace(page);
     expect(calls.filter((call) => ["readSchema", "startPreview", "executeQuery"].includes(call.operation) && call.outcome === "pending")).toHaveLength(0);
@@ -82,7 +83,8 @@ test("access reduction removes pending consent and unresolved identity withholds
   await button(page, "Open in SQL Workspace").click(); await expect(page.getByText("Replace edited draft?", { exact: true })).toBeVisible();
   await button(page, "Resolve synthetic Viewer").click();
   await expect(page.getByText("Replace edited draft?", { exact: true })).toHaveCount(0);
-  await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+  await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveCount(0);
+  await expect(page.getByText("Query access denied", { exact: true })).toBeVisible();
   await expect(page.getByRole("table")).toHaveCount(0);
   await button(page, "Withhold unresolved session").click();
   await expect(page.locator('[data-fixture-root="synthetic-only"]').getByRole("table", { includeHidden: true })).toHaveCount(0);

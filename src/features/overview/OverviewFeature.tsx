@@ -26,6 +26,6 @@ function OverviewContent({ operations, onNavigate }: OverviewFeatureProps) {
     notice={model.invalidRange ? <StatusMessage tone="error" title="Choose valid calendar dates in chronological order" /> : model.failure ? <StatusMessage tone="error" title={model.failure.kind === "forbidden" ? "National data access denied" : model.failure.message} actions={model.failure.kind !== "forbidden" && <Button onClick={model.retry}>Retry</Button>} /> : model.loading || !model.dataset ? <StatusMessage title="Loading national observations" pending /> : undefined}
     metrics={model.series && <NationalMetricCards observation={[...model.series.observations].sort((a, b) => a.date.localeCompare(b.date)).at(-1)} />}
     trend={model.series && model.series.observations.length > 0 && <NationalTrend key={`${String(model.session.generation)}:${model.series.range.start ?? "open"}:${model.series.range.end ?? "open"}:${model.series.provenance.snapshotId}`} series={model.series} />}
-    observations={model.series && (model.series.observations.length === 0 ? <EmptyState title="No observations in this range" /> : <DailyObservations observations={model.series.observations} {...(onNavigate ? { onExplore: model.explore } : {})} />)}
+    observations={model.series && (model.series.observations.length === 0 ? <EmptyState title="No observations in this range" /> : <DailyObservations observations={model.series.observations} {...(onNavigate && model.session.session.capabilities.canExploreDatasets ? { onExplore: model.explore } : {})} />)}
   />;
 }

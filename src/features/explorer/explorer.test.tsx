@@ -212,12 +212,12 @@ describe("Explorer authorized cursor lifecycle", () => {
 describe("Explorer feature interaction", () => {
   it("renders permitted schema tabs, exact/null values, validates inputs and emits SQL context", async () => {
     const user = userEvent.setup();
-    const fixture = createFixtureOperations({ persona: "viewer" });
+    const fixture = createFixtureOperations({ persona: "analyst" });
     const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
     const onNavigate = vi.fn();
     render(<ExplorerFeature operations={fixture.operations} runtime={runtime} onNavigate={onNavigate} />);
     await screen.findByRole("table", { name: "Synthetic national observations preview" });
-    expect(screen.queryByText("Synthetic facility observations")).not.toBeInTheDocument();
+    expect(screen.getByText("Synthetic facility observations")).toBeVisible();
     expect(screen.queryByLabelText("Facility")).not.toBeInTheDocument();
     expect(screen.getAllByText("0.00").length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText("Missing value").length).toBeGreaterThan(0);

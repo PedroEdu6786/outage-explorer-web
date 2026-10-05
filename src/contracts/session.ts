@@ -15,6 +15,7 @@ export interface SessionIdentity {
 export interface SessionCapabilities {
   readonly datasetIds: readonly DatasetId[];
   readonly canReadNationalSeries: boolean;
+  readonly canExploreDatasets: boolean;
   readonly canExecuteQuery: boolean;
 }
 

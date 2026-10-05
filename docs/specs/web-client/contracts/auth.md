@@ -336,9 +336,14 @@ The subsequent user-provided restrictions authorize presentation mapping from
 `viewer`, `analyst` and `admin`: national for all three, facilities/generators
 for Analyst/Admin, refresh for Admin. This supersedes the earlier prohibition
 on deriving UI capabilities from roles for this integration. Roles remain
-backend-assigned; the client never sends role/capability claims. Existing
-read-only SQL scope remains national-only for Viewer and all permitted datasets
-for Analyst/Admin. Refresh UI remains conditional and is not added.
+backend-assigned; the client never sends role/capability claims. The latest October 5 user instruction restricts Viewer web access to Overview
+only. Presentation mapping sets `canExploreDatasets` and `canExecuteQuery` false
+for Viewer and true for Analyst/Admin; national dataset IDs remain available for
+Overview metadata. Sidebar links and Overview exploration actions are withheld.
+The shared protected layout redirects blocked `/datasets` and `/query` visits to
+`/overview` before mounting feature content; current navigation handoffs are also
+checked. Backend authorization remains independent. This supersedes the earlier
+national-only Viewer SQL UI scope. Refresh UI remains conditional and is not added.
 
 Integration owns `src/integration/config.ts`, `live-composition.ts`,
 `next.config.ts`, `.env.example`, `src/adapters/live/auth-schema.ts`,

@@ -31,7 +31,7 @@ describe("live auth adapter with controlled HTTP responses", () => {
     const body = payload(role);
     fetch.mockResolvedValue(json(body));
     await service.perform("resolve", callbacks);
-    expect(runtime.getSnapshot()).toMatchObject({ status: "authenticated", session: { identity: { subject: body.user.id, displayName: body.user.email }, capabilities: { datasetIds, canReadNationalSeries: true, canExecuteQuery: true }, expiresAt: body.expires_at } });
+    expect(runtime.getSnapshot()).toMatchObject({ status: "authenticated", session: { identity: { subject: body.user.id, displayName: body.user.email }, capabilities: { datasetIds, canReadNationalSeries: true, canExploreDatasets: role !== "viewer", canExecuteQuery: role !== "viewer" }, expiresAt: body.expires_at } });
     expect(JSON.stringify(runtime.getSnapshot())).not.toContain(body.csrf_token);
     expect(adapter.csrfToken()).toBe(body.csrf_token);
     expect(fetch).toHaveBeenCalledExactlyOnceWith("/api/auth/session", { method: "GET", credentials: "include", cache: "no-store", redirect: "error" });
