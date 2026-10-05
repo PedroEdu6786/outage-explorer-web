@@ -35,6 +35,16 @@ and connected acceptance remain open. Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
+## Integration completion planning
+
+The active [integration completion plan](../../../specs/backend-integration/plan.md)
+turns the [integration spec](../../../specs/backend-integration/spec.md) into the
+remaining design strategy. It reuses the established component and adapter work;
+its scope supplements the original delivery plan and preserves existing live and
+page-assembly gates. The [state/security assessment](integration-assessment.md)
+records the supporting findings. Planning does not authorize implementation or
+close acceptance gates; generate the integration task list with `/tasks` next.
+
 ## Parallel delivery
 
 The task manifest contains **78 tasks across seven phases**, with **21 marked

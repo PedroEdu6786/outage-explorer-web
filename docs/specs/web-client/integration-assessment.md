@@ -117,9 +117,10 @@ No client improvement is evidence of OS file/network/credential isolation.
 
 ## Planning handoff
 
-Use the draft spec for behavior and acceptance. The subsequent plan should choose
-whether catalog deduplication merits a dependency, reconcile current snapshots
-and nullable generation identity, address the access-loss race and expiry, then
-complete connected operation and browser evidence. Numeric processing budgets
-and the production header policy remain recommendations needing concrete design.
+Use the draft spec for behavior and acceptance. The
+[integration plan](../../../specs/backend-integration/plan.md) retains controller
+ownership without adding a state dependency, then reconciles current snapshots
+and nullable generation identity, addresses the access-loss race and expiry,
+and completes connected operation and browser evidence. Numeric processing
+budgets and the production header policy remain optional follow-up decisions.
 Existing phase/task acceptance gates remain open; this assessment closes none.
