@@ -183,3 +183,21 @@ For unconfigured production checks, build with `OUTAGE_API_ORIGIN='' npm run bui
 then run the production Playwright project with the same empty override. Restore
 a configured build afterward before running local auth or starting the frontend.
 See [auth evidence](../specs/web-client/verification/auth-integration.md).
+
+## Development login-return regression
+
+With `OUTAGE_API_ORIGIN` configured in `.env.local`, run `npm run dev` on
+localhost:3000, then in a separate terminal run:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npx playwright test --config playwright.development.config.ts --workers=1
+```
+
+This project uses the already running development server and isolated browser
+contexts. It intercepts only the session endpoint with explicitly synthetic
+signed-out/Viewer/Analyst/Admin responses; it does not complete Cognito sign-in
+or prove live session acceptance. It verifies the HTTP307 root redirect,
+session restoration under development Strict Mode, authenticated sign-in-page
+navigation and absence of browser runtime errors. No traces, videos or
+screenshots are recorded. Cold route compilation has a15-second assertion budget.
+The suite is separate from Storybook, production, live auth and Vitest discovery.

@@ -101,3 +101,35 @@ No new visual layout was designed or compared with Figma. Existing pending/error
 components are reused; fixture browser checks verify behavior, not a new fidelity
 review. Data adapters remain controlled preparations and are not registered in
 production. No release, push, provider configuration change or deployment.
+## Development login-return correction — October 5
+
+User reported Runtime TypeError `Type error` at native `measure` on Next16.3.8
+webpack. Local development logs and an isolated Chromium reproduction identified
+`HomePage cannot have a negative time stamp`. The root page's rendering-time
+`redirect("/overview")` triggered the failure with both signed-out and synthetic
+authenticated responses. This matches the category of development timing failures
+tracked in [Next issue86060](https://github.com/vercel/next.js/issues/86060),
+although this repository's root-redirect reproduction is the decisive evidence.
+
+Moved the root redirect to the
+[Next redirect configuration](https://nextjs.org/docs/app/api-reference/config/next-config-js/redirects)
+with HTTP307 and removed the throwing root page. Corrected production-provider
+cleanup to clear protected state to `pending`, allowing Strict Mode's next setup
+to perform a fresh authoritative cookie-session check. Previously its simulated
+unmount changed the runtime to `unauthenticated`, suppressing that check.
+
+Controlled regression: four development Chromium scenarios cover signed-out,
+Viewer, Analyst and Admin returns through `/` and `/sign-in`, using synthetic
+session responses only. Runtime errors disappear, signed-in sessions reach the
+real overview with data-service unavailability, and signed-out sessions keep
+protected navigation hidden. First cold sign-in assertion exceeded the old
+five-second timeout; warmed rerun passed and the dedicated project now allows
+15 seconds for cold route compilation. Authenticated Cognito completion remains
+unverified; existing live and fixture evidence above retains its original scope.
+These changes supersede the earlier source/build binding for the affected files.
+
+Checks:179 Vitest tests, four controlled development browser scenarios,
+typecheck, lint, webpack build, source boundaries (98 modules/15 roots) and
+production fixture exclusion (153 emitted files) passed. Initial typecheck saw
+stale generated types for the deleted root page; the fresh build regenerated them
+and the subsequent typecheck passed. No dependency upgrade or backend change.

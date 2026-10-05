@@ -7,6 +7,11 @@ const live = readLiveConfiguration(process.env.OUTAGE_API_ORIGIN);
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  redirects() {
+    // Redirect before rendering: throwing redirect() from the root page trips
+    // React's development component timing on the pinned Next/React versions.
+    return Promise.resolve([{ source: "/", destination: "/overview", permanent: false }]);
+  },
   rewrites() {
     return Promise.resolve(live.status === "configured" ? [{ source: "/api/:path*", destination: `${live.apiOrigin}/api/:path*` }] : []);
   },

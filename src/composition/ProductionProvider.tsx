@@ -12,7 +12,9 @@ export function ProductionProvider({ children, authEnabled = false }: { readonly
   const router = useRouter();
   const pathname = usePathname();
   const path: ApplicationPath = pathname in routeTitles ? pathname as ApplicationPath : "/overview";
-  useEffect(() => () => { runtime.invalidate(); }, [runtime]);
+  // Strict Mode replays cleanup/setup during development. Clear protected state
+  // while keeping the runtime unresolved so the next setup checks the cookie.
+  useEffect(() => () => { runtime.invalidate("pending"); }, [runtime]);
   return <ApplicationProvider operations={operations} runtime={runtime} path={path} go={(next) => { router.push(next); }} querySettings={productionQuerySettings}>
     <div onClick={(event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
