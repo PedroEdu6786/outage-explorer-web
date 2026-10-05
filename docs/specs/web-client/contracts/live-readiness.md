@@ -1,24 +1,24 @@
 # Live contract readiness
 
-Ledger revision: **6**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
+Ledger revision: **7**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
 FR2–FR4, FR6–FR7, FR9, FR13, FR16; TR3, TR5, TR7, TR9.
 
-**Backend auth works and is ready for frontend integration, as confirmed by the
-user on October 5. Frontend live acceptance is still pending.** Start T5.3 Auth
-current response/configuration intake, then T5.4/T5.5; data API availability does
-not block this auth sequence. Data API v1 contracts and local adaptations are
-prepared; data runtime readiness remains unconfirmed. User feedback accepts date-only optional bounds
-and assigns capability additions to the backend. The [adaptation record](frontend-adaptation.md)
-and [controlled evidence](../verification/contract-adaptation.md) describe what is
-implemented without API availability. The client sends no role/capability claims and does not require a role field in
-the revised session response. Confirm current auth capability field names during
-intake; production composition/proxy and actual frontend live checks remain pending.
+**Auth configuration/composition and the current session adapter are implemented;
+full authenticated browser acceptance remains pending.** The user confirmed the
+role-only session DTO and supplied role restrictions, authorizing presentation
+mapping from backend-assigned roles. This supersedes the earlier capability-only
+constraint. The client sends no role/capability claims. See the
+[current decision](auth.md#current-response-and-revised-user-decision--october-5)
+and [auth integration evidence](../verification/auth-integration.md).
+Data API v1 contracts and local adaptations are prepared; data runtime readiness
+and source corrections remain separate. No expanded capability response is
+required for the agreed auth integration.
 The [data handoff](data-api.md) now supplies all seven service operations and
 resolves Q3 contract defaults/expiry/delivery. Data backend runtime is pending and
 [frontend/source discrepancies](contract-review.md) require reconciliation.
 The earlier October 5 [auth handoff](auth.md) supplies routes, payloads, errors, backend
 callback ownership, HttpOnly session cookies, logout CSRF and a same-origin local
-proxy. Auth adapter mapping, environment and live evidence remain pending. The accepted
+proxy. Auth mapping/configuration are implemented; full lifecycle evidence remains pending. The accepted
 [frontend contracts](../../../../src/contracts/session.ts) define proposed
 feature-facing models; they do not approve HTTP payloads, routes, error codes,
 credential transport or SQL settings. Synthetic checks cannot close live gates.
@@ -34,12 +34,12 @@ backend environment was verified; source contracts prove no live readiness.
 
 | Required slot | Current assignment/value | Evidence needed |
 | --- | --- | --- |
-| Backend/session contract decision owner | Unassigned — Q2 | Named responsible person and recorded agreement |
+| Backend/session contract decision owner | User supplies auth DTO/restrictions; data owner unassigned | Auth decision recorded; data reconciliation pending |
 | Frontend integration implementation owner | Integration lane | Coordinate mappings and affected consumer checks |
 | Backend contract version | Auth reference and [Data API v1 snapshots/hashes](data-api.md) recorded; data artifacts uncommitted at source | Select artifacts for the target integration version |
 | Backend implementation revision | Auth source checkout recorded; deployed target unprovided — Q2 | Commit/release tied to the target environment |
-| Target environment | Unprovided — Q2 | Environment identifier and approved connection configuration |
-| Session/Cognito configuration decision owner | Unassigned — Q2 | Responsible person for callback, exchange and session choices |
+| Target environment | Local Flask8000 / Next3000 for auth; deployment/data target pending | Limited connected auth smoke evidence |
+| Session/Cognito configuration decision owner | User supplies auth setup; Integration aligns transport | Existing callback8000 retained; UI3000 redirect approved |
 | SQL lifecycle/settings decision owner | Person unassigned; v1 settings supplied | Responsible person for reconciliation and target runtime verification |
 | Live verification environment/accounts owner | Unassigned — Q2 | Access-controlled test setup and independent session identities |
 
@@ -59,9 +59,9 @@ authorization/error cases and an operation exercised against the target version.
 
 | Operation / frontend seam | Required request and response agreement | Required authorization, failures and encoding agreement | Gate / current evidence |
 | --- | --- | --- | --- |
-| Resolve session / `resolveSession` | `GET /api/auth/session` with cookie only; revised response needs ID/email, effective capabilities, expiry and CSRF, no required role | `401`/`403`/`503` documented; identity/capability seam mapping pending | Auth / [handoff](auth.md), no adapter/live evidence |
-| Managed login / `beginLogin` and callback | Browser GET login; Flask PKCE/callback/exchange; allowlisted UI redirect | Generic errors documented; exact environment callback/proxy values pending | Auth / [handoff](auth.md), no adapter/live evidence |
-| Current-session logout / `logout` | POST with cookie, exact Origin and session CSRF; `204` after invalidation | `503` retains cookie and is unconfirmed; frontend pending/confirmed lifecycle mapping pending | Auth / [handoff](auth.md), no adapter/live evidence |
+| Resolve session / `resolveSession` | GET cookie only; confirmed ID/email/role/expiry/CSRF | User-approved role presentation mapping; malformed/unknown role fails closed | Controlled adapter + real signed-out proxy evidence; authenticated restoration pending |
+| Managed login / `beginLogin` and callback | Browser GET login; Flask PKCE/callback/exchange; return `/` | Local Flask8000 / Next3000; callback stays8000 | Controlled navigation + real redirect/cookie evidence; Cognito completion pending |
+| Current-session logout / `logout` | POST cookie, exact browser Origin and memory CSRF; only204 confirms | Unconfirmed failures retain scoped retry token; original expiry discards it | Controlled failure/token cases + real signed-out logout; authenticated invalidation pending |
 | Authorized catalog / `listDatasets` | GET datasets: IDs/SQL names, coverage, embedded schemas, generation | Role-filtered; capability/summary mapping pending | Catalog/Preview / [contract](catalog-preview.md), controlled adapters only |
 | Authorized schema / `readSchema` | Embedded catalog columns; no standalone schema route | Descriptor/nullability/client-description mapping prepared | Catalog/Preview / [contract](catalog-preview.md), controlled adapters only |
 | Preview first page / `startPreview` | GET preview: optional inclusive date sides, size 100/max500 | Date-only optional bounds accepted and locally adapted | Catalog/Preview / [contract](catalog-preview.md), controlled adapters only |
@@ -77,29 +77,30 @@ conditional and no refresh implementation task is added.
 Its dataset/filter authorization comes from the agreed session/catalog context;
 its generation guard and explicit edited-draft replacement remain frontend duties.
 
-## Auth subgate — backend ready; frontend implementation next
+## Auth subgate — current contract accepted for implementation
 
-The [auth contract](auth.md) records the supplied browser-to-Flask flow: backend
-code exchange/callback, HttpOnly session cookie, in-memory CSRF token, fixed
-expiry, confirmed current-session logout and same-origin local proxy. It also
-records exact Origin/CORS rules and the distinction from provider SSO lifetimes.
-These transport details are no longer unspecified. The user confirms backend
-auth works and is ready to integrate. The older local reference still labels
-integration choices draft and shows no capability fields; capture the current
-response/configuration during intake. This is not a wait for auth to be built.
+The user supplies contract/configuration decisions; Integration owns the exact
+paths in Phase 5. Current DTO: application ID/email/role, original expiry and
+CSRF. Viewer maps to national; Analyst/Admin to national/facilities/generators;
+read-only SQL uses each role's permitted datasets. Refresh UI remains excluded.
+The backend remains the authorization authority and receives no client claims.
 
-Remaining frontend integration inputs/work: current backend capability DTO,
-responsible integration person, target version/environment, actual
-UI/public/callback origins and return paths, capability/identity mapping, and
-logout retry/token handling. The current fixture session requires capabilities
-absent from the wire response and invalidates local state before logout completes.
-Do not fabricate capabilities or treat a failed logout as confirmed.
+Target: user-confirmed Flask `http://localhost:8000`, Next
+`http://localhost:3000`, server-only `OUTAGE_API_ORIGIN` proxy target.
+Existing public/callback origin remains port 8000; backend UI origin is now
+port 3000 after approved `.env` update and user restart. Default return path `/`
+is allowed. No frontend callback/exchange is added. The local reference checkout
+is `808205158669836e52e107cbc626d1517e0df4e6`; the running API does not advertise
+its revision, so this is source provenance rather than a deployed-version claim.
 
-Before implementation, record required proxy/configuration/adapter file paths and
-update the phase-5 tasks and dependency graph under the coordinator's ownership.
-No frontend callback/code exchange is required. Paths are now recorded in Phase 5.
-This documentation update identifies the next implementation; it does not mark
-T5.3 or frontend live acceptance complete.
+T5.4/T5.5 implement decoding, role presentation mapping, fixed expiry and scoped
+memory-only CSRF. Logout clears protected state immediately, preserves only the
+current generation's retry token until original expiry, and confirms on `204`.
+Malformed/unknown-role responses withhold access. Controlled and connected smoke
+checks are recorded separately in [auth integration evidence](../verification/auth-integration.md).
+Real authenticated Cognito completion, persistent reload/reopen, role changes and
+independent session verification remain open. Combined T5.3/T5.L/T6.L remain
+incomplete pending the other operation gates and release evidence.
 
 ## Catalog/Preview and Metric subgates — contract received, mapping pending
 
@@ -152,3 +153,4 @@ allow independent fixture work to continue under the accepted execution plan.
 | 4 | 2026-10-05 | User accepts date-only/optional bounds and backend capability additions; local data decoders, models, UI and injected transport prepared and tested. No production registration, auth mapping or live acceptance. |
 | 5 | 2026-10-05 | User confirms backend-only role assignment/capability control; no client permission claims or role-derived capabilities. Revised session response need not include role; illustrative capability names await backend contract. Documentation only. |
 | 6 | 2026-10-05 | User confirms backend auth works and is ready for frontend implementation. T5.3 Auth intake → T5.4 → T5.5 is next, independently of data API availability. Capture current DTO/configuration; frontend live acceptance remains unverified. Documentation only; no endpoint calls. |
+| 7 | 2026-10-05 | User confirms current role-only DTO, supplies presentation role matrix and Flask URL. Auth adapter/configuration/composition implemented; backend UI origin aligned with approval and user restart. Controlled checks and limited real-Flask smoke evidence recorded; full authenticated lifecycle and data/release acceptance remain open. |

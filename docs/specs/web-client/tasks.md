@@ -1,5 +1,5 @@
 # Tasks: Outage Explorer web client
-> Status: fixture milestone complete; local data adaptation verified; backend auth ready; frontend auth and live integration next · Slug: web-client · Plan: ./plan.md · Spec: ./spec.md
+> Status: fixture milestone complete; local data adaptation verified; auth integration implemented; data registration and full live acceptance pending · Slug: web-client · Plan: ./plan.md · Spec: ./spec.md
 
 ## Overview
 
@@ -15,8 +15,8 @@
 - [x] **Phase 2: Tokens and atoms** — [7 tasks](tasks/phase-2.md); status: accepted; [verification](verification/phase-2.md).
 - [x] **Phase 3: Molecules, shared organisms and templates** — [13 tasks](tasks/phase-3.md); status: accepted; [verification](verification/phase-3.md).
 - [x] **Phase 4: Parallel feature compositions** — [20 tasks](tasks/phase-4.md); status: accepted; [verification](verification/phase-4.md).
-- [ ] **Phase 5: Integration seams and gated live adapters** — [11 tasks](tasks/phase-5.md); status: fixture T5.1/T5.2/T5.H accepted; local data preparation verified; backend auth ready; current DTO/configuration intake, frontend integration and live acceptance next; [verification](verification/phase-5.md).
-- [ ] **Phase 6: Individual pages last** — [8 tasks](tasks/phase-6.md); status: fixture T6.1–T6.6/T6.C accepted; T6.L pending completed auth/composition and configured target; [verification](verification/phase-6.md).
+- [ ] **Phase 5: Integration seams and gated live adapters** — [11 tasks](tasks/phase-5.md); status: fixture T5.1/T5.2/T5.H accepted; local data preparation verified; T5.4/T5.5 auth configuration/adapter accepted; data integration and full lifecycle acceptance pending; [verification](verification/phase-5.md).
+- [ ] **Phase 6: Individual pages last** — [8 tasks](tasks/phase-6.md); status: fixture T6.1–T6.6/T6.C accepted; T6.L pending data adapters/combined registration and full live evidence; [verification](verification/phase-6.md).
 - [ ] **Phase 7: Release verification** — [7 tasks](tasks/phase-7.md); status: not started.
 
 ## Dependency graph and start rules
@@ -49,7 +49,7 @@ request that includes those phases; planning does not start execution.
 
 ## Open inputs and scope guards
 
-- **Q2:** auth endpoint/cookie/CSRF/backend callback contracts are supplied. Backend auth works and is ready for frontend integration per the user. Capture current backend-controlled capability DTO and target environment/version/origins/return paths during T5.3 Auth, then implement T5.4/T5.5. Data readiness does not block this sequence; frontend live evidence remains required. The client sends no role/capability claims and does not require role in the response.
+- **Q2:** auth endpoint/cookie/CSRF/backend callback contracts are supplied. Backend auth works and is ready for frontend integration per the user. Capture current backend-controlled capability DTO and target environment/version/origins/return paths during T5.3 Auth, then implement T5.4/T5.5. Data readiness does not block this sequence; frontend live evidence remains required. The client sends no permission claims; the newer user-confirmed role-only DTO and role presentation mapping are now implemented.
 - **Q3:** contract values supplied: synchronous SQL, default100/max500, fixed15-minute result lifetime, 1,000 rows/1 MiB and explicit GET recovery. User-owned artifact corrections and actual backend runtime verification remain; do not reopen supplied settings as missing inputs.
 - **Q4:** browser/viewport matrix. Proposed current Chromium/Firefox/WebKit at inspected 1440/390 and 1000/760/480 boundary widths; agreement precedes final visual sign-off, not component work.
 - **Asset gate:** actual visible vector icons/logo and licensed font sources must be retained with provenance. Unread Make PNG files have no assumed purpose; missing required source blocks affected visual implementation only.
@@ -70,5 +70,13 @@ request that includes those phases; planning does not start execution.
 ## Next step
 
 - Follow the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5): working backend auth intake (T5.3 Auth) → proxy/composition (T5.4) → session adapter (T5.5) → reuse data adapters → production registration and live scenarios → actual live/release verification.
-- Date-only optional bounds and backend-only authorization ownership are accepted. Never infer capability flags from roles or accept client permission claims.
+- Date-only optional bounds and backend-only authorization ownership are accepted. Use only the user-approved role presentation restrictions; never assign roles or send client permission claims.
 - Local preparation evidence does not close live checkboxes. Existing P1–P4 preparation is recorded in [Phase 5](tasks/phase-5.md); no additional task IDs or completed live tasks are implied.
+
+## Auth integration update — October 5
+
+T5.3 Auth intake and exact-path expansion accepted for implementation; T5.4/T5.5
+verified with current role DTO, scoped CSRF and local Flask8000/Next3000 transport.
+See [auth integration evidence](verification/auth-integration.md). Next: finish
+T5.6–T5.8 after their own runtime/contract gates, then combined registration and
+authenticated/data release verification. Older next-step notes are historical.

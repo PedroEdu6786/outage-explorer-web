@@ -157,3 +157,29 @@ for current affected-consumer, decoder, injected HTTP, browser and build results
 Data adapter tests use supplied synthetic response examples; HTTP tests inject
 fetch responses and make no backend requests. The user expects API unavailability;
 expanded auth capabilities and live integration remain pending.
+
+## Local auth checks — October 5
+
+Auth-only live composition is opt-in through server-only OUTAGE_API_ORIGIN.
+The local target is Flask http://localhost:8000, with Next http://localhost:3000;
+the backend UI origin must match3000, while its existing callback8000 remains.
+Restart/rebuild Next after changing the target; rewrite configuration and the
+server-supplied enabled flag belong to the same build environment.
+External rewrite transport follows the [official Next documentation](https://nextjs.org/docs/app/api-reference/config/next-config-js/rewrites);
+only the enabled boolean reaches client props, following
+[environment guidance](https://nextjs.org/docs/app/guides/environment-variables).
+
+Run a fresh configured build, then
+`PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npx playwright test --config playwright.auth.config.ts --workers=1`.
+The isolated project uses real Flask and no interception, fixtures, traces,
+videos or screenshots; actual cookies/PKCE values must not enter evidence.
+It checks signed-out session, login redirect/binding cookies and signed-out
+logout Origin handling. Missing backend/configuration fails, never silently skips.
+Authenticated Cognito completion, reload/reopen, role changes and independent
+sessions still need separately coordinated accounts and live evidence.
+Vitest excludes tests/live; Storybook projects do not discover them.
+
+For unconfigured production checks, build with `OUTAGE_API_ORIGIN='' npm run build`,
+then run the production Playwright project with the same empty override. Restore
+a configured build afterward before running local auth or starting the frontend.
+See [auth evidence](../specs/web-client/verification/auth-integration.md).

@@ -74,14 +74,14 @@ Admin refresh controls and the deferred new-data card remain excluded.
 
 ## Remaining inputs
 
-**Next: integrate the working backend auth.** The user confirmed backend auth is
+**Auth integration is implemented; connected data and full live acceptance are next.** The user confirmed backend auth is
 ready on October 5. Read the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5),
-then [Phase 5: T5.3 Auth → T5.4 → T5.5](tasks/phase-5.md#next-implementation-connect-working-backend-auth)
-and the [auth contract](contracts/auth.md). Current response/configuration intake
-starts the work; data endpoint availability does not block auth integration.
+then [Phase 5: T5.3 Auth → T5.4 → T5.5](tasks/phase-5.md#current-implementation-connected-backend-auth)
+and the [auth contract](contracts/auth.md). The current user-approved role mapping and local proxy are implemented; see
+[auth integration evidence](verification/auth-integration.md). Data readiness is separate.
 
-- Auth handoff is documented with source revision/digest; target environment,
-  responsible integration person and frontend mapping remain pending. Data API v1
+- Auth handoff is documented with source revision/digest; local target and role presentation mapping are recorded;
+  full authenticated browser lifecycle acceptance remains pending. Data API v1
   service contracts are now received; backend runtime and contract reconciliation
   remain pending.
 - SQL contract defaults/TTL/delivery are supplied; source fixture corrections,
@@ -95,7 +95,7 @@ Foundation, tokens/atoms and shared molecules/organisms/templates are implemente
 and [execution ledger](execution-state.md). The Auth, Overview, Explorer and Queries fixture features are implemented and
 accepted; see [Phase 4 verification](verification/phase-4.md). The Phase 5 composed
 fixture harness is accepted; see [Phase 5 verification](verification/phase-5.md).
-The four fixture page compositions are accepted; see [Phase 6 verification](verification/phase-6.md). Backend auth is ready for frontend integration. Full T6.L registration still requires completed adapters and their evidence; production routes show explicit unavailability until live registration.
+The four fixture page compositions are accepted; see [Phase 6 verification](verification/phase-6.md). Auth-only production composition is implemented. Full T6.L registration still requires connected data adapters and their evidence; data operations remain explicitly unavailable.
 
 These are named gates in the plan and tasks. The documented auth source contract
 does not establish production deployment or completed live/visual acceptance.

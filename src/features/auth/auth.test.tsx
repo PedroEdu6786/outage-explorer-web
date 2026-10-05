@@ -105,10 +105,13 @@ describe("Auth fixture lifecycle", () => {
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(runtime.isCurrent(before)).toBe(false);
     expect(cleanup).toHaveBeenCalledOnce();
+    expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
+    expect(screen.getByText("Signing out")).toBeInTheDocument();
     expect(screen.queryByText("Protected analysis")).not.toBeInTheDocument();
     expect(controller.callLog.read()[0]?.generation).toBeGreaterThan(before.generation);
     expect(independent.getSnapshot().status).toBe("authenticated");
     await act(async () => { delayed.release(); await Promise.resolve(); });
+    expect(runtime.getSnapshot().status).toBe("unauthenticated");
     expect(screen.getByRole("button", { name: "Continue to sign in" })).toBeEnabled();
   });
 
@@ -118,11 +121,64 @@ describe("Auth fixture lifecycle", () => {
     render(entry);
     fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await screen.findByText("Sign-out not confirmed");
-    expect(runtime.getSnapshot().status).toBe("unauthenticated");
+    expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
     expect(screen.queryByText("Protected analysis")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Retry sign out" }));
     await screen.findByRole("button", { name: "Continue to sign in" });
     expect(controller.callLog.read().map((call) => call.operation)).toEqual(["logout", "logout"]);
+  });
+
+  it("keeps uncertain logout withheld after remount without resolving the retained cookie", async () => {
+    const { controller, runtime, entry } = setup(true);
+    controller.failNext("logout", { kind: "service-failure", message: "Unconfirmed logout" });
+    const view = render(entry);
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await screen.findByText("Sign-out not confirmed");
+    view.unmount();
+    render(<StrictMode>{entry}</StrictMode>);
+    expect(screen.queryByText("Protected analysis")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry sign out" })).toBeEnabled();
+    const service = createAuthService(controller.operations, runtime);
+    const callbacks = { onSuccess: vi.fn(), onFailure: vi.fn() };
+    await expect(service.perform("resolve", callbacks)).resolves.toBe("discarded");
+    await expect(service.perform("login", callbacks)).resolves.toBe("discarded");
+    expect(controller.callLog.read().map((call) => call.operation)).toEqual(["logout"]);
+    fireEvent.click(screen.getByRole("button", { name: "Retry sign out" }));
+    await screen.findByRole("button", { name: "Continue to sign in" });
+    expect(runtime.getSnapshot().status).toBe("unauthenticated");
+  });
+
+  it.each(["success", "forbidden", "rejection"] as const)("discards late logout %s after a different identity resolves", async (outcome) => {
+    const { controller, runtime } = setup(true);
+    if (outcome === "forbidden") controller.failNext("logout", { kind: "forbidden", message: "Old session denied" });
+    const delayed = controller.deferNext("logout");
+    const callbacks = { onSuccess: vi.fn(), onFailure: vi.fn() };
+    const operation = createAuthService(controller.operations, runtime).perform("logout", callbacks);
+    controller.setPersona("viewer");
+    runtime.setResolution(controller.sessionResolution());
+    const generation = runtime.getSnapshot().generation;
+    if (outcome === "rejection") delayed.reject(new Error("Network failure"));
+    else delayed.release();
+    await expect(operation).resolves.toBe("discarded");
+    expect(callbacks.onSuccess).not.toHaveBeenCalled();
+    expect(callbacks.onFailure).not.toHaveBeenCalled();
+    expect(runtime.getSnapshot()).toMatchObject({ status: "authenticated", generation });
+  });
+
+  it.each(["forbidden", "rejection"] as const)("does not confirm logout on %s", async (outcome) => {
+    const { controller, runtime, entry } = setup(true);
+    if (outcome === "forbidden") controller.failNext("logout", { kind: "forbidden", message: "Access denied" });
+    const delayed = controller.deferNext("logout");
+    render(entry);
+    fireEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await act(async () => {
+      if (outcome === "rejection") delayed.reject(new Error("Network failure"));
+      else delayed.release();
+      await Promise.resolve();
+    });
+    await screen.findByText("Sign-out not confirmed");
+    expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
+    expect(screen.queryByText("Protected analysis")).not.toBeInTheDocument();
   });
 
   it.each(["forbidden", "service-failure"] as const)("shows actionable %s resolution failure without protected content or automatic retry", async (kind) => {

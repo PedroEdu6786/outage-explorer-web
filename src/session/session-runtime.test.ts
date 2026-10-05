@@ -36,6 +36,24 @@ describe("session invalidation", () => {
     runtime.dispose();
   });
 
+  it("clears protected state once for unconfirmed logout and preserves the retry generation", () => {
+    const runtime = createSessionRuntime();
+    runtime.setResolution(session());
+    const protectedContext = runtime.capture();
+    const cleanup = vi.fn();
+    runtime.registerCleanup(cleanup);
+    runtime.beginLogout();
+    const logoutContext = runtime.capture();
+    expect(runtime.getSnapshot()).toMatchObject({ status: "pending", reason: "logout" });
+    expect(runtime.isCurrent(protectedContext)).toBe(false);
+    runtime.beginLogout();
+    expect(runtime.isCurrent(logoutContext)).toBe(true);
+    expect(cleanup).toHaveBeenCalledOnce();
+    runtime.setResolution(session(["national"]));
+    expect(runtime.isCurrent(logoutContext)).toBe(false);
+    runtime.dispose();
+  });
+
   it("expires without renewal and cancels the obsolete session timer", () => {
     vi.useFakeTimers();
     const runtime = createSessionRuntime();

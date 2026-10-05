@@ -38,8 +38,9 @@ Phase 1 application scaffolding, frontend contracts, session runtime and isolate
 fixture tooling are implemented; see the
 [Phase 1 evidence](../../specs/web-client/verification/phase-1.md). The October 5
 [auth handoff](../../specs/web-client/contracts/auth.md) now documents session
-transport and endpoints; frontend mapping, target configuration and live checks
-remain pending. The subsequent [Data API v1 handoff](../../specs/web-client/contracts/data-api.md)
+transport and endpoints; current role mapping, local configuration and auth
+adapter are implemented. Full authenticated lifecycle checks remain pending;
+see [auth integration evidence](../../specs/web-client/verification/auth-integration.md). The subsequent [Data API v1 handoff](../../specs/web-client/contracts/data-api.md)
 now supplies service contracts, with [frontend/source differences](../../specs/web-client/contracts/contract-review.md);
 backend runtime remains pending. Published prototype asset sources and font licenses are
 recorded in the [asset ledger](../../specs/web-client/assets.md); local licensed fonts and actual loaded-weight evidence are now recorded in the
@@ -49,7 +50,7 @@ molecules, table/navigation organisms and slot templates are implemented with
 per-feature readiness records in
 [Phase 3 verification](../../specs/web-client/verification/phase-3.md). Auth, Overview, Explorer and Queries fixture compositions are now accepted;
 see [Phase 4 verification](../../specs/web-client/verification/phase-4.md).
-The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 auth integration is next, with backend auth confirmed ready; data live acceptance remains pending; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Production routes fail closed until T6.L live registration.
+The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 auth configuration/adapter are implemented; data live acceptance remains pending; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Auth is opt-in through configured transport; data operations fail closed until combined live registration.
 See the
 [project README](../../../README.md) and [agent guidance](../../../AGENTS.md)
 for repository entry points. Keep accepted requirements separate from suggested

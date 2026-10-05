@@ -1,20 +1,28 @@
 # Tasks: Integration seams and gated live adapters
-> Status: backend auth working and ready for frontend integration (user-confirmed October 5); fixture/local data preparation verified; frontend integration and live acceptance pending · Slug: web-client · Plan phase: 5 · Manifest: ../tasks.md · Spec: ../spec.md
+> Status: auth configuration/adapter implemented; fixture/local data preparation verified; full live/data acceptance pending · Slug: web-client · Plan phase: 5 · Manifest: ../tasks.md · Spec: ../spec.md
 
-- 11 tasks; T5.1, T5.2 and T5.H accepted; live tasks remain unchecked. Paths below identify existing modules to reuse and planned additions; no live checkbox is completed by local preparation.
+- 11 tasks; T5.1, T5.2, T5.H, T5.4 and T5.5 accepted at their stated scope; combined contract/data/release gates remain open. Controlled adapter acceptance never closes T5.L.
 - Dependencies name completed tasks or explicit external readiness subgates. `[P]` permits concurrency only with disjoint ready work; it never waives predecessors.
 
-## Next implementation: connect working backend auth
+## Current implementation: connected backend auth
 
-The user confirms backend authentication already works and is ready for frontend
-implementation. Start with **T5.3 Auth → T5.4 → T5.5**: capture the current session
-response and environment settings, configure the same-origin proxy/composition,
-then implement login navigation, session restoration, fixed expiry and CSRF logout.
-Keep roles and capabilities backend-controlled. Confirm capability field names
-from the current backend response; the linked response proposal is not a final DTO.
-Data API availability and source corrections do not block this auth sequence.
-Verify connected auth as soon as configured; combined T5.L/T6.L/release acceptance
-still requires all named operations. No checkbox is completed by this status update.
+T5.3 Auth intake → T5.4 → T5.5 is implemented. The user confirmed the
+role-only session response and supplied role restrictions, authorizing UI
+presentation mapping from backend-assigned roles. This supersedes the earlier
+capability-only constraint. The client sends no permission claims. Auth-only
+production wiring does not complete combined T6.L or release acceptance.
+
+Flask is at `http://localhost:8000`; local Next is at `http://localhost:3000`.
+The approved backend UI origin update and user restart align final redirects
+and browser logout Origin. The existing callback8000 stays unchanged.
+Integration owns the listed adapter/configuration/shared files plus
+`src/app/layout.tsx`, `src/app/providers.tsx`,
+`src/composition/ProductionProvider.tsx`, `production-operations.ts`,
+`playwright.auth.config.ts` and `tests/live/auth-smoke.spec.ts`. The latter is an
+independent auth smoke check; it does not complete combined T5.9 data scenarios.
+No frontend callback route or provider exchange is added. See
+[auth integration evidence](../verification/auth-integration.md) for controlled
+and limited connected checks; full authenticated lifecycle remains open.
 
 ## Task checklist
 
@@ -30,12 +38,12 @@ still requires all named operations. No checkbox is completed by this status upd
 - [ ] **T5.3** Resolve per-operation backend and session contracts before transport coding — `docs/specs/web-client/contracts/live-readiness.md`, `docs/specs/web-client/contracts/auth.md`, `docs/specs/web-client/contracts/catalog-preview.md`, `docs/specs/web-client/contracts/metric.md`, `docs/specs/web-client/contracts/sql.md`, `docs/specs/web-client/tasks.md`, `docs/specs/web-client/tasks/phase-5.md` (FR2, FR3, FR4, FR6, FR7, FR9, FR13, FR16, TR3, TR5, TR7, TR9)
   - Owner: **Integration**. Depends: **T1.9; user-confirmed working auth and current contract/configuration intake; supplied data/SQL contracts**.
   - Acceptance: Blocked for affected operations until responsible person, backend version/environment, request/response/error/encoding/authorization and credential transport are approved. Before dependent code, record exact callback/bridge/server file paths if required and update tasks/DAG; do not invent them now. SQL adds page size/TTL/delivery/outcome. Record separate Auth, Catalog/Preview, Metric and SQL readiness subgates so unrelated agreed operations can proceed.
-- [ ] **T5.4** Implement live-only adapter composition with fail-closed configuration — `src/integration/live-composition.ts`, `src/integration/config.ts`, `src/integration/data-http-client.ts`, `src/integration/data-http-client.test.ts`, `next.config.ts`, `.env.example`, `src/integration/live-composition.test.ts` (FR5, FR16, FR18, TR3, TR6, TR7)
+- [x] **T5.4** Implement live-only adapter composition with fail-closed configuration — `src/integration/live-composition.ts`, `src/integration/config.ts`, `src/integration/data-http-client.ts`, `src/integration/data-http-client.test.ts`, `next.config.ts`, `.env.example`, `src/integration/live-composition.test.ts` (FR5, FR16, FR18, TR3, TR6, TR7)
   - Owner: **Integration**. Depends: **T5.3 Auth subgate; T1.10**.
   - Acceptance: Create typed live operation factory using approved transport; unavailable operations fail closed. No runtime fixture selector or demo imports. No credentials/SQL in URLs, secret serialization or implicit execute retries. Implement any newly recorded callback/bridge paths only after task expansion.
-- [ ] **T5.5** Implement agreed session adapter and runtime decoding — `src/adapters/live/auth-adapter.ts`, `src/adapters/live/auth-schema.ts`, `src/adapters/live/auth-adapter.test.ts`, `src/features/auth/service.ts`, `src/features/auth/useAuth.ts`, `src/session/session-runtime.ts` and affected tests (FR2, FR3, FR4, FR5, FR6, FR16, TR3, TR6, TR7)
+- [x] **T5.5** Implement agreed session adapter and runtime decoding — `src/adapters/live/auth-adapter.ts`, `src/adapters/live/auth-schema.ts`, `src/adapters/live/auth-adapter.test.ts`, `src/features/auth/service.ts`, `src/features/auth/useAuth.ts`, `src/session/session-runtime.ts` and affected tests (FR2, FR3, FR4, FR5, FR6, FR16, TR3, TR6, TR7)
   - Owner: **Live-auth**. Depends: **T5.4; T5.3 Auth subgate and exact-path expansion**.
-  - Acceptance: Navigate to backend login; Flask owns PKCE/exchange/callback. Decode backend identity/effective capabilities/expiry/CSRF without requiring role or sending permission claims. Keep CSRF in memory; reject stale responses, clear protected state on logout, retain scoped retry context on unconfirmed `503`, and confirm only on `204`. Verify fixed expiry, reload resolution, malformed/missing capabilities and `401`/`403`/network failures with controlled responses; no silent renewal or provider-token storage.
+  - Acceptance: Navigate to backend login; Flask owns PKCE/exchange/callback. Decode the user-confirmed identity/role/expiry/CSRF response and map the user-approved presentation restrictions without sending permission claims. Keep CSRF in memory; reject stale responses, clear protected state on logout, retain scoped retry context on unconfirmed `503`, and confirm only on `204`. Verify fixed expiry, reload resolution, malformed/missing or unknown role and `401`/`403`/network failures with controlled responses; no silent renewal or provider-token storage.
 - [ ] **T5.6** Implement agreed authorized catalog/schema and preview adapters — `src/adapters/live/data-adapter.ts`, `src/adapters/live/data-schema.ts`, `src/adapters/live/data-mapping.ts`, `src/adapters/live/table-mapping.ts`, `src/adapters/live/data-adapter.test.ts` (FR6, FR7, FR8, FR9, FR11, FR16, TR3, TR4, TR6, TR7)
   - Owner: **Integration (serialized shared data modules)**. Depends: **T5.4; T5.3 Catalog/Preview subgate**.
   - Acceptance: Reuse the locally tested modules; support date-only optional bounds and valid out-of-coverage empty results, schema from catalog and current/next cursors. Decode allowed metadata/coverage/cursor/snapshot/expiry at untrusted boundary and map to feature contracts; preserve original expiry and identifiers. Do not treat source EIA route names as API/SQL names.
@@ -50,7 +58,7 @@ still requires all named operations. No checkbox is completed by this status upd
   - Acceptance: Author route-aware real-provider/backend scenarios after contracts are known; configure separate live project without fixture interception, secrets in source or automatic destructive data controls. Missing environment/accounts/lifecycle controls report blocked, never a green skipped acceptance. Browser execution occurs in phase 7 after pages.
 - [ ] **T5.L** Checkpoint: accept versioned live adapters for release verification — `docs/specs/web-client/verification/integration-adapters.md` (FR2, FR3, FR4, FR6, FR7, FR9, FR10, FR11, FR12, FR13, FR14, FR15, FR16, FR20, TR3, TR5, TR7, TR9, AC2, AC6, AC7, AC9, AC10, AC11, AC12, AC13, AC14, AC15, AC16, AC20)
   - Owner: **Integration**. Depends: **T5.9**.
-  - Acceptance: Reconcile adapters with approved backend version and contract tests; run each agreed operation against target environment. Missing revised auth DTO, target configuration or actual backend evidence keeps this incomplete, independently of T5.H. Release still needs phase-7 end-to-end evidence.
+  - Acceptance: Reconcile adapters with approved backend version and contract tests; run each agreed operation against target environment. Missing accepted contract/configuration or actual backend evidence keeps this incomplete, independently of T5.H. Release still needs phase-7 end-to-end evidence.
 
 ## Run outcome — October 4, 2026
 
@@ -138,3 +146,14 @@ listed above; shared runtime/model changes and consumer tests remain serialized.
 The main task records describe remaining completion, not a need to rewrite P1–P4
 preparation. T5.6–T5.8 no longer carry parallel flags because their implemented
 modules overlap. All live checkboxes remain open until their evidence is met.
+
+## Auth implementation outcome — October 5
+
+T5.3 Auth intake is accepted for coding under the newer user-supplied role DTO,
+role restrictions and local target configuration. T5.4/T5.5 are implemented and
+verified with controlled responses; limited real-Flask proxy checks are recorded
+in [auth integration evidence](../verification/auth-integration.md). The earlier
+capability-only notes above are historical and superseded. Data operations stay
+unregistered. Auth-only production wiring does not close T6.L; full authenticated
+Cognito/reload/role-change/independent-session evidence and combined data checks
+remain open. No deployment or provider configuration change.

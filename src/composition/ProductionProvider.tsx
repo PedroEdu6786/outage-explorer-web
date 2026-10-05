@@ -6,9 +6,9 @@ import { ApplicationProvider } from "./ApplicationProvider";
 import { createProductionOperations, productionQuerySettings } from "./production-operations";
 import { routeTitles, type ApplicationPath } from "./navigation";
 
-export function ProductionProvider({ children }: { readonly children: ReactNode }) {
+export function ProductionProvider({ children, authEnabled = false }: { readonly children: ReactNode; readonly authEnabled?: boolean }) {
   const [runtime] = useState(createSessionRuntime);
-  const [operations] = useState(createProductionOperations);
+  const [operations] = useState(() => createProductionOperations({ runtime, authEnabled }));
   const router = useRouter();
   const pathname = usePathname();
   const path: ApplicationPath = pathname in routeTitles ? pathname as ApplicationPath : "/overview";

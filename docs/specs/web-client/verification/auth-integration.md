@@ -1,0 +1,103 @@
+# Auth integration implementation and evidence
+
+October 5, 2026: **T5.3 Auth intake accepted for coding; T5.4/T5.5 implemented**.
+FR2–FR6/FR16/FR19; TR3/TR6/TR7. Combined T5.3, T5.9/T5.L, T6.L and release
+acceptance remain open for data and full authenticated lifecycle evidence.
+
+The user supplied the current role-only response and Viewer/Analyst/Admin
+restrictions. That authorizes presentation mapping from backend-assigned roles,
+superseding the earlier capability-only frontend decision. No permission claims
+are sent. Viewer sees national only; Analyst/Admin see all three datasets;
+SQL scope follows permitted datasets. Refresh UI remains excluded. See the
+[current decision](../contracts/auth.md#current-response-and-revised-user-decision--october-5).
+
+## Implementation
+
+- Strict runtime decoding maps application ID to the existing opaque identity
+  slot and email to display name, retaining the original timezone-bearing expiry.
+  Unknown/missing role, malformed expiry or missing CSRF withholds access.
+- Login navigates to Flask's `/api/auth/login?return_to=%2F`. Provider exchange
+  and callback stay entirely on Flask. Session fetch sends cookies only.
+- The server-only target config installs a Next `/api` rewrite. Only an enabled
+  boolean crosses into client props. Missing target fails closed; invalid target
+  rejects startup without echoing values. No secret or backend address appears
+  in emitted client JavaScript.
+- CSRF lives only inside the adapter. Admission to a resolved generation binds
+  it to that identity and original expiry. Protected cleanup precedes logout;
+  only its unresolved logout generation retains the retry token. Other changes,
+  aborts, original expiry and confirmed logout discard obsolete material.
+- Pending logout is distinct from confirmed signed-out state. Network/503/403
+  failures do not confirm success; only 204 does. Remounting cannot resolve the
+  retained cookie and restore access during uncertain logout. Late responses
+  cannot invalidate another identity or transfer its CSRF token.
+- Production registers auth only when configured. Data/navigation operations
+  remain explicitly unavailable; no fixture or implicit data/SQL registration.
+
+## Version and configuration binding
+
+Source reference checkout: backend `808205158669836e52e107cbc626d1517e0df4e6`.
+HTTP auth reference SHA-256:
+`07bafab29790478a7364d12274c8dae8aa2996414ebad9bf6806da7672837e0e`.
+Backend identity serializer SHA-256:
+`6eed444c4f1091a2d76703f3b98b94a8dbc4980aedf2c4c742808076c8a635d6`.
+The running API advertises no revision; these hashes identify the locally
+inspected source, not an independently proven deployed revision.
+
+Flask target is user-confirmed `http://localhost:8000`; Next UI is
+`http://localhost:3000`. Gitignored `.env.local` sets server-only
+`OUTAGE_API_ORIGIN`. With explicit sandbox approval, only backend `.env`
+`OUTAGE_AUTH_UI_ORIGIN` changed from 8000 to 3000; the user restarted Flask.
+Public/Cognito callback remains `http://localhost:8000/api/auth/callback`.
+Default `/` is already allowlisted. No Cognito settings, accounts, provider
+credentials or backend source changed. Use localhost consistently for host cookies.
+
+Frontend pre-implementation HEAD: `5646588adacd3ef6658e9173652982a7148ee03d`.
+[Digest manifest](auth-integration-digests.json) binds 186 source/test/script/asset
+and root config/lock/example files, including untracked additions. It excludes
+documentation, generated outputs and the private `.env.local`. Aggregate digest
+hashes sorted paths, NUL, bytes, NUL. The manifest records the final configured
+build ID and content hashes; the same source was also built with an empty target
+for the separate unconfigured production browser check.
+
+## Checks actually run
+
+| Check | Result / scope |
+| --- | --- |
+| `npm run typecheck` | Passed; strict TypeScript and Next route generation |
+| `npm run lint` | Passed across final source/config/tests |
+| `npm test` | 179 tests across 22 files passed; includes auth transport/lifecycle and all affected feature consumers |
+| `npm run test:boundaries` | 33 adversarial tests passed |
+| `npm run check:boundaries` | 99 modules / 16 production roots passed |
+| `npm run build` | Fresh configured webpack build passed; also separately passed with `OUTAGE_API_ORIGIN=''` |
+| `npm run check:production-fixtures` | Fresh configured build scan passed, 158 emitted files; client target/env-name scan found no matches |
+| `npm run build-storybook` | Passed; existing nonfatal module-directive warnings |
+| Fixture Chromium: feature-harness, navigation, sign-in-page | 8 tests passed against the fresh Storybook build |
+| Unconfigured production Chromium | 1 actual-Next scenario passed with empty target at build/start; no fixture interception or fabricated traffic |
+| Real-Flask auth Chromium project | 3 tests passed: signed-out session/UI,302 managed-login redirect/HttpOnly binding cookie, browser-origin signed-out logout204 |
+| `npm run check:release-boundaries` | Expected failure: combined live production registration remains unverified |
+
+Controlled tests cover all three roles, unknown/missing roles, malformed expiry,
+offset/microsecond expiry, token isolation, fixed original expiry, stale/aborted
+resolution, late logout after identity change, retryable503/network/403,
+unexpected logout200, logout401 and repeated204. They use clearly synthetic
+identities/tokens; no actual user response or credential is recorded.
+
+The live project uses actual Next/Flask with no fixtures/interception and disables
+traces, screenshots and videos. Assertions avoid serializing cookie/PKCE values.
+Initial logout failed 403 under the old UI origin; after correction/restart it
+passed. The first post-restart login returned 503 once; a direct check returned 302,
+and the subsequent complete auth suite passed. These failures are retained as
+observed environment evidence rather than hidden with test retries.
+
+## Remaining acceptance
+
+No live authenticated Cognito completion, authenticated reload/reopen, backend
+fixed-expiry enforcement, role mutation/access reduction, authenticated CSRF
+logout or independent-session invalidation was exercised. Those require
+coordinated accounts/lifecycle controls and remain open. Backend authorization
+is not established by the presentation role map or signed-out smoke.
+
+No new visual layout was designed or compared with Figma. Existing pending/error
+components are reused; fixture browser checks verify behavior, not a new fidelity
+review. Data adapters remain controlled preparations and are not registered in
+production. No release, push, provider configuration change or deployment.

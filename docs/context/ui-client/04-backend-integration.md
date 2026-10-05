@@ -65,12 +65,11 @@ Seeded accounts are sufficient and public registration is disabled. Application
 permissions belong to PostgreSQL, and the backend must enforce them on every
 operation, including subsequent preview/result pages.
 
-The user clarified that roles and capabilities are assigned and controlled only
-by the backend. The client sends no role/capability claims. Session resolution
-uses the cookie and consumes backend-returned effective capabilities for UI
-visibility; a role field is not required by the frontend. The original handoff's
-role-bearing response is historical evidence, not the revised response requirement.
-See the [accepted auth boundary](../../specs/web-client/contracts/auth.md#accepted-authorization-boundary--october-5-2026).
+Roles remain assigned only by the backend, and the client sends no permission
+claims. After confirming the current role-only response, the user supplied a
+role restriction matrix and authorized mapping those backend roles into UI
+capabilities. This supersedes the earlier capability-only frontend decision;
+see the [current auth record](../../specs/web-client/contracts/auth.md#current-response-and-revised-user-decision--october-5).
 
 The October 5 handoff supplies browser-to-Flask authentication through a
 same-origin local `/api` proxy. Flask owns code exchange and callback, sets an
@@ -143,3 +142,12 @@ See the [expected-versus-available proposal and implementation record](../../spe
 Controlled tests do not establish live acceptance. Backend auth is ready per the
 user; the earlier expectation of no API responses now applies to data services.
 Earlier fixture milestones remain historical evidence.
+
+## Connected auth implementation — October 5
+
+Opt-in auth adapter/configuration/composition are implemented for local
+Flask8000 / Next3000. The existing callback8000 is retained; UI origin3000
+was approved and applied after user restart. Identity/role/expiry decoding,
+memory-only scoped CSRF and uncertain-logout protection have controlled coverage;
+real signed-out proxy checks pass. See [auth evidence](../../specs/web-client/verification/auth-integration.md).
+Full authenticated lifecycle and all data/release gates remain separate.

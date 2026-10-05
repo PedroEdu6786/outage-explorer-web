@@ -61,8 +61,8 @@ readiness records; see [Phase 3 verification](docs/specs/web-client/verification
 Auth, Overview, Explorer and Queries now expose injected feature entries,
 synthetic Storybook stories and adversarial lifecycle coverage; see
 [Phase 4 verification](docs/specs/web-client/verification/phase-4.md).
-The composed fixture harness is now accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Local data adapters are prepared; auth capability fields, target configuration and live checks still gate T6.L registration.
-Source-boundary and emitted-fixture checks are executable. Product routes now build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Production operations fail closed with explicit backend unavailability until live registration; fixture page demos remain in isolated Storybook roots. See the coordinator-owned
+The composed fixture harness is accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Auth now has opt-in live composition; pending data registration and full live acceptance still gate T6.L.
+Source-boundary and emitted-fixture checks are executable. Product routes build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Configured auth uses a same-origin Flask proxy; unconfigured auth and pending data operations fail closed. Fixture page demos remain in isolated Storybook roots. See the coordinator-owned
 [execution state](docs/specs/web-client/execution-state.md) for accepted tasks
 and the [Phase 1 verification record](docs/specs/web-client/verification/phase-1.md)
 for the integrated checkpoint evidence.
@@ -77,14 +77,15 @@ versions and their official compatibility evidence are recorded in the
 [toolchain documentation](docs/development/toolchain.md). The October 5
 [auth HTTP handoff](docs/specs/web-client/contracts/auth.md) documents Flask-owned
 Cognito login/callback, HttpOnly cookie sessions, CSRF logout and a same-origin
-local proxy. Frontend mapping, environment configuration and live verification
-remain pending. The subsequent [Data API v1 handoff](docs/specs/web-client/contracts/data-api.md)
+local proxy. The current role-bearing response and user-approved presentation
+mapping are integrated; see [auth integration evidence](docs/specs/web-client/verification/auth-integration.md).
+Full authenticated browser lifecycle acceptance remains pending. The subsequent [Data API v1 handoff](docs/specs/web-client/contracts/data-api.md)
 now documents catalog/preview, prepared national metrics, SQL and refresh, with
 local OpenAPI/fixture snapshots and a [comparison report](docs/specs/web-client/contracts/contract-review.md).
 Backend data endpoints remain pending implementation; frontend hosting remains open.
 The supplied published Figma
-prototype has been inspected; live integration still needs expanded auth capabilities,
-backend runtime/environment and live mapping verification, plus asset provenance; see
+prototype has been inspected; release still needs connected data/lifecycle
+verification and visual sign-off; see
 the [remaining inputs](docs/context/ui-client/05-delivery-and-acceptance.md#inputs-still-needed-for-implementation).
 Explicit synthetic fixtures support independent UI work while live integration
 is pending. They are isolated from production and do not establish EIA findings.
@@ -100,7 +101,7 @@ npm ci
 ```
 
 `npm run storybook` serves isolated previews on port 6006. `npm run dev` serves
-the assembled production routes with explicit unavailable operations until live contracts are configured. Both development
+the assembled routes with configured live auth and explicit unavailable data operations. Both development
 and production framework builds explicitly use webpack because Turbopack's
 PostCSS worker port binding failed in this runtime.
 
@@ -146,3 +147,29 @@ See the [expected-versus-available proposal and implementation record](docs/spec
 Controlled tests do not establish live acceptance. Backend auth is ready per the
 user; the earlier expectation of no API responses now applies to data services.
 Earlier fixture milestones remain historical evidence.
+
+## Connected local auth — October 5, 2026
+
+Set the server-only `OUTAGE_API_ORIGIN=http://localhost:8000` in `.env.local`
+(configured in this workspace), then run `npm run dev` and open
+`http://localhost:3000`. Restart/rebuild Next after configuration changes.
+Flask remains on port 8000 with its existing Cognito callback there; its
+`OUTAGE_AUTH_UI_ORIGIN=http://localhost:3000` makes final login redirects and
+logout Origin checks match the UI. Cookies are shared by the localhost host,
+not by port; use localhost consistently rather than mixing it with 127.0.0.1.
+
+The user confirmed the role-only response and supplied Viewer/Analyst/Admin
+presentation restrictions. Backend-assigned role now maps to UI capabilities;
+Flask still enforces every request. No capability expansion is required for this
+auth integration. Data adapters remain unregistered and do not use fixtures.
+
+After a configured fresh build, run the separate real-Flask smoke tests:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npx playwright test --config playwright.auth.config.ts --workers=1
+```
+
+These cover signed-out resolution, login redirect/binding cookies and idempotent
+logout Origin handling. They do not prove authenticated Cognito completion,
+reload/reopen, backend role changes or independent-session logout; see the
+[evidence and remaining checks](docs/specs/web-client/verification/auth-integration.md).

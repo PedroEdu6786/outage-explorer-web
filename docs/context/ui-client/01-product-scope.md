@@ -33,11 +33,12 @@ apply when configured; no tenant model, facility assignment or hidden-column
 policy has been selected. Use server-provided capabilities when the contract
 exists, and handle denied requests even after a screen was initially allowed.
 
-The persona table describes backend policy, not a client-side permission map.
-The frontend never sends or assigns roles/capabilities and does not require a
-role in the session response. Backend-returned effective capabilities guide UI
-visibility; the backend authorizes every request. The user explicitly confirmed
-this boundary on October 5; see the [auth contract](../../specs/web-client/contracts/auth.md).
+The persona table describes backend policy. The frontend never sends or assigns
+roles. On October 5 the user confirmed the current role-only session response
+and supplied role restrictions, authorizing a presentation mapping into the
+existing frontend capability model. This supersedes the earlier capability-only
+decision; the backend authorizes every request. See the
+[current auth decision](../../specs/web-client/contracts/auth.md#current-response-and-revised-user-decision--october-5).
 
 ## Expected initial web capabilities
 

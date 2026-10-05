@@ -63,6 +63,12 @@ Commit each completed repository update, including documentation changes, as
 requested by the user on October 5, 2026. This is standing authorization for local
 commits; pushing and deployment require their own authorization.
 
+Every commit must include a descriptive body in addition to its title. Explain
+the problem and resulting behavior, then log the substantive changes by feature
+or file group. Record checks actually run and any remaining limitations. Scale
+detail to the change; do not copy raw tool output or record secrets. Use an
+actual multiline message, preferably supplied through `git commit --file`.
+
 Preserve the append-only journal in `docs/devlog/YYYY-MM-DD.md`. Repo-local
 Codex hooks in `.codex/hooks.json` buffer completed-turn assistant summaries
 and append pending summaries before literal `git commit` tool calls. See

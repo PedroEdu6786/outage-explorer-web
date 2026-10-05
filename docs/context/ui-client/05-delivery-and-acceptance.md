@@ -140,3 +140,13 @@ See the [expected-versus-available proposal and implementation record](../../spe
 Controlled tests do not establish live acceptance. Backend auth is ready per the
 user; the earlier expectation of no API responses now applies to data services.
 Earlier fixture milestones remain historical evidence.
+
+## Auth implementation update — October 5
+
+The user-confirmed role-only session DTO and supplied role restrictions now
+drive presentation mapping. Local Flask8000 / Next3000 configuration, opt-in
+production auth and scoped CSRF lifecycle are implemented; see
+[auth integration evidence](../../specs/web-client/verification/auth-integration.md).
+Backend authorization, full authenticated browser acceptance, data registration
+and release checks remain distinct. Earlier missing-capability notes describe
+the previous intake, not a current auth implementation prerequisite.

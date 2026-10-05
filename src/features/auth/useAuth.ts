@@ -16,7 +16,12 @@ export type AuthActivity =
 export function useAuth(operations: SessionOperations, runtime: SessionRuntime) {
   const session = useSyncExternalStore(runtime.subscribe, runtime.getSnapshot, () => serverSnapshot);
   const service = useMemo(() => createAuthService(operations, runtime), [operations, runtime]);
-  const [activity, setActivity] = useState<AuthActivity>({ status: "idle" });
+  const [activity, setActivity] = useState<AuthActivity>(() => {
+    const state = runtime.getSnapshot();
+    return state.status === "pending" && state.reason === "logout"
+      ? { status: "failure", action: "logout", failure: { kind: "service-failure", message: "Sign-out has not been confirmed. Retry to confirm." } }
+      : { status: "idle" };
+  });
   const active = useRef<AbortController | null>(null);
   const initialResolution = useRef<Promise<unknown> | null>(null);
   const run = useCallback(async (action: "resolve" | "login" | "logout") => {
@@ -37,7 +42,8 @@ export function useAuth(operations: SessionOperations, runtime: SessionRuntime) 
     }
   }, [service]);
   useEffect(() => {
-    if (runtime.getSnapshot().status === "pending" && initialResolution.current === null) {
+    const state = runtime.getSnapshot();
+    if (state.status === "pending" && state.reason !== "logout" && initialResolution.current === null) {
       initialResolution.current = run("resolve");
     }
     return () => {
@@ -49,7 +55,10 @@ export function useAuth(operations: SessionOperations, runtime: SessionRuntime) 
   useEffect(() => runtime.registerCleanup(() => {
     // Resolve itself transitions generation; its publication callback resets activity.
     // External transitions also remove any obsolete login/error presentation.
-    setActivity({ status: "idle" });
+    const state = runtime.getSnapshot();
+    setActivity(state.status === "pending" && state.reason === "logout"
+      ? { status: "working", action: "logout" }
+      : { status: "idle" });
   }), [runtime]);
   return {
     session, activity,

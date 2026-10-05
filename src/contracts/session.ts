@@ -1,7 +1,7 @@
 import type { DatasetId } from "./catalog";
 import type { OperationResult } from "./failures";
 
-/** Frontend models. Cookie transport is documented; expanded capability DTO is awaited. */
+/** Frontend models. The live adapter maps the current user-confirmed backend DTO. */
 export type SessionGeneration = number;
 /** Backend-supplied instant, unlike an observation's timezone-free calendar date. */
 export type ExpiryInstant = string;
@@ -11,7 +11,7 @@ export interface SessionIdentity {
   readonly displayName: string;
 }
 
-/** Returned by the backend; these are presentation capabilities, not authorization. */
+/** Presentation restrictions from backend identity; never authorization evidence. */
 export interface SessionCapabilities {
   readonly datasetIds: readonly DatasetId[];
   readonly canReadNationalSeries: boolean;
@@ -30,7 +30,7 @@ export type SessionResolution =
   | { readonly status: "authenticated"; readonly session: AuthenticatedSession };
 
 export type SessionState =
-  | { readonly status: "pending"; readonly generation: SessionGeneration }
+  | { readonly status: "pending"; readonly generation: SessionGeneration; readonly reason?: "logout" }
   | (SessionResolution & { readonly generation: SessionGeneration });
 
 /** Capture before dispatch; check before publishing any success/error or side effect. */

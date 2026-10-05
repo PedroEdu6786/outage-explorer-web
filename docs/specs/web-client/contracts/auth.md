@@ -10,7 +10,7 @@ supplies the service contracts and extends CSRF usage to SQL/refresh POST.
 
 The user confirms auth already works and is ready to implement in the web client.
 Proceed with the [next implementation sequence](../plan.md#remaining-implementation-sequence--reconciled-october-5)
-and [Phase 5 auth tasks](../tasks/phase-5.md#next-implementation-connect-working-backend-auth).
+and [Phase 5 auth tasks](../tasks/phase-5.md#current-implementation-connected-backend-auth).
 The remaining work is frontend integration: target/proxy configuration, login
 navigation, session mapping, memory-only CSRF, expiry and confirmed/retryable logout.
 Data endpoints need not be ready to implement and verify these auth flows.
@@ -267,7 +267,7 @@ These are documented integration gaps, not changes to the accepted fixture code:
 | `SessionCapabilities.datasetIds`, `canReadNationalSeries`, `canExecuteQuery` | Session returns only a role. The later [catalog contract](catalog-preview.md) supplies authorized dataset IDs but no capability booleans; agree capability population or revise the seam; do not invent dataset IDs or permission payloads from fixtures. |
 | `AuthenticatedSession.expiresAt` | Map validated `expires_at` without extending its instant; keep the CSRF token in session-scoped memory outside shared presentation props. |
 | `beginLogin` | Browser navigation to Flask login; callback/code exchange stays entirely on Flask. |
-| `createAuthService` in `src/features/auth/service.ts` | Currently invalidates local state before the logout request. Reconcile pending cleanup, confirmed logout and retryable `503` with CSRF lifetime before using real transport. |
+| `createAuthService` in `src/features/auth/service.ts` | Now clears protected state into `pending` with logout reason; only confirmed success transitions to signed out. Adapter retains the original memory-only token for scoped retry; other transitions/expiry discard it. |
 
 Before transport coding, record the integration owner, target environment and
 version; settle the capability/identity mapping and logout lifecycle; assign exact
@@ -292,7 +292,7 @@ Service, metric, preview and SQL endpoints are outside this auth-only handoff.
 No live calls, adapter tests or visual checks were run for this documentation-only
 handoff. Fixture acceptance remains separate from live auth acceptance.
 
-## User decision after intake — October 5
+## Earlier user decision after intake — October 5
 
 The backend owns capability fields. Preserve the existing frontend capability
 model and confirm the current response for validation/mapping during intake.
@@ -300,3 +300,39 @@ The user subsequently confirmed auth works and is ready for frontend integration
 the earlier expectation of no API responses now applies to data services.
 Do not infer capability flags from role as a substitute. Auth integration is next;
 see [the adaptation record](frontend-adaptation.md).
+
+## Current response and revised user decision — October 5
+
+The user supplied the current response shape: `user.id`, `user.email`,
+`user.role`, `expires_at` and `csrf_token`; there are no capability fields.
+Actual identifiers, expiry and CSRF values are intentionally omitted here.
+The subsequent user-provided restrictions authorize presentation mapping from
+`viewer`, `analyst` and `admin`: national for all three, facilities/generators
+for Analyst/Admin, refresh for Admin. This supersedes the earlier prohibition
+on deriving UI capabilities from roles for this integration. Roles remain
+backend-assigned; the client never sends role/capability claims. Existing
+read-only SQL scope remains national-only for Viewer and all permitted datasets
+for Analyst/Admin. Refresh UI remains conditional and is not added.
+
+Integration owns `src/integration/config.ts`, `live-composition.ts`,
+`next.config.ts`, `.env.example`, `src/adapters/live/auth-schema.ts`,
+`auth-adapter.ts`, their tests and affected composition/session/auth modules.
+Use an opt-in server-only `OUTAGE_API_ORIGIN` for the same-origin `/api` proxy;
+missing configuration leaves production operations unavailable. Flask owns
+`/api/auth/callback` through that proxy; no frontend callback handler is added.
+Browser login uses the existing default allowlisted return path `/`.
+The user confirmed Flask at `http://localhost:8000`. Local Next uses
+`http://localhost:3000`; `.env.local` points its proxy to Flask. The existing
+backend public/callback origins stay on port 8000, preserving the configured
+Cognito callback. Backend `.env` UI origin alone was updated to port 3000 with
+sandbox approval; the user restarted Flask. This explicit same-site loopback
+variant shares host cookies through the proxy and retains browser Origin.
+Controlled adapter tests do not establish authenticated Cognito completion.
+
+Map application ID to the existing opaque `identity.subject` presentation slot
+(it is not a provider subject), and email to `displayName`. Unknown/missing role
+or malformed expiry withholds authentication. Keep original timezone-bearing
+expiry; keep CSRF in adapter memory, never shared presentation props/storage.
+Logout begins with protected-state removal, retains the token only for the
+current unresolved logout generation and original expiry, and confirms on `204`.
+Clear tokens on other identity/access transitions and reject stale responses.

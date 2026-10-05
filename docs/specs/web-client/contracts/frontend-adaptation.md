@@ -3,7 +3,7 @@
 October 5, 2026. The user accepts date-only filtering for v1, owns backend
 documentation corrections B1–B3, and requests frontend adaptation without
 expecting data API responses yet. The user subsequently confirmed backend auth
-works and is ready for frontend integration. Follow the [next auth tasks](../tasks/phase-5.md#next-implementation-connect-working-backend-auth);
+works and is ready for frontend integration. Follow the [next auth tasks](../tasks/phase-5.md#current-implementation-connected-backend-auth);
 frontend connected verification remains required.
 
 ## Expected experience versus available contract

@@ -156,23 +156,25 @@ Earlier fixture milestones remain historical evidence.
 This sequence governs the remaining work; earlier numbered phases retain their
 accepted fixture milestones. No new implementation is performed by this plan update.
 
-**Next implementation: backend authentication integration, T5.3 Auth → T5.4 →
-T5.5.** On October 5 the user confirmed that backend auth already works and is
-ready to implement in the web client. Record the current response/configuration
-as integration inputs, then connect login, session restoration and logout. Data
-API availability does not block this auth work. This confirmation establishes
-backend readiness; frontend end-to-end acceptance still needs connected tests.
+**Auth integration is implemented (T5.3 Auth intake → T5.4 → T5.5).**
+The user supplied the current role-bearing session response, role restrictions
+and Flask8000 target. Auth-only production composition, same-origin proxy,
+fixed expiry and scoped CSRF logout are verified; see
+[auth integration evidence](verification/auth-integration.md). This newer
+role presentation decision supersedes earlier capability-only notes. Full
+Cognito/authenticated lifecycle acceptance remains open; data operations are
+not registered. Next implementation reuses T5.6–T5.8 after their own gates.
 
 | Order / task | Work and completion criteria | Dependencies / current status |
 | --- | --- | --- |
-| 1 — T5.3 Auth | Capture the working backend's current session DTO and target revision/origins/return paths. Confirm effective capability field names and integration ownership; retain user-owned data corrections in their separate subgates. | Backend auth ready per user; contract/configuration intake is the first integration step, not a wait for backend auth implementation. |
-| 2 — T5.4 | Finish fail-closed configuration and injected transport/composition seams. Reuse prepared data HTTP client; configure same-origin `/api` proxy from explicit backend target. Preserve redirects and cookies. | Configuration work follows agreed target; no frontend OAuth callback or provider exchange. |
-| 3 — T5.5 | Implement session decoding, browser login navigation, fixed expiry and memory-only CSRF. Clear protected state and reject stale completions; retain scoped logout retry context on `503`, confirm sign-out only on `204`. Handle `401`/`403`/network errors. | Working backend auth is available for integration; map confirmed capability fields, use controlled failure cases and verify connected auth without waiting for data APIs. |
+| 1 — T5.3 Auth | Capture the working backend's current session DTO and target revision/origins/return paths. Confirm the current role response and user-approved presentation restrictions; retain user-owned data corrections in their separate subgates. | Auth intake accepted for coding; local target and role mapping recorded. Combined T5.3 remains open for data. |
+| 2 — T5.4 | Finish fail-closed configuration and injected transport/composition seams. Reuse prepared data HTTP client; configure same-origin `/api` proxy from explicit backend target. Preserve redirects and cookies. | Implemented and verified for opt-in auth; missing configuration fails closed. No frontend OAuth callback or exchange. |
+| 3 — T5.5 | Implement session decoding, browser login navigation, fixed expiry and memory-only CSRF. Clear protected state and reject stale completions; retain scoped logout retry context on `503`, confirm sign-out only on `204`. Handle `401`/`403`/network errors. | Implemented with current role DTO and controlled lifecycle tests plus limited real-Flask smoke. Full authenticated lifecycle remains pending. |
 | 4 — T5.6–T5.8 | Reuse and finish integration of existing catalog/preview/metric/query modules. Preserve date-only optional bounds, embedded schemas, exact fractions, complete preview series and GET-only SQL recovery. Revalidate affected consumers against corrected artifacts. | Local implementation already tested; remaining shared-module changes serialized under Integration. |
 | 5 — T6.L and T5.9/T5.L | Wire auth/data factories into production operations and author real-environment scenarios. Verify configuration failures without fixtures; exercise accepted adapters against the target when available. | Completed adapter contracts/composition; live checks also need backend/environment/accounts. |
 | 6 — Phase 7 | Verify real auth/permissions, snapshot/expiry, exact values, SQL request traces and failure isolation; complete agreed accessibility/visual review and release evidence. | T6.L/T5.L plus actual live and visual prerequisites. No release from mock responses. |
 
 Concrete remaining paths and acceptance are owned by [Phase 5](tasks/phase-5.md).
-Production stays explicitly unavailable until registration is ready. Backend
+Auth is opt-in through configured transport; data operations stay explicitly unavailable until registration is ready. Backend
 unavailability does not prevent agreed controlled tests, and is never counted as
 live success. Admin UI, new-data card and deployment remain outside this work.

@@ -18,6 +18,8 @@ export interface SessionRuntime {
   isCurrent(context: OperationContext): boolean;
   /** Every authoritative resolution establishes a new generation. */
   setResolution(resolution: SessionResolution): void;
+  /** Clear protected state without claiming backend logout; retries share this generation. */
+  beginLogout(): void;
   /** Invalidate locally before dispatching logout or changing identity/access. */
   invalidate(status?: "pending" | "unauthenticated" | "expired"): void;
   /** Releases timer and protected state. The runtime is unusable after disposal. */
@@ -39,7 +41,7 @@ export function createSessionRuntime(clock: SessionClock = browserClock): Sessio
   const listeners = new Set<() => void>();
   const cleanups = new Set<() => void>();
 
-  function transition(resolution: SessionResolution | { readonly status: "pending" }) {
+  function transition(resolution: SessionResolution | { readonly status: "pending"; readonly reason?: "logout" }) {
     if (disposed) return;
     cancelExpiry?.();
     cancelExpiry = undefined;
@@ -117,6 +119,9 @@ export function createSessionRuntime(clock: SessionClock = browserClock): Sessio
       }
     },
     invalidate: (status = "unauthenticated") => { transition({ status }); },
+    beginLogout() {
+      if (state.status !== "pending" || state.reason !== "logout") transition({ status: "pending", reason: "logout" });
+    },
     dispose() {
       if (disposed) return;
       try {

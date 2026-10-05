@@ -225,3 +225,26 @@ contract decisions. Reuse implemented data modules; serialize overlapping T5.6â€
 work. Assign remaining auth/runtime/configuration/proxy/composition paths explicitly.
 No task checkbox closed, runtime code changed, backend request made or commit/push
 performed by this documentation update.
+
+## Auth integration â€” October 5, 2026
+
+- User authorized implementation, confirmed current role-only DTO and supplied
+  role restrictions; latest decision authorizes presentation mapping and
+  supersedes earlier capability-only notes. No client permission claims.
+- Single Integration writer owns auth adapter/schema/configuration/composition,
+  shared runtime/hook/service, tests and relevant docs. No agents were spawned.
+  Paths were recorded in Phase5/auth contract before transport coding.
+- T5.3 Auth intake accepted for coding; T5.4/T5.5 implemented and verified.
+  Auth-only production wiring is an explicit partial operation registration,
+  never combined T6.L acceptance. Data operations remain unavailable.
+- Local Flask8000/Next3000 uses server-only target and same-origin API proxy;
+  backend callback8000 is unchanged. Approved external `.env` UI-origin update
+  and user restart align login redirects/logout Origin. Backend source untouched.
+-179 behavior tests,33 boundary tests,8 fixture browser checks,1 unconfigured
+  actual-production scenario,3 real-Flask signed-out auth smoke checks pass.
+  Type/lint and fresh configured/empty-target builds pass;158-file emitted scan
+  passes. Release boundaries fail as expected.
+- Evidence: [auth integration](verification/auth-integration.md) and source
+  digest manifest. Transient login503 after restart is recorded; no automatic
+  application retry or credential-bearing trace. Full authenticated lifecycle,
+  connected data and release evidence remain pending; no push/deployment.
