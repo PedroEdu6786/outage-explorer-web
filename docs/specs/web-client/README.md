@@ -53,6 +53,12 @@ checks: same-generation denial revocation, original SQL expiry and UTF-8 submiss
 bounds. See [phase 2 evidence](../../../specs/backend-integration/verification/phase-2.md).
 Connected operation registration and live acceptance remain open.
 
+Backend-integration phase 3 prepared authenticated data composition separately
+from production registration, hardened transport publication guards and
+revalidated catalog/preview, complete national range and retained SQL seams.
+See [controlled adapter evidence](verification/integration-adapters.md).
+Production data registration is phase 4; connected acceptance is phase 5.
+
 ## Parallel delivery
 
 The task manifest contains **78 tasks across seven phases**, with **21 marked

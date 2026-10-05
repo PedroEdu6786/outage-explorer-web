@@ -16,7 +16,7 @@ explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
 
-Ledger revision: **7**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
+Ledger revision: **8**, October 5, 2026. Tasks: **T1.9 / T5.3**. Requirements:
 FR2–FR4, FR6–FR7, FR9, FR13, FR16; TR3, TR5, TR7, TR9.
 
 **Auth configuration/composition and the current session adapter are implemented;
@@ -45,6 +45,30 @@ describes October 4 findings. The auth reference was read at backend checkout
 status are recorded in [auth.md](auth.md). The later data handoff is a working-tree artifact, not contained in that HEAD;
 its separate [hashes and snapshots](data-api.md) identify the intake. No running
 backend environment was verified; source contracts prove no live readiness.
+
+## Phase 3 controlled readiness update — October 5
+
+The current corrected Data API v1 snapshots and auth contract are consumed by
+prepared `createLiveComposition().dataOperations`, with the same runtime and
+auth-owned memory-only CSRF. `operations` still registers only auth/refresh;
+production analytical registration remains phase 4. Current authenticated status,
+generation, cancellation and token continuity guard dispatch and response
+publication, including asynchronous JSON decoding. Requests use same-origin
+cookies, `no-store` and rejected redirects with no automatic retry.
+
+| Prepared operation | Contract / controlled readiness | Connected acceptance |
+| --- | --- | --- |
+| Catalog/schema | Authorized embedded metadata, coverage and hidden-schema withholding verified | Open |
+| Preview | Independently optional dates; 1–500 sizes; cursor-only advance/revisit; original sequence identity; explicit controller restart verified | Open |
+| National series | Complete same-generation continuation; original expiry; partial-failure withholding; exact fractions/displays, measured zero and missing-date gaps verified | Open |
+| SQL execute/page | Unchanged SQL-only POST, retained-only GET, null generation/rich types, documented errors/advisory retry, owned recovery and whole-result limits verified | Open |
+
+See [adapter evidence](../verification/integration-adapters.md) for source binding,
+actual checks and scope. Backend authorization/Origin/CSRF enforcement, named
+enabled target/resources and full authenticated browser scenarios remain
+unverified here. Original T5.L/T6.L and release/visual gates stay open.
+Earlier runtime/source-correction statements below retain intake provenance;
+the phase-1 corrected snapshot reconciliation supersedes those artifact gaps.
 
 ## Responsibility and target slots
 
@@ -170,3 +194,4 @@ allow independent fixture work to continue under the accepted execution plan.
 | 5 | 2026-10-05 | User confirms backend-only role assignment/capability control; no client permission claims or role-derived capabilities. Revised session response need not include role; illustrative capability names await backend contract. Documentation only. |
 | 6 | 2026-10-05 | User confirms backend auth works and is ready for frontend implementation. T5.3 Auth intake → T5.4 → T5.5 is next, independently of data API availability. Capture current DTO/configuration; frontend live acceptance remains unverified. Documentation only; no endpoint calls. |
 | 7 | 2026-10-05 | User confirms current role-only DTO, supplies presentation role matrix and Flask URL. Auth adapter/configuration/composition implemented; backend UI origin aligned with approval and user restart. Controlled checks and limited real-Flask smoke evidence recorded; full authenticated lifecycle and data/release acceptance remain open. |
+| 8 | 2026-10-05 | Backend-integration T3.1–T3.C prepared auth-owned guarded data composition and revalidated data seams with injected responses; protected metadata-denial races and expired national assembly fixed. Production registration and connected/live/visual acceptance remain open. |

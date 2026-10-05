@@ -94,7 +94,7 @@ export function createExplorerController({ operations, runtime, now = Date.now, 
       if (schema.datasetId !== datasetId) { publish({ schemaStatus: "error", schemaFailure: { kind: "service-failure", message: "Schema belongs to a different dataset." } }); return; }
       publish({ schema, schemaStatus: "ready" });
     }, (failure) => {
-      if (failure.kind === "forbidden" || failure.kind === "unauthenticated") reject(failure);
+      if (failure.kind === "forbidden" || failure.kind === "unauthenticated" || failure.code === "dataset_unavailable") reject(failure);
       else publish({ schemaStatus: "error", schemaFailure: failure });
     });
     void request(valid, () => operations.startPreview(context, selection), (page) => { acceptPage(page, selection); });
@@ -112,7 +112,7 @@ export function createExplorerController({ operations, runtime, now = Date.now, 
       publish({ catalog: authorized, catalogStatus: "ready" });
       if (authorized[0]) select(authorized[0].id);
     }, (failure) => {
-      if (failure.kind === "unauthenticated") reject(failure);
+      if (failure.kind === "unauthenticated" || failure.kind === "forbidden" || failure.code === "dataset_unavailable") reject(failure);
       else publish({ catalog: [], catalogStatus: "error", failure });
     });
   }

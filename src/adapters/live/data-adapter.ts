@@ -23,7 +23,7 @@ function boundsValid(bounds: { readonly start?: string; readonly end?: string } 
     && (bounds.start === undefined || bounds.end === undefined || bounds.start <= bounds.end));
 }
 
-export function createDataAdapter(transport: DataTransport): CatalogOperations & PreviewOperations & ObservationOperations & QueryOperations {
+export function createDataAdapter(transport: DataTransport, now: () => number = Date.now): CatalogOperations & PreviewOperations & ObservationOperations & QueryOperations {
   async function get<T>(context: OperationContext, path: string, decode: (raw: unknown) => T): Promise<OperationResult<T>> {
     if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
     try {
@@ -72,6 +72,7 @@ export function createDataAdapter(transport: DataTransport): CatalogOperations &
       try {
         for (;;) {
           if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
+          if (Date.parse(first.sequence.expiresAt) <= now()) return fail("preview-expired", "This preview has expired. Restart browsing.");
           const page = result.value;
           if (JSON.stringify(page.table.columns) !== JSON.stringify(first.table.columns)) return malformed();
           observations.push(...mapNationalRows(page.table));
@@ -84,6 +85,7 @@ export function createDataAdapter(transport: DataTransport): CatalogOperations &
         if (new Set(observations.map((item) => item.date)).size !== observations.length
           || observations.some((item) => (range.start !== undefined && item.date < range.start) || (range.end !== undefined && item.date > range.end))) return malformed();
         observations.sort((a, b) => a.date.localeCompare(b.date));
+        if (Date.parse(first.sequence.expiresAt) <= now()) return fail("preview-expired", "This preview has expired. Restart browsing.");
         return { ok: true, value: { range, coverage: national.coverage, provenance: { source: "EIA national observations", snapshotId: first.sequence.snapshotId }, observations } };
       } catch { return malformed(); }
     },

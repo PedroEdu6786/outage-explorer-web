@@ -22,6 +22,26 @@ function setup(options: FixtureOptions = {}, operationsOverride?: (operations: E
 const ready = async (controller: ReturnType<typeof createExplorerController>) => { await waitFor(() => { expect(controller.getSnapshot().previewStatus).toBe("ready"); }); };
 
 describe("Explorer authorized cursor lifecycle", () => {
+  it.each(["catalog", "schema"] as const)("revokes the sequence after %s denial before delayed protected successes arrive", async (source) => {
+    for (const failure of [{ kind: "forbidden", message: "Denied" }, { kind: "data-unavailable", code: "dataset_unavailable", message: "Unavailable" }] as const) {
+      const { controller, fixture, runtime } = setup(); await ready(controller);
+      const schemaDelay = source === "catalog" ? fixture.deferNext("readSchema") : null;
+      const previewDelay = fixture.deferNext("startPreview");
+      if (source === "schema") fixture.failNext("readSchema", failure);
+      controller.select("synthetic-generator");
+      if (source === "catalog") { fixture.failNext("listDatasets", failure); controller.retryCatalog(); }
+      await waitFor(() => { expect(controller.getSnapshot().failure?.kind).toBe(failure.kind); });
+      expect(controller.getSnapshot().schema).toBeNull();
+      expect(controller.getSnapshot().selected).toBeNull();
+      schemaDelay?.release(); previewDelay.release();
+      await waitFor(() => { expect(fixture.callLog.read().filter((call) => call.outcome === "pending")).toHaveLength(0); });
+      expect(controller.getSnapshot().catalog).toEqual([]);
+      expect(controller.getSnapshot().pages).toEqual([]);
+      expect(controller.getSnapshot().schema).toBeNull();
+      expect(controller.sqlIntent()).toBeNull();
+      expect(runtime.getSnapshot().status).toBe("authenticated");
+    }
+  });
   it("keeps Viewer metadata national-only and uses returned coverage", async () => {
     const { controller, fixture } = setup({ persona: "viewer" });
     await ready(controller);

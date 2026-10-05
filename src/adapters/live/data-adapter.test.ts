@@ -12,6 +12,7 @@ const example = (name: string) => {
   return structuredClone(entry.body);
 };
 const context = { generation: 1 };
+const beforePreviewExpiry = () => Date.parse("2026-10-05T12:00:00Z");
 const selection = { datasetId: "national", filters: {}, pageSize: 100 };
 const previewExample = () => {
   const fixture = fixtures.fixtures.find((item) => item.schema === "Preview" && item.status === 200 && "dataset" in item.body && item.body.dataset === "national");
@@ -24,6 +25,96 @@ function transport(responses: unknown[]) {
 }
 
 describe("Data API v1 frontend adaptation (controlled responses only)", () => {
+  it("reads authorized embedded schemas without inventing a schema route or hidden dataset", async () => {
+    const backend = transport([example("catalog_viewer"), example("catalog_viewer"), example("catalog_viewer")]);
+    const adapter = createDataAdapter(backend);
+    expect(await adapter.listDatasets(context)).toMatchObject({ ok: true, value: [{ id: "national" }] });
+    const schema = await adapter.readSchema(context, "national");
+    if (!schema.ok) throw new Error("Expected national schema");
+    expect(schema.value.datasetId).toBe("national");
+    expect(schema.value.columns[0]?.label).toBe("period");
+    expect(await adapter.readSchema(context, "facilities")).toMatchObject({ ok: false, failure: { kind: "data-unavailable" } });
+    expect(backend.request.mock.calls.map((call) => call[1])).toEqual(Array<string>(3).fill("/api/datasets"));
+  });
+  it("keeps optional-date and preview/query size choices independent with cursor-only revisits", async () => {
+    const raw = previewExample();
+    const backend = transport([{ ...raw, page_size: 500 }, { ...raw, page_size: 500 }, { ...raw, page_size: 500 }, { ...raw, page_size: 1, rows: [] }, example("query_reference_free")]);
+    const adapter = createDataAdapter(backend);
+    const selection = { datasetId: "national", filters: { dates: { start: "2026-09-01" } }, pageSize: 500 };
+    const first = await adapter.startPreview(context, selection);
+    if (!first.ok || !first.value.pageCursor) throw new Error("Expected first preview with revisit cursor");
+    await adapter.continuePreview(context, { sequence: first.value.sequence, cursor: "opaque/+?" });
+    await adapter.continuePreview(context, { sequence: first.value.sequence, cursor: first.value.pageCursor });
+    expect(await adapter.startPreview(context, { datasetId: "national", filters: { dates: { end: "2025-01-01" } }, pageSize: 1 })).toMatchObject({ ok: true, value: { table: { rows: [] } } });
+    expect((await adapter.executeQuery(context, { sql: "SELECT 1", page: 1, pageSize: 1 })).ok).toBe(true);
+    const calls = backend.request.mock.calls.map((call) => call[1]);
+    expect(calls[0]).toBe("/api/datasets/national/preview?page_size=500&start_date=2026-09-01");
+    for (const path of calls.slice(1, 3)) expect([...new URL(path, "https://example.invalid").searchParams.keys()]).toEqual(["cursor"]);
+    const before = backend.request.mock.calls.length;
+    for (const pageSize of [0, 501, 1.5]) {
+      expect((await adapter.startPreview(context, { ...selection, pageSize })).ok).toBe(false);
+      expect((await adapter.executeQuery(context, { sql: "SELECT 1", page: 1, pageSize })).ok).toBe(false);
+    }
+    expect(backend.request).toHaveBeenCalledTimes(before);
+  });
+  it.each(["generation", "expiry", "size", "dataset"] as const)("rejects changed preview sequence %s without starting over", async (field) => {
+    const raw = { ...previewExample(), page_size: 100 };
+    const first = decodePreview(raw, selection);
+    const changed = { ...raw, ...(field === "generation" ? { generation_id: "new" } : field === "expiry" ? { expires_at: "2026-10-05T12:16:00Z" } : field === "size" ? { page_size: 500 } : { dataset: "facilities" }) };
+    const backend = transport([changed]);
+    expect(await createDataAdapter(backend).continuePreview(context, { sequence: first.sequence, cursor: "next" })).toMatchObject({ ok: false, failure: { kind: "service-failure" } });
+    expect(backend.request).toHaveBeenCalledTimes(1);
+  });
+  it.each(["failure", "expired", "final-expiry", "cycle", "duplicate", "range"] as const)("withholds national partial output on %s", async (scenario) => {
+    const raw = previewExample();
+    if (!("rows" in raw) || !raw.rows[0]) throw new Error("Missing national row");
+    const row = [...raw.rows[0]]; row[0] = "2026-09-29";
+    const first = { ...raw, page_size: 100, page_cursor: "first", next_cursor: "next", has_more: true };
+    const second = { ...raw, page_size: 100, rows: scenario === "duplicate" ? raw.rows : [row], page_cursor: "next", next_cursor: null, has_more: false };
+    const backend = transport([example("catalog_viewer"), first, scenario === "cycle" ? { ...second, page_cursor: "another", next_cursor: "next", has_more: true } : second]);
+    if (scenario === "failure") backend.request.mockImplementationOnce(() => Promise.resolve({ ok: true, value: example("catalog_viewer") })).mockImplementationOnce(() => Promise.resolve({ ok: true, value: first })).mockResolvedValueOnce({ ok: false, failure: { kind: "preview-expired", message: "Expired" } });
+    let ticks = 0;
+    const now = () => ++ticks >= (scenario === "final-expiry" ? 3 : 2) && (scenario === "expired" || scenario === "final-expiry") ? Date.parse("2026-10-05T12:15:00Z") : beforePreviewExpiry();
+    expect(await createDataAdapter(backend, now).readNationalSeries(context, scenario === "range" ? { start: "2026-09-30" } : {})).toMatchObject({ ok: false });
+    expect(backend.request).toHaveBeenCalledTimes(3);
+  });
+  it("preserves measured zero and an omitted date as a gap across a newer complete generation", async () => {
+    const raw = previewExample();
+    if (!("rows" in raw) || !raw.rows[0]) throw new Error("Missing national row");
+    const zero = [...raw.rows[0]]; zero[0] = "2026-09-29";
+    for (const index of [2, 3, 4, 5, 7, 8]) zero[index] = index === 5 ? "0" : "0.00";
+    zero[6] = "1";
+    const backend = transport([example("catalog_viewer"), { ...raw, generation_id: "new-preview-generation", page_size: 100, page_cursor: "first", next_cursor: "next", has_more: true }, { ...raw, generation_id: "new-preview-generation", rows: [zero], page_size: 100, page_cursor: "next", next_cursor: null, has_more: false }]);
+    const result = await createDataAdapter(backend, beforePreviewExpiry).readNationalSeries(context, {});
+    if (!result.ok) throw new Error("Complete national result required");
+    expect(result.value.provenance.snapshotId).toBe("new-preview-generation");
+    expect(result.value.observations.map((row) => row.date)).toEqual(["2026-09-29", "2026-10-01"]);
+    expect(result.value.observations[0]).toMatchObject({ status: "available", calculatedPercentage: { numerator: "0", denominator: "1", display: "0.00" } });
+    expect(plotSegments(result.value.observations, "calculatedPercentage")).toHaveLength(2);
+  });
+  it("preserves owned out-of-range GET recovery and all documented data errors without replay", async () => {
+    const expected: Record<string, string> = { invalid_request: "invalid-input", invalid_sql: "invalid-input", unsupported_sql: "unsupported-sql", page_out_of_range: "invalid-input", page_size_mismatch: "invalid-input", unauthenticated: "unauthenticated", forbidden: "forbidden", dataset_unavailable: "data-unavailable", preview_unavailable: "preview-expired", query_resource_limit: "resource-limit", query_busy: "busy", query_timeout: "execution-timeout", result_capacity_exhausted: "capacity-exhausted", data_unavailable: "data-unavailable", service_unavailable: "service-failure" };
+    for (const fixture of fixtures.fixtures.filter((item) => item.name.startsWith("error_"))) {
+      if (!("error" in fixture.body)) continue;
+      const code = fixture.body.error.code;
+      const kind = code === "query_unavailable" ? fixture.status === 410 ? "result-expired" : "result-lost" : expected[code];
+      if (!kind) continue;
+      const failure = decodeFailure(fixture.status, fixture.body);
+      expect(failure.kind).toBe(kind);
+      const backend = transport([]); backend.request.mockResolvedValueOnce({ ok: false, failure });
+      const result = await createDataAdapter(backend).executeQuery(context, { sql: "SELECT 1", page: 3, pageSize: 1 });
+      expect(result).toMatchObject({ ok: false, failure: { kind } });
+      expect(backend.request).toHaveBeenCalledTimes(1);
+    }
+    const failure = decodeFailure(400, { error: { code: "page_out_of_range", message: "private", details: { query_id: "query-synthetic-1", expires_at: "2026-10-05T12:15:00Z" } } });
+    const backend = transport([]); backend.request.mockResolvedValueOnce({ ok: false, failure }).mockResolvedValueOnce({ ok: true, value: example("query_reference_free") });
+    const adapter = createDataAdapter(backend);
+    const initial = await adapter.executeQuery(context, { sql: "SELECT 1", page: 3, pageSize: 1 });
+    if (initial.ok || initial.failure.kind === "unknown-execution-outcome" || !initial.failure.retainedQuery) throw new Error("Owned recovery required");
+    expect(initial.failure.retainedQuery.pageSize).toBe(1);
+    expect((await adapter.readQueryPage(context, { ...initial.failure.retainedQuery, page: 1, pageSize: 1 })).ok).toBe(true);
+    expect(backend.request.mock.calls[1]?.slice(1)).toEqual(["/api/query?query_id=query-synthetic-1&page=1&page_size=1"]);
+  });
   it.each(["a", "é", "😀"])("enforces UTF-8 SQL byte boundaries for %s without rewriting", async (character) => {
     const byteSize = new TextEncoder().encode(character).byteLength;
     const accepted = character.repeat(65_536 / byteSize);
@@ -124,7 +215,7 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
     const firstRow = raw.rows[0];
     const secondRow = [...firstRow]; secondRow[0] = "2026-09-30";
     const backend = transport([example("catalog_viewer"), { ...raw, rows: [firstRow], page_size: 100, page_cursor: "first", next_cursor: "next", has_more: true }, { ...raw, rows: [secondRow], page_size: 100, page_cursor: "next", next_cursor: null, has_more: false }]);
-    const result = await createDataAdapter(backend).readNationalSeries(context, {});
+    const result = await createDataAdapter(backend, beforePreviewExpiry).readNationalSeries(context, {});
     expect(result).toMatchObject({ ok: true, value: { observations: [{ date: "2026-09-30" }, { date: "2026-10-01" }] } });
     expect(backend.request.mock.calls.map((call) => call[1])).toEqual(["/api/datasets", "/api/datasets/national/preview?page_size=100", "/api/datasets/national/preview?cursor=next"]);
     expect(backend.request.mock.calls.every((call) => call[2] === undefined)).toBe(true);
@@ -132,7 +223,7 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
   it("does not publish a partial chart after generation change or failed continuation", async () => {
     const raw = previewExample();
     const backend = transport([example("catalog_viewer"), { ...raw, page_size: 100, page_cursor: "first", next_cursor: "next", has_more: true }, { ...raw, page_size: 100, generation_id: "different", page_cursor: "next", next_cursor: null, has_more: false }]);
-    expect(await createDataAdapter(backend).readNationalSeries(context, {})).toMatchObject({ ok: false });
+    expect(await createDataAdapter(backend, beforePreviewExpiry).readNationalSeries(context, {})).toMatchObject({ ok: false });
     expect(backend.request).toHaveBeenCalledTimes(3);
   });
   it("sends optional bounds but rejects facility inputs and invalid calendars before dispatch", async () => {
