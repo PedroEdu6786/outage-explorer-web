@@ -1,88 +1,226 @@
 # Plan: Reuse already fetched data
-> Status: draft · Slug: data-reuse · Spec: ./spec.md
+> Status: controlled implementation complete; production retention deferred · Slug: data-reuse · Spec: ./spec.md
 
-## Scope revision — October 5, 2026
+## Scope and decisions
 
-The user narrowed the immediate implementation to selective reuse: model/schema
-metadata should not repeatedly reload, while observation row tables may fetch
-again on page visits. See [the resource-by-resource review](scope-review.md).
-Phase 1's shared catalog foundation proceeds under controlled policy; the broad
-Overview/Explorer retention and SQL-page caching proposal below is deferred and
-must be revised before execution. Reuse lasts until page reload, subject to
-existing explicit invalidation and access/deadline rules. The user deferred
-the memory budget and production reuse, so production retention remains disabled.
-The remaining sections preserve the original proposal's provenance.
+The October 5, 2026 scope review is authoritative. Reuse is limited to the
+decoded catalog bundle: authorized dataset and SQL relation names, coverage,
+generation, column models/types, and supported filters. Listing, embedded
+schema projections, and national metadata share this bundle and identical
+pending reads. Catalog reuse lasts until page reload under the enabled policy;
+route changes alone do not invalidate it. There is no extra TTL or browser
+storage.
+
+Observation rows remain governed by their current workflows. Explorer tables may
+reload on visits; Overview continues its national-series retrieval; SQL retains
+its existing execution/controller, and a page GET may retrieve rows again for
+the same execution. Additional row/page retention is out of scope. An explicit
+SQL Run remains the only way to execute SQL. Preview and SQL absolute deadlines,
+cursor behavior, and recovery rules remain unchanged.
+
+Protected catalog metadata clears on session cleanup, identity/capability
+changes, current-context denial, provider disposal/replacement, unavailable
+dataset invalidation, and known successful publication. Late responses cannot
+restore invalidated metadata. Publication invalidates before Overview reloads
+metadata and observations, preserving selected date bounds. Session/access
+resolution and expiry remain owned by the existing session runtime. No new
+focus/reconnect polling is introduced.
+
+Completed controlled implementation evidence is recorded in
+[phase 1](verification/phase-1.md) and the
+[publication follow-up](verification/publication.md). The scope decision and
+resource boundaries are recorded in [scope review](scope-review.md). This plan
+does not mark deferred specification acceptance criteria complete. In
+particular, production completed-response retention remains disabled pending
+the user's deferred budget decision and explicit production enabling; live and
+visual release evidence also remains open.
 
 ## Approach
-Keep React Context as the delivery mechanism for stable, application-owned dependencies and use the existing subscribed-controller pattern for feature state. Add one memory-only resource repository under the application composition to reuse successful reads and share identical pending reads; retain Overview and Explorer controllers alongside the existing Queries controller across route changes. Preserve session guards, explicit recovery and absolute snapshot/execution deadlines; freshness and retention beyond existing contracts remain configurable policy decisions rather than invented lifetimes. (FR1–FR9, TR1–TR4)
+
+Use the existing React Context and subscribed-controller architecture. An
+application-owned repository supplies one decoded catalog bundle to the
+catalog listing, schema projection, and national metadata reads, and shares
+identical pending catalog requests. Repository ownership is protected by the
+current session identity/capabilities and resource epoch. Production currently
+uses `retention: disabled`; the controlled fixture/test composition injects a
+synthetic bounded policy. The policy is not a production default. (FR2, FR4,
+FR5, TR1, TR3, TR4)
+
+Keep adapters responsible for HTTP transport and decoding, and features
+responsible for their existing observation workflows. Do not introduce a
+cross-route Explorer row cache, national-series cache, or historical SQL page
+cache. Keep `executeQuery` uncached and non-deduplicated; page retrieval accepts
+only the existing execution identity and page inputs and never submits SQL.
+(FR1–FR9, TR1–TR4)
 
 ## Components affected
-- **Application composition and Context** — own stable repository, policy and Overview/Explorer/Queries controllers for the open app; route entries pass public dependencies, while features subscribe to their own snapshots instead of placing response bodies in Context. Provider replacement/disposal clears state; ordinary route unmount only removes consumers. (FR1, FR2, FR4, FR5, FR8, TR1)
-- **Shared resource repository** — own protected reusable entries, matching pending reads, invalidation epochs and usability checks. Supply one narrow public read/invalidation contract to adapters and controllers without feature-to-feature imports. (FR1–FR5, FR9, TR1–TR3)
-- **Catalog/data adapter and live composition** — retain the decoded catalog bundle, including its generation and embedded schemas; use the same bundle loader for dataset listings, schema lookup and national metadata. Expose the original national preview lifetime through the observation contract. HTTP parsing and URLs remain adapter responsibilities. (FR2, FR3, FR5, TR1, TR2, TR4)
-- **Overview controller and hook** — move fetched metadata/series ownership out of page-local state; read matching usable series immediately, handle range changes with separate request versions, and preserve deliberate retry plus published-refresh revalidation. (FR1, FR3–FR5, TR1–TR4)
-- **Explorer controller and hook** — separate controller attachment from page subscriptions, retain matching selection-bound preview sequences/pages, and preserve explicit restart and cursor navigation. Do not reset data merely because a page unmounts or reload the catalog solely to reconnect. (FR1, FR3–FR6, TR1, TR2, TR4)
-- **Queries controller and hook** — reuse shared metadata and add pages for the current retained execution to the repository; preserve draft/submitted SQL separation, known-execution recovery and existing absolute-expiry checks. (FR2–FR5, FR7–FR9, TR1, TR2, TR4)
 
-## Data model changes
-- **Authorized ownership** — each entry records the session generation and resolved identity/access context. A separate resource epoch changes on invalidation within the same session; neither cached reads nor delayed writes are accepted against an obsolete epoch. Session generation and backend data generation are distinct identities. (FR4, FR5, TR1)
-- **Reusable entry** — kind, normalized request key, decoded immutable value, observed backend generation/snapshot/execution identity where applicable, fetch time, original absolute expiry where supplied, and resource epoch. Successful empty responses are reusable; errors, ambiguous execution outcomes and incomplete national assemblies are not successful entries. (FR1–FR3, FR5, TR1–TR4)
-- **Catalog bundle** — authorized dataset summaries plus their ordered embedded schemas and `generationId`, stored atomically from one decoded response. A lookup index identifies the currently reusable bundle without requiring a new request merely to discover its generation. (FR2, TR1, TR4)
-- **National series provenance** — retain the first preview sequence's original `expiresAt` alongside its snapshot identity; the current `NationalSeries` model drops that deadline after assembly. The complete series is reusable only before that deadline and any stricter freshness policy. (FR1, FR3, TR1, TR2)
-- **Preview sequence entries** — normalized dataset/filter/page-size selection points to a specific retained sequence; pages belong to that sequence's snapshot and deadline and retain current/next cursor relationships. Changing controls detaches the active view from the old sequence; revisiting the same request can find an existing usable sequence. Preserve an expired-sequence marker without rows so returning offers Restart instead of silently creating a new sequence. (FR1, FR3, FR5, FR6, TR1, TR2)
-- **Query page entries** — key by ownership, query ID, nullable snapshot identity, fixed execution page size and numbered page. Seed the first successful page and retain additional pages only for the current execution, with its original deadline, columns, counts and truncation metadata. New explicit Run replaces the old execution's pages even if submitted SQL is identical. (FR7–FR9, TR1, TR2, TR4)
-- **Policy and retention accounting** — resource-specific freshness decisions and entry/byte accounting support bounded retention without altering backend deadlines. Expired data is removed; active view and recovery descriptors remain identifiable if payloads are evicted. Numeric budgets and eviction behavior for still-valid preview pages require agreement before implementation, since arbitrary eviction must not silently replace an existing browsing sequence. (FR3, FR6, FR7, TR2, TR3)
-
-## Interfaces & contracts
-- **Repository read** — inputs: operation context, resource kind, canonical request identity, injected decoded loader and consumer signal; output: the existing `OperationResult` shape for a matching usable value or the loader outcome. Check current authentication, capability and ownership on cache hits as well as completion. Missing optional date bounds remain absent; opaque IDs and cursors remain unchanged. (FR1–FR5, FR9, TR1, TR4)
-- **Shared pending-read ownership** — identical safe reads share a repository-owned request and cancellation signal. A consumer abort detaches that consumer and suppresses its publication without aborting other consumers' transport. Invalidation/provider disposal aborts the owned request and advances its epoch; late responses fail the write guard even when transport ignores abort. Route detachment does not dispose controller-owned work. (FR2, FR4, FR5, TR1)
-- **Catalog loader seam** — injected adapter loader returns the decoded catalog bundle; `listDatasets(context)` and `readSchema(context, datasetId)` remain feature-facing projections of that bundle. National assembly uses the same loader. Avoid an outer projection-only cache that still permits hidden catalog requests inside `readNationalSeries`. Fixture composition supplies explicit synthetic loaders through the same public contract. (FR2, FR3, TR1, TR4)
-- **Controller lifecycle** — provider-owned `attach`/`dispose`, subscriptions and synchronous snapshots are separate from route-level activate/read actions. Setup/cleanup is safe under React Strict Mode; standalone feature stories/tests may own their controller lifetime. Activation checks expiry before exposing cached rows, without resetting usable data or performing implicit SQL execution. (FR1, FR4–FR8, TR2)
-- **Invalidation** — session cleanup clears all protected entries and controller snapshots synchronously. Current-context unauthenticated responses invoke the existing session invalidation; current-context forbidden responses conservatively clear protected reusable data and revoke its resource epoch across consumers without claiming confirmed backend logout. Unavailable dataset/snapshot/result responses remove affected entries and dependent views; old request contexts cannot clear a newer session. Lost/expired SQL purges every page for that execution and retains explicit rerun recovery. (FR3–FR7, TR1)
-- **Freshness/revalidation policy** — inputs: resource kind, entry metadata, current time and explicit event; output: reusable, fetch required, or explicit recovery required. Route changes alone do not invalidate usable entries. Preserve the existing successful-refresh callback as a bypass/invalidation event for current catalog and Overview reads; retain already-bound preview/SQL sequences until their original expiry. Retry after a failed read does not return an entry made obsolete by that failure. No automatic focus/reconnect polling or new refresh UI is introduced. Exact additional events and durations remain open. (FR1–FR3, FR6–FR8, TR1–TR3)
-- **Query boundaries** — `executeQuery` remains an uncached, non-deduplicated explicit action. Page reuse/read accepts only query ID, numbered page and original page size; it never submits SQL. Preserve existing known-execution page recovery and unknown-outcome behavior; cache lookup cannot bypass a reported lost/expired result. (FR3, FR7–FR9, TR1, TR2)
-- **Transport** — existing endpoints, same-origin cookie/CSRF transport and `no-store` HTTP behavior remain intact. Memory reuse occurs after decoding; no browser storage, service-worker cache, backend resource access or endpoint changes are needed. (FR4, TR1, TR4)
+- **Application composition and repository** — own the shared catalog loader,
+  pending-read coordination, protected metadata, invalidation epochs, and
+  provider lifecycle. Context carries dependencies, not response payloads.
+  Consumer cancellation detaches that consumer; disposal and invalidation clear
+  metadata and abort owned work. (FR2, FR4, FR5, TR1)
+- **Catalog/data adapter** — decode the catalog bundle atomically, preserving
+  ordered embedded schemas, coverage and generation identity. Listing, schema,
+  and national metadata project from the same bundle. A newer preview's own
+  snapshot and columns remain authoritative for its rows. (FR2, FR3, TR1, TR4)
+- **Overview publication flow** — invalidate the catalog on the existing
+  current-session successful-publication event before reloading Overview
+  metadata and national observations. Preserve selected date bounds. Other
+  refresh statuses do not invalidate or reload data. (FR2, FR3, TR1)
+- **Explorer, Overview rows, and SQL pages** — retain current feature behavior;
+  their row reads are not made reusable across visits. Existing preview cursor,
+  query execution, page retrieval, expiry, and recovery contracts remain in
+  force. (FR1, FR3, FR6–FR9, TR2)
 
 ## Implementation phases
-1. **Shared ownership and read contracts** — establish stable application repository ownership, decoded catalog bundle reuse, pending-read deduplication, policy injection and protected invalidation. Standalone fixture composition follows the same seams; generation/epoch race checks pass before retained data reaches feature views. (FR2–FR5, TR1, TR3, TR4)
-2. **Overview and Explorer retention** — attach application-owned controllers, preserve complete-series expiry, separate selection publication from cache identity, and reuse matching data across route changes with explicit preview expiry/restart. Confirm successful-refresh revalidation and standalone feature behavior. (FR1, FR3–FR6, TR1–TR4)
-3. **Retained SQL page reuse** — integrate shared metadata and current-execution pages, original-deadline eviction, known-execution recovery and execution replacement; request traces show no implicit POST under any cache lifecycle. (FR2–FR5, FR7–FR9, TR1, TR2, TR4)
-4. **Composed navigation and acceptance evidence** — verify the existing page assembly with shared ownership, concurrent readers, navigation/remounts, denial and expiry. Record controlled request counts separately from named-target live evidence and unchanged presentation comparison; existing release gates remain separate. (FR1–FR9, TR1–TR4, AC1–AC10)
+
+1. **Shared catalog foundation — complete.** Decoded catalog sharing, pending-
+   read coordination, protected ownership and lifecycle are implemented and
+   verified under controlled policy. Production completed-value retention is
+   disabled. (FR2, FR4, FR5; relevant portions of AC2–AC5)
+2. **Publication invalidation — complete.** Guarded successful publication
+   clears catalog metadata before Overview reload; controlled ordering and
+   status behavior are verified. (FR2, FR3)
+3. **Production enabling — gated.** Requires explicit agreement on a production
+   memory budget and retention/admission policy, followed by verification of
+   that policy. No implementation or default is implied by the synthetic test
+   policy. (TR3)
+4. **Broader row or SQL-page retention — deferred, not an active phase.** Any
+   Overview/Explorer row reuse, retained preview sequence, or additional SQL
+   page cache requires a fresh scope decision and revised requirements/ACs.
+
+## Data and interface contracts
+
+- **Catalog bundle** — one decoded value contains authorized dataset summaries,
+  ordered embedded schemas, coverage, and `generationId`. Successful empty
+  responses may be reused. Errors and malformed payloads are not reusable.
+  Listing and schema reads use the same repository identity and pending loader.
+  (FR2, TR1, TR4)
+- **Ownership and invalidation** — entries are scoped to session generation,
+  resolved subject/capabilities, and a resource epoch. Check ownership on hits
+  and completion. Session cleanup, current denial, provider disposal, known
+  unavailable-dataset responses, and successful publication clear applicable
+  protected metadata. Delayed writes from an obsolete session or epoch are
+  rejected. A current forbidden result clears metadata without asserting
+  backend logout. (FR4, FR5, TR1)
+- **Pending reads** — identical authorized catalog reads share one repository-
+  owned transport request. Aborting one consumer detaches it without aborting
+  other consumers. Invalidation/disposal aborts owned work; late completion
+  cannot repopulate cleared metadata even if transport ignores abort. (FR2,
+  FR4, FR5, TR1)
+- **Publication** — only the existing guarded `succeeded` publication status
+  invalidates, once per successful run. Invalidation is observable before
+  Overview reload starts. Selected date bounds survive that reload; session
+  cleanup resets range preservation. (FR2, FR3, TR1)
+- **Rows and execution boundaries** — catalog metadata reuse does not retain
+  preview pages or complete national series. Preview snapshot/cursor and SQL
+  execution/page deadlines are never extended. SQL execution is an explicit,
+  uncached action; page reuse never submits SQL. (FR1, FR3, FR6–FR9, TR2)
+- **Transport and fixtures** — retain existing endpoints, cookie/CSRF behavior,
+  and `no-store` transport. No browser storage or new cache dependency. Fixtures
+  use explicitly synthetic injected policy/loaders, isolated from production.
+  (FR4, TR1, TR4)
+
+## Implementation status and acceptance traceability
+
+The controlled catalog ownership foundation and publication invalidation
+follow-up are implemented. Evidence includes repository, adapter, session,
+feature, composition and controlled browser checks; exact commands and results
+are in the two verification records. These checks establish the implemented
+catalog seam and regression behavior, not live backend authorization or visual
+fidelity.
+
+| Acceptance criterion | Status and evidence |
+| --- | --- |
+| AC1 — Overview/Explorer rows survive navigation | Deferred with row retention; not implemented or claimed complete. |
+| AC2 — permitted catalog/list/schema reuse | Catalog seam is controlled-verified; production completed-value reuse is disabled pending policy agreement. |
+| AC3 — mismatched/unavailable data keeps retrieval/recovery behavior | Catalog identity, empty/malformed response and unavailable-dataset cases are controlled-verified; broad resource behavior remains scoped to existing workflows. |
+| AC4 — cleanup on logout/expiry/identity/access change | Catalog metadata cleanup is controlled-verified for repository/session cases; this does not claim global clearing of all feature snapshots. |
+| AC5 — stale completion cannot restore or replace protected data | Catalog epoch, delayed response, denial and disposal cases are controlled-verified. |
+| AC6 — expired preview requires explicit restart | Existing preview behavior preserved; no retained preview cache added. Broad AC6 remains outside this implementation. |
+| AC7 — expired/unavailable SQL result requires explicit rerun | Existing SQL recovery behavior preserved; no new result-page retention added. |
+| AC8 — no implicit SQL execution; same execution/page size | Existing explicit Run behavior preserved; controlled traces confirm identical Runs still issue separate POSTs. Full retained-page reuse is not claimed. |
+| AC9 — identifiers, dates, null/zero, ordering, duplicates and metrics preserved | Existing regression checks passed as recorded; no row-retention claim. |
+| AC10 — usable SQL page revisits avoid another page request | Deferred with additional SQL-page retention; existing page GET behavior remains. |
+
+Named-target live authorization and visual comparison are separate open release
+gates. Controlled checks do not close them or establish backend-only access
+change discovery.
 
 ## Dependencies & integrations
-- Existing React Context, `useSyncExternalStore`, session runtime and injected operations are sufficient; add no Redux or cache/state dependency. Retain thin pages, atomic UI and public feature boundaries. (FR1, FR2, FR4, FR5)
-- Use the accepted [catalog/preview](../../docs/specs/web-client/contracts/catalog-preview.md), [SQL](../../docs/specs/web-client/contracts/sql.md) and [metric](../../docs/specs/web-client/contracts/metric.md) contracts and the current [backend integration plan](../backend-integration/plan.md). This effort supersedes that plan's deliberate repeated-catalog-read tradeoff, while preserving authorization, pagination and expiry. Revalidate integration artifacts if the target changes. (FR2, FR6–FR9, TR1, TR2, TR4)
-- Use the established [verification commands](../../docs/development/verification.md) and accepted feature/composition predecessors in the [active handoff](../../docs/specs/web-client/README.md). Named-target live verification needs authorized session/access/state-loss scenarios; controlled tests do not establish backend enforcement or close release gates. (FR3–FR7, TR1)
+
+- Continue using the accepted [catalog/preview](../../docs/specs/web-client/contracts/catalog-preview.md),
+  [SQL](../../docs/specs/web-client/contracts/sql.md), and
+  [metric](../../docs/specs/web-client/contracts/metric.md) contracts, plus the
+  current [backend integration plan](../backend-integration/plan.md). Preserve
+  its authorization, pagination, and expiry rules. (FR2, FR6–FR9, TR1, TR2,
+  TR4)
+- Existing React Context, `useSyncExternalStore`, session runtime, and injected
+  operations are sufficient. Keep feature boundaries and fixture isolation.
+- Use the established [verification guidance](../../docs/development/verification.md)
+  for any future work. Named-target live scenarios require authorized backend
+  access; they remain distinct from controlled synthetic evidence.
 
 ## Risks & tradeoffs
-- **Permission revocation becomes less observable without a new request** — cached data is checked against the current resolved session and cleared on known transitions or denial. Memory reuse cannot discover a backend-only role change by itself; freshness/access revalidation cadence must be settled without promising instantaneous detection. (FR4, FR5, TR1, TR3)
-- **Shared cancellation and same-session races** — repository ownership, consumer detachment and per-resource epochs prevent one page from aborting another's request or a late response restoring denied data. (FR4, FR5, TR1)
-- **Snapshot lifetime lost during mapping or browser suspension** — preserve first-page expiry for national assembly and preview/query entries; check absolute deadlines on activation, every read and resumed lifecycle, as well as timers. Never derive a fresh 15-minute deadline on reuse. (FR6–FR8, TR2)
-- **Stale publication and cache growth** — separate current-generation reads from bound sequences, preserve deliberate refresh invalidation, and account for retained entries/bytes. Agree freshness and bounded eviction policy before implementing production defaults. (FR3, FR6, FR7, TR1–TR3)
-- **Controller lifecycle regressions** — provider ownership changes teardown behavior; exercise Strict Mode, operation/runtime replacement and standalone stories to avoid duplicate subscriptions, requests or cleanup gaps. Keep large payloads out of Context values. (FR1, FR4, FR5, FR8)
+
+- **Backend-only access changes are not discovered on a catalog memory hit.**
+  Existing session resolution/expiry, fresh backend enforcement on row reads,
+  and known denial invalidation remain authoritative. No new polling cadence is
+  approved. (FR4, FR5, TR3)
+- **Publication can stale coverage and generation.** The existing successful
+  publication callback now clears catalog metadata before Overview reloads;
+  other statuses leave current data alone. (FR2, FR3)
+- **Production retention has no approved budget.** Production completed-value
+  retention stays disabled until the user decides the memory budget and
+  explicitly enables it. Synthetic fixture limits do not establish production
+  policy. (TR3)
+- **Broader acceptance remains unproven.** Controlled tests do not prove live
+  backend enforcement, backend-only permission-change discovery, broad row
+  retention, or Figma fidelity. Keep those release claims open. (AC1–AC10)
 
 ### Alternatives considered
-- **Redux/RTK Query** — rejected under the user's explicit Context choice; migration and another lifecycle owner are unnecessary for this scoped change. (FR1, FR2)
-- **Page-local caches** — rejected because they disappear on route unmount and cannot share the embedded catalog across consumers. (FR1, FR2)
-- **Durable/browser HTTP caching** — deferred because reload/reopen scope is unresolved; protected memory reuse fits current cleanup and `no-store` contracts. (FR4, TR1)
 
-## Test strategy
-- **AC1, AC2** — controller and composed-provider navigation tests count underlying catalog/preview requests, including simultaneous Overview/Explorer/Queries readers, schemas already embedded in catalog, range revisits and remount during a pending read. Usable data displays promptly without loading everything again.
-- **AC3** — adapter/repository tests distinguish dataset, optional bounds, page size, snapshot, query ID and ownership; validate usable empty responses, missing entries, malformed payloads, deliberate retry, expired markers and new publication. Cached metadata may accompany a newer preview, whose own columns/snapshot remain authoritative.
-- **AC4, AC5** — adversarial tests cover logout, session expiry, identity/capability transitions, same-session forbidden responses across feature consumers and delayed successes/errors. Include consumer abort while another reader remains, provider disposal/replacement and delayed catalog/series/schema/page writes after invalidation.
-- **AC6** — fake-clock and resumed-browser tests expire preview rows across navigation/hidden tabs and verify explicit Restart. Check national assembly retains its first sequence deadline, no partial series is cached and cursor continuation/reuse never extends expiry.
-- **AC7** — fake-clock and backend-error tests invalidate all execution pages on expiry/loss and reject delayed page completions; revisiting offers explicit rerun. Preserve known-execution deliberate page recovery and safe draft behavior.
-- **AC8, AC10** — full request traces cover Run → page 2 → page 1 → route return, repeated same-page requests, draft edits, next-run size changes, identical SQL in a new explicit Run, focus/online/visibility and result loss. Assert unchanged execute count, matching retained query ID/fixed size and zero page request on a usable hit.
-- **AC9** — compare first-read and reused decoded/presented values for opaque IDs, calendar dates, null/zero, ordered positional columns, duplicate labels/rows, exact metrics, half-up display and truncation. No additional sorting or deduplication is introduced.
-- **AC1–AC10** — run affected behavior/adapter/composition tests, typecheck, lint, boundary checks, production build/fixture exclusion and controlled actual-Next navigation request-count checks. Verify named-target reuse and denial separately where authorized backend scenarios are available; use existing viewport evidence for presentation regression without claiming new Figma sign-off.
+- **Redux/RTK Query or another cache dependency** — unnecessary for the
+  accepted Context and repository seam; no dependency was added. (FR1, FR2)
+- **Page-local catalog caches** — do not share embedded schemas across
+  consumers or pending reads and are lost on route unmount.
+- **Browser/durable caching** — outside the chosen lifetime, which ends at page
+  reload; protected browser persistence was not approved. (FR4, TR1)
+
+## Test strategy and evidence
+
+No new implementation phase is authorized by this plan; the in-scope work is
+complete. Refer to [phase 1 verification](verification/phase-1.md) for catalog
+sharing, ownership, lifecycle, pending-read, fixture-policy, and unchanged row
+request traces. Refer to [publication verification](verification/publication.md)
+for status-by-status invalidation, ordering, date preservation, and controlled
+browser evidence. The records distinguish controlled synthetic validation from
+live integration and visual comparison.
+
+Any future production-enabling change must first settle and record the retained
+entry/byte budget and eviction/admission behavior, then verify production policy
+without changing preview/SQL absolute deadlines or explicit execution rules.
+Any expansion into row or SQL-page retention requires a fresh scope decision and
+must not be inferred from the original broad spec.
 
 ## Assumptions
-- Open-app provider memory is the initial design scope. Reload creates a new authenticated composition and fetches afresh; persistence after reload/reopen is not agreed and no protected durable storage is added. (FR4, TR1; scope clarification)
-- Metadata can be reused until supplied policy invalidates it; no numeric metadata lifetime is approved here. Preview-derived Overview data cannot exceed its original sequence deadline; SQL and preview retain their existing absolute 15-minute limits. Policy may be stricter, never longer. (FR1–FR3, FR6, FR7, TR2, TR3)
-- Retaining selection/execution descriptors is necessary to identify reusable data; this does not add restoration of navigation position, selected controls or unfinished work as a separate deliverable. (FR1, FR8, FR9; non-goals)
-- The architecture can be planned without final freshness and retention values. Those values are implementation-policy gates and must be recorded explicitly before production defaults are written. (TR3)
+
+- **Decided:** catalog metadata reuse lasts until page reload when enabled;
+  there is no added TTL, route-change invalidation, automatic polling, or
+  cross-reload persistence. (Scope review; FR2, TR1)
+- **Decided:** row tables may reload on page visits. Overview observations and
+  Explorer rows do not gain cross-route retention. SQL execution remains
+  explicit and SQL page GET behavior remains unchanged. (Scope review; FR1,
+  FR6–FR9)
 
 ## Open decisions
-- Agree freshness per resource and additional invalidation/revalidation events, including how often current access should be rechecked when all reads are memory hits. Preserve existing explicit published-refresh behavior and fixed deadlines. (TR3, FR4)
-- Confirm whether scope extends beyond the open app to reload/reopen; this plan proposes memory-only reuse for the current scope. (Scope clarification, FR4)
-- Agree bounded retained entry/byte budgets and eviction behavior for still-valid previews/series. Retain only the current SQL execution; avoid presenting eviction as backend result loss or silently restarting a preview. (FR3, FR6, FR7, TR3)
+
+- Agree explicitly on the production retained-entry/byte budget and
+  admission/eviction policy before enabling completed-response retention.
+  Current production policy is disabled; controlled synthetic policy is
+  test-only. (TR3)
+- Decide through a fresh scope review whether to pursue Overview/Explorer row
+  reuse or additional SQL-page retention. Those items are deferred and are not
+  active implementation phases; update their requirements and acceptance
+  criteria before starting.
