@@ -6,6 +6,8 @@
 - Only phase 1's catalog foundation is currently executable. Phase 2/3 row-retention work and broad phase 4 acceptance below are deferred proposal history; revise their scope before implementation.
 - The user chose reuse until page reload and explicitly deferred memory budgets and production reuse. Controlled policy verifies the seam; production retention stays disabled. Existing access cleanup and explicit invalidation remain mandatory.
 
+- Follow-up to phase 1: known successful Admin publication now invalidates catalog metadata before Overview reloads. See [controlled publication evidence](verification/publication.md). This closes the documented callback gap without starting deferred row-retention phases or enabling production retention.
+
 ## Overview
 - 24 tasks across four plan phases; three independently owned tasks marked [P]. Single-file layout.
 - Run one phase per implementation invocation. Checkboxes require integrated passing evidence; coordinator owns acceptance and shared contracts/configuration.

@@ -168,7 +168,10 @@ work to shared dataset models, schemas and catalog metadata. The controlled
 [phase-1 foundation](specs/data-reuse/verification/phase-1.md) shares one decoded
 catalog loader across consumers; observation rows and SQL-page reads retain
 existing retrieval behavior. Production completed-response retention is disabled
-pending the user's deferred budget decision and publication callback wiring.
+pending the user's deferred budget decision and production enabling.
+Successful Admin publication now invalidates catalog metadata before Overview
+reloads metadata and observations, preserving selected dates; see the
+[publication follow-up](specs/data-reuse/verification/publication.md).
 Reuse is scoped to the open app until page reload, with existing session/access
 cleanup and explicit invalidation. Broader row retention remains deferred.
 

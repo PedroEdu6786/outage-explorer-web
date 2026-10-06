@@ -76,6 +76,10 @@ stays zero. Fixture remount listing/schema issue one underlying listing read.
 
 ## Limitations
 
+The publication-wiring limitation below records the original checkpoint. It is
+resolved by the [publication follow-up](publication.md); production retention and
+budget agreement remain deferred.
+
 The repository's published-refresh invalidation seam is tested, but the existing
 Overview refresh publication callback is not wired to it in this phase. Before
 production catalog retention is enabled, integrate that callback so bundled

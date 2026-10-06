@@ -25,7 +25,7 @@ export function SignInEntry() {
 }
 export function OverviewEntry() {
   const app = useApplication();
-  return <OverviewFeature {...(app.operations.refresh ? { refreshOperations: app.operations.refresh } : {})} operations={app.operations} runtime={app.runtime} onNavigate={app.navigate} />;
+  return <OverviewFeature {...(app.operations.refresh ? { refreshOperations: app.operations.refresh } : {})} operations={app.operations} runtime={app.runtime} onNavigate={app.navigate} onPublished={() => { app.resources.invalidate({ reason: "published-refresh", kind: "catalog" }); }} />;
 }
 export function ExplorerEntry() {
   const app = useApplication();

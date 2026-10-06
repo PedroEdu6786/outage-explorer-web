@@ -2,7 +2,7 @@ import { FixtureProvider, useFixtureController } from "../fixtures/FixtureProvid
 import { StrictMode } from "react";
 import { createResourceRepository } from "../../src/resources/resource-repository";
 import { syntheticResourcePolicy } from "../fixtures/operations";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { ApplicationProvider, useApplication } from "../../src/composition/ApplicationProvider";
 import { QueryEntry, OverviewEntry, ProtectedLayout } from "../../src/composition/PageEntries";
@@ -179,4 +179,52 @@ it("fixture ownership reattaches before route readers under Strict Mode and clea
   expect((await fixture.controller.operations.readSchema(fixture.runtime.capture(), "synthetic-national")).ok).toBe(true);
   expect(fixture.controller.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
   view.unmount(); expect(fixture.resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+});
+
+
+it.each(["accepted", "running", "retained", "failed", "interrupted", "publication_unknown", "succeeded"] as const)("only published refresh status %s invalidates catalog before Overview reload", async (status) => {
+  const runtime = createSessionRuntime(); runtimes.push(runtime);
+  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ resources, persona: "admin" });
+  runtime.setResolution(fixture.sessionResolution());
+  const readSeries = vi.spyOn(fixture.operations, "readNationalSeries");
+  const refresh = {
+    admitRefresh: vi.fn(),
+    readRefresh: vi.fn().mockResolvedValue({ ok: true, value: { runId: "synthetic-publication", status, interval: { start: "2026-09-01", end: "2026-09-04" } } }),
+  };
+  const operations = { ...fixture.operations, refresh };
+  const invalidated = vi.fn(() => { expect(resources.accounting().entries).toBe(0); });
+  const unsubscribe = resources.subscribe(invalidated);
+  const view = render(<ApplicationProvider operations={operations} runtime={runtime} resources={resources} path="/overview" go={vi.fn()} querySettings={null}><OverviewEntry /></ApplicationProvider>);
+  await screen.findByRole("table", { name: "Daily national observations" });
+  fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+  await screen.findByRole("table", { name: "Daily national observations" });
+  const beforeRows = readSeries.mock.calls.length;
+  const catalogReads = () => fixture.callLog.read().filter((call) => call.operation === "listDatasets").length;
+  expect(catalogReads()).toBe(1);
+  fixture.publishSnapshot();
+  fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+  await waitFor(() => { expect(screen.getByRole("button", { name: "Check refresh status" })).toBeEnabled(); });
+  if (status === "succeeded") {
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(invalidated).toHaveBeenCalledExactlyOnceWith({ reason: "published-refresh", kind: "catalog" });
+    expect(catalogReads()).toBe(2);
+    expect(readSeries).toHaveBeenCalledTimes(beforeRows + 1);
+    expect(readSeries.mock.calls.at(-1)?.[1]).toEqual({ start: "2026-09-01", end: "2026-09-03" });
+    expect(await readSeries.mock.results.at(-1)?.value).toMatchObject({ ok: true, value: { provenance: { snapshotId: "synthetic-snapshot-2" } } });
+    await fixture.operations.readSchema(runtime.capture(), "synthetic-national");
+    expect(catalogReads()).toBe(2);
+    fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+    await waitFor(() => { expect(refresh.readRefresh).toHaveBeenCalledTimes(2); expect(screen.getByRole("button", { name: "Check refresh status" })).toBeEnabled(); });
+    expect(invalidated).toHaveBeenCalledTimes(1);
+    expect(catalogReads()).toBe(2);
+    expect(readSeries).toHaveBeenCalledTimes(beforeRows + 1);
+  } else {
+    expect(invalidated).not.toHaveBeenCalled();
+    expect(catalogReads()).toBe(1);
+    expect(readSeries).toHaveBeenCalledTimes(beforeRows);
+  }
+  expect(refresh.admitRefresh).not.toHaveBeenCalled();
+  expect(fixture.callLog.read().some((call) => call.operation === "executeQuery")).toBe(false);
+  unsubscribe(); view.unmount();
 });

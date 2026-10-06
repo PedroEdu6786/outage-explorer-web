@@ -20,8 +20,10 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
   const [revision, setRevision] = useState(0);
   const [catalogRevision, setCatalogRevision] = useState(0);
   const selection = useRef(0);
+  const preserveRange = useRef(false);
   const activeSeries = useRef<AbortController | null>(null);
   useEffect(() => runtime.registerCleanup(() => {
+    preserveRange.current = false;
     activeSeries.current?.abort(); selection.current += 1; setDataset(null); setSeries(null); setRange({}); setFailure(null); setLoading(false);
   }), [runtime]);
   useEffect(() => {
@@ -33,7 +35,9 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
         const currentSession = runtime.getSnapshot();
         const national = catalog.find((item) => item.grain === "national" && currentSession.status === "authenticated" && currentSession.session.capabilities.datasetIds.includes(item.id)) ?? null;
         setDataset(national);
-        if (national?.coverage.status === "available") setRange(national.coverage.range);
+        if (national?.coverage.status === "available") {
+          if (!preserveRange.current) setRange(national.coverage.range);
+        }
         else setFailure({ kind: "data-unavailable", message: "National observations are unavailable." });
       },
       onFailure: setFailure,
@@ -69,5 +73,12 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
       || !currentSession.session.capabilities.canExploreDatasets || !currentSession.session.capabilities.canReadNationalSeries || !currentSession.session.capabilities.datasetIds.includes(dataset.id)) return;
     guardCurrent(runtime, context, () => { onNavigate({ target: "explorer", generation: context.generation, datasetId: dataset.id, filters: { dates: range } }); });
   }
-  return { dataset, series, range, failure, loading, session, changeRange, explore, retry: () => { if (dataset) setRevision((value) => value + 1); else setCatalogRevision((value) => value + 1); }, invalidRange: !validRange(range) };
+  function reloadMetadata() {
+    // Publication changes catalog coverage; preserve the currently selected dates.
+    preserveRange.current = true;
+    activeSeries.current?.abort(); selection.current += 1;
+    setDataset(null); setSeries(null); setFailure(null); setLoading(false);
+    setCatalogRevision((value) => value + 1);
+  }
+  return { dataset, series, range, failure, loading, session, changeRange, explore, reloadMetadata, retry: () => { if (dataset) setRevision((value) => value + 1); else setCatalogRevision((value) => value + 1); }, invalidRange: !validRange(range) };
 }
