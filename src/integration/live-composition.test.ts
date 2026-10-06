@@ -80,3 +80,22 @@ it("prepares authenticated data with auth-owned CSRF while leaving production re
     expect(fetch).toHaveBeenCalledTimes(3);
   } finally { composition.dispose(); runtime.dispose(); }
 });
+
+
+it("default live policy deduplicates pending catalog only and does not enable production retention", async () => {
+  const runtime = createSessionRuntime(); const fetch = vi.fn<typeof globalThis.fetch>();
+  const composition = createLiveComposition({ runtime, fetch, navigate: vi.fn(), authEnabled: true });
+  if (!composition) throw new Error("Configured composition required");
+  try {
+    expect(composition.resources.policy).toEqual({ retention: "disabled" });
+    fetch.mockResolvedValueOnce(new Response(JSON.stringify({ user: { id: "synthetic-user", email: "synthetic@example.invalid", role: "analyst" }, expires_at: new Date(Date.now() + 3600_000).toISOString(), csrf_token: "synthetic-memory" }), { status: 200 }));
+    await createAuthService(composition.operations, runtime).perform("resolve", { onSuccess: vi.fn(), onFailure: vi.fn() });
+    const catalog = fixtures.fixtures.find((item) => item.name === "catalog_analyst"); if (!catalog) throw new Error("Catalog required");
+    fetch.mockImplementation(() => Promise.resolve(new Response(JSON.stringify(catalog.body), { status: 200 })));
+    const context = runtime.capture();
+    await Promise.all([composition.dataOperations.listDatasets(context), composition.dataOperations.readSchema(context, "national")]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    await composition.dataOperations.readSchema(context, "national"); expect(fetch).toHaveBeenCalledTimes(3);
+    expect(composition.resources.accounting().entries).toBe(0);
+  } finally { composition.dispose(); runtime.dispose(); }
+});

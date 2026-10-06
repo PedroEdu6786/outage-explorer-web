@@ -1,5 +1,7 @@
 "use client";
-import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
+import type { ResourceRepository } from "../contracts/resources";
+import { createResourceRepository, disabledResourcePolicy } from "../resources/resource-repository";
 import { AuthFeature, type AuthControls } from "../features/auth";
 import { createQueriesController, type QueriesController } from "../features/queries";
 import type { NavigationIntent } from "../contracts/navigation";
@@ -9,6 +11,7 @@ import { acceptsIntent, type ApplicationPath } from "./navigation";
 import type { ApplicationOperations, QuerySettings } from "./production-operations";
 
 interface ApplicationComposition {
+  readonly resources: ResourceRepository;
   readonly operations: ApplicationOperations;
   readonly runtime: SessionRuntime;
   readonly path: ApplicationPath;
@@ -23,6 +26,7 @@ const Context = createContext<ApplicationComposition | null>(null);
 const Controls = createContext<AuthControls | null>(null);
 const pending: SessionState = { status: "pending", generation: 0 };
 export interface ApplicationProviderProps {
+  readonly resources?: ResourceRepository;
   readonly operations: ApplicationOperations;
   readonly runtime: SessionRuntime;
   readonly path: ApplicationPath;
@@ -33,6 +37,8 @@ export interface ApplicationProviderProps {
 }
 /** One injected composition. Production root supplies only unavailable/approved live operations. */
 export function ApplicationProvider({ children, ...props }: ApplicationProviderProps) {
+  const resources = useMemo(() => props.resources ?? props.operations.resources ?? createResourceRepository({ runtime: props.runtime, policy: disabledResourcePolicy, attachOnCreate: false }), [props.resources, props.operations, props.runtime]);
+  useLayoutEffect(() => { resources.attach(); return () => { resources.dispose(); }; }, [resources]);
   const [intent, setIntent] = useState<NavigationIntent | null>(null);
   const queries = useMemo(() => props.querySettings ? createQueriesController({ operations: props.operations, runtime: props.runtime, ...props.querySettings }) : null, [props.operations, props.runtime, props.querySettings]);
   useEffect(() => { queries?.attach(); return () => { queries?.dispose(); }; }, [queries]);
@@ -43,7 +49,7 @@ export function ApplicationProvider({ children, ...props }: ApplicationProviderP
     props.go(next.target === "explorer" ? "/datasets" : "/query");
   };
   // The query controller survives route unmounts; its session cleanup remains authoritative.
-  return <Context.Provider value={{ ...props, intent, navigate, queries }}><AuthFeature operations={props.operations} runtime={props.runtime}>{(controls) => <Controls.Provider value={controls}>{children}</Controls.Provider>}</AuthFeature></Context.Provider>;
+  return <Context.Provider value={{ ...props, resources, intent, navigate, queries }}><AuthFeature operations={props.operations} runtime={props.runtime}>{(controls) => <Controls.Provider value={controls}>{children}</Controls.Provider>}</AuthFeature></Context.Provider>;
 }
 export function useApplication() {
   const value = useContext(Context);

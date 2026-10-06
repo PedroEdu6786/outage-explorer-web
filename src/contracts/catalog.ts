@@ -53,6 +53,13 @@ export interface DatasetSchema {
   readonly columns: readonly DatasetSchemaColumn[];
 }
 
+/** One authorized decoded response; schema order and generation are retained atomically. */
+export interface CatalogBundle {
+  readonly generationId: string;
+  readonly datasets: readonly DatasetSummary[];
+  readonly schemas: readonly DatasetSchema[];
+}
+
 export interface CatalogOperations {
   listDatasets(context: OperationContext): Promise<OperationResult<readonly DatasetSummary[]>>;
   readSchema(context: OperationContext, datasetId: DatasetId): Promise<OperationResult<DatasetSchema>>;

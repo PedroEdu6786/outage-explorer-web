@@ -1,6 +1,18 @@
 # Plan: Reuse already fetched data
 > Status: draft · Slug: data-reuse · Spec: ./spec.md
 
+## Scope revision — October 5, 2026
+
+The user narrowed the immediate implementation to selective reuse: model/schema
+metadata should not repeatedly reload, while observation row tables may fetch
+again on page visits. See [the resource-by-resource review](scope-review.md).
+Phase 1's shared catalog foundation proceeds under controlled policy; the broad
+Overview/Explorer retention and SQL-page caching proposal below is deferred and
+must be revised before execution. Reuse lasts until page reload, subject to
+existing explicit invalidation and access/deadline rules. The user deferred
+the memory budget and production reuse, so production retention remains disabled.
+The remaining sections preserve the original proposal's provenance.
+
 ## Approach
 Keep React Context as the delivery mechanism for stable, application-owned dependencies and use the existing subscribed-controller pattern for feature state. Add one memory-only resource repository under the application composition to reuse successful reads and share identical pending reads; retain Overview and Explorer controllers alongside the existing Queries controller across route changes. Preserve session guards, explicit recovery and absolute snapshot/execution deadlines; freshness and retention beyond existing contracts remain configurable policy decisions rather than invented lifetimes. (FR1–FR9, TR1–TR4)
 

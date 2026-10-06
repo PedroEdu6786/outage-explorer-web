@@ -161,6 +161,17 @@ Controlled tests do not establish live acceptance. Backend auth is ready per the
 user; the earlier expectation of no API responses now applies to data services.
 Earlier fixture milestones remain historical evidence.
 
+## Selective metadata reuse — October 5, 2026
+
+The [data-reuse scope review](specs/data-reuse/scope-review.md) narrows current
+work to shared dataset models, schemas and catalog metadata. The controlled
+[phase-1 foundation](specs/data-reuse/verification/phase-1.md) shares one decoded
+catalog loader across consumers; observation rows and SQL-page reads retain
+existing retrieval behavior. Production completed-response retention is disabled
+pending the user's deferred budget decision and publication callback wiring.
+Reuse is scoped to the open app until page reload, with existing session/access
+cleanup and explicit invalidation. Broader row retention remains deferred.
+
 ## Connected local auth — October 5, 2026
 
 Set the server-only `OUTAGE_API_ORIGIN=http://localhost:8000` in `.env.local`

@@ -1,11 +1,11 @@
-import type { DatasetSchema, DatasetSummary } from "../../contracts/catalog";
+import type { CatalogBundle, DatasetSchema, DatasetSummary } from "../../contracts/catalog";
 import type { PreviewPage, PreviewSelection } from "../../contracts/preview";
 import type { QueryPage } from "../../contracts/query";
 import { catalogSchema, previewSchema, querySchema } from "./data-schema";
 import { mapColumns, mapTable } from "./table-mapping";
 
 const grains = { national: "national", facilities: "facility", generators: "generator" } as const;
-export function decodeCatalog(raw: unknown) {
+export function decodeCatalog(raw: unknown): CatalogBundle {
   const wire = catalogSchema.parse(raw);
   const datasets: readonly DatasetSummary[] = wire.datasets.map((dataset) => ({
     id: dataset.id, sqlName: dataset.sql_name, label: dataset.label, grain: grains[dataset.id],

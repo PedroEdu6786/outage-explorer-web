@@ -1,6 +1,19 @@
 # Spec: Reuse already fetched data
 > Status: draft · Slug: data-reuse
 
+## Scope revision — October 5, 2026
+
+The user clarified that models/schemas should be reused while row tables may
+reload on page visits. See [the selective reuse review](scope-review.md).
+Immediate implementation covers the shared catalog foundation, not all of the
+row-retention requirements below. Their original wording is retained as proposal
+history and does not authorize broad optimization. The user chose reuse until
+page reload, and deferred the memory budget and production enabling. No periodic
+freshness timeout or durable storage is selected. Existing session/access cleanup,
+known publication invalidation and original preview/SQL deadlines still apply.
+Revise the deferred requirements and their acceptance criteria before implementing
+row retention.
+
 ## Problem
 Outage Explorer users repeatedly wait for information the app has already
 retrieved when revisiting pages or using the same information elsewhere. This

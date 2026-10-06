@@ -1,3 +1,4 @@
+import type { ResourceRepository } from "../../contracts/resources";
 import type { CatalogOperations } from "../../contracts/catalog";
 import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from "../../contracts/failures";
 import type { ObservationOperations } from "../../contracts/observations";
@@ -23,17 +24,19 @@ function boundsValid(bounds: { readonly start?: string; readonly end?: string } 
     && (bounds.start === undefined || bounds.end === undefined || bounds.start <= bounds.end));
 }
 
-export function createDataAdapter(transport: DataTransport, now: () => number = Date.now): CatalogOperations & PreviewOperations & ObservationOperations & QueryOperations {
-  async function get<T>(context: OperationContext, path: string, decode: (raw: unknown) => T): Promise<OperationResult<T>> {
+export function createDataAdapter(transport: DataTransport, now: () => number = Date.now, resources?: ResourceRepository): CatalogOperations & PreviewOperations & ObservationOperations & QueryOperations {
+  async function get<T>(context: OperationContext, path: string, decode: (raw: unknown) => T, reportDenial = true): Promise<OperationResult<T>> {
     if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
     try {
       const response = await transport.request(context, path);
       if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
+      if (reportDenial && !response.ok && response.failure.kind !== "unknown-execution-outcome") resources?.reportFailure(context, response.failure);
       if (!response.ok) return response.failure.kind === "unknown-execution-outcome" ? malformed() : { ok: false, failure: response.failure };
       return { ok: true, value: decode(response.value) };
     } catch { return malformed(); }
   }
-  const catalog = (context: OperationContext) => get(context, "/api/datasets", decodeCatalog);
+  const loadCatalog = (context: OperationContext) => get(context, "/api/datasets", decodeCatalog, false);
+  const catalog = (context: OperationContext) => resources ? resources.read({ context, identity: { kind: "catalog", requestKey: "authorized-catalog" }, load: loadCatalog, describe: (bundle) => ({ dataGeneration: bundle.generationId }) }) : loadCatalog(context);
   const adapter: CatalogOperations & PreviewOperations & ObservationOperations & QueryOperations = {
     async listDatasets(context) { const result = await catalog(context); return result.ok ? { ok: true, value: result.value.datasets } : result; },
     async readSchema(context, datasetId) {
@@ -95,6 +98,7 @@ export function createDataAdapter(transport: DataTransport, now: () => number = 
       try {
         const response = await transport.request(context, `/api/query?${new URLSearchParams({ page: String(input.page), page_size: String(input.pageSize) }).toString()}`, { method: "POST", body: { sql: input.sql } });
         if (!transport.isCurrent(context)) return fail("unauthenticated", "Session context changed.");
+        if (!response.ok && response.failure.kind !== "unknown-execution-outcome") resources?.reportFailure(context, response.failure);
         if (!response.ok) return response.failure.kind !== "unknown-execution-outcome" && response.failure.retainedQuery
           ? { ok: false, failure: { ...response.failure, retainedQuery: { ...response.failure.retainedQuery, pageSize: input.pageSize } } } : response;
         const page = decodeQuery(response.value);

@@ -1,3 +1,7 @@
+import { FixtureProvider, useFixtureController } from "../fixtures/FixtureProvider";
+import { StrictMode } from "react";
+import { createResourceRepository } from "../../src/resources/resource-repository";
+import { syntheticResourcePolicy } from "../fixtures/operations";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { ApplicationProvider, useApplication } from "../../src/composition/ApplicationProvider";
@@ -121,4 +125,58 @@ it("registers configured production data with current auth CSRF and independent 
   expect(fetch).toHaveBeenCalledTimes(2);
   runtime.invalidate("pending");
   expect(operations.consumeNavigationIntent(runtime.capture(), intent).ok).toBe(false);
+});
+
+
+it("keeps catalog ownership through route consumer remounts and aborts replacement work", async () => {
+  const { runtime } = setup();
+  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ resources });
+  const observer: { app: ReturnType<typeof useApplication> | null } = { app: null };
+  function Observe() { observer.app = useApplication(); return <p>Catalog consumer</p>; }
+  function Root({ shown = true, replacement = false }: { shown?: boolean; replacement?: boolean }) {
+    return <ApplicationProvider operations={replacement ? next.operations : fixture.operations} runtime={runtime} path={shown ? "/query" : "/overview"} go={vi.fn()} querySettings={null}>{shown ? <Observe /> : <p>Away</p>}</ApplicationProvider>;
+  }
+  const nextResources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
+  const next = createFixtureOperations({ resources: nextResources });
+  const view = render(<Root />); const delayed = fixture.deferNext("listDatasets");
+  const first = fixture.operations.listDatasets(runtime.capture()); await Promise.resolve();
+  view.rerender(<Root shown={false} />); view.rerender(<Root />);
+  const schema = fixture.operations.readSchema(runtime.capture(), "synthetic-national");
+  expect(observer.app?.resources).toBe(resources);
+  delayed.release(); expect((await first).ok).toBe(true); expect((await schema).ok).toBe(true);
+  expect(fixture.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
+  resources.invalidate({ reason: "published-refresh" });
+  const delayedOld = fixture.deferNext("listDatasets");
+  const old = fixture.operations.listDatasets(runtime.capture()); await Promise.resolve();
+  view.rerender(<Root replacement />);
+  expect(observer.app?.resources).toBe(nextResources); expect((await old).ok).toBe(false);
+  expect(resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+  delayedOld.release(); await Promise.resolve(); expect(resources.accounting().entries).toBe(0);
+  expect((await next.operations.listDatasets(runtime.capture())).ok).toBe(true);
+  view.unmount(); expect(nextResources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+});
+
+it("reattaches shared catalog cleanup under Strict Mode without retaining discarded ownership", async () => {
+  const { runtime } = setup();
+  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ resources });
+  const view = render(<StrictMode><ApplicationProvider operations={fixture.operations} runtime={runtime} path="/overview" go={vi.fn()} querySettings={null}><p>Strict catalog</p></ApplicationProvider></StrictMode>);
+  expect((await fixture.operations.listDatasets(runtime.capture())).ok).toBe(true);
+  expect((await fixture.operations.readSchema(runtime.capture(), "synthetic-national")).ok).toBe(true);
+  expect(fixture.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
+  act(() => { runtime.invalidate(); }); expect(resources.accounting().entries).toBe(0);
+  view.unmount(); expect(resources.accounting().pending).toBe(0);
+});
+
+
+it("fixture ownership reattaches before route readers under Strict Mode and clears on unmount", async () => {
+  const observed: { fixture: ReturnType<typeof useFixtureController> | null } = { fixture: null };
+  function Observe() { observed.fixture = useFixtureController(); return <p>Fixture catalog</p>; }
+  const view = render(<StrictMode><FixtureProvider><Observe /></FixtureProvider></StrictMode>);
+  const fixture = observed.fixture; if (!fixture) throw new Error("Fixture dependencies required");
+  expect((await fixture.controller.operations.listDatasets(fixture.runtime.capture())).ok).toBe(true);
+  expect((await fixture.controller.operations.readSchema(fixture.runtime.capture(), "synthetic-national")).ok).toBe(true);
+  expect(fixture.controller.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
+  view.unmount(); expect(fixture.resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
 });
