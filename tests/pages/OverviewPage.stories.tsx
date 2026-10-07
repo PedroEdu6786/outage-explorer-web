@@ -5,3 +5,5 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Ready: Story = { args: { mode: "ready" } };
 export const Pending: Story = { args: { mode: "pending" } };
+export const LongRangeZoom: Story = { args: { mode: "viewer", zoomYears: 1 } };
+export const TwoYearZoom: Story = { args: { mode: "ready", zoomYears: 2 } };

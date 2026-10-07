@@ -324,3 +324,23 @@ performed by this documentation update.
   or physical-device acceptance implied; user owns the pending live test.
 - Phase 3 may proceed from this isolated feature gate. AC8/page lifecycle remains
   its responsibility; final browser/motion/device/live evidence remains phase 4.
+
+## Overview chart zoom — phase 3 assignment, October 7
+
+- Coordinator accepts isolated phase-2 feature at `555d02f` and dispatches
+  T3.1–T3.C to `overview_zoom_spec` under the user's all-phases authorization.
+- Exclusive scope: OverviewFeature availability, overview/retained-series
+  regressions and feature stories; PageDemo, Overview page stories/browser checks;
+  phase-3 evidence, task state, ledger and devlog. No shared configuration or
+  external runtime writes. Existing page assembly consumes the accepted feature.
+
+## Overview chart zoom — phase 3 checkpoint, October 7
+
+- T3.1–T3.3/T3.C complete; explicit retained-chart unavailability and assembled
+  long-range fixtures preserve page scope and protected lifecycle.
+- [Phase-3 evidence](../../../specs/overview-chart-zoom/verification/phase-3.md):
+  39 affected unit tests, typecheck/lint, 33 boundary tests, source boundaries,
+  fresh Storybook and four actual-page Chromium scenarios passed.
+- Chart-only operation counts, cards/table/date isolation, snapshot/date reset
+  and late-response/session/access safety are controlled fixture evidence.
+  Phase 4 may proceed; user-owned live and physical-device/human gates remain.

@@ -1,10 +1,12 @@
 import { act, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SessionProvider } from "../../session/SessionProvider";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { createFixtureOperations } from "../../../tests/fixtures/operations";
 import { syntheticObservations } from "../../../tests/fixtures/scenarios";
+import { syntheticZoomSeries } from "../../../tests/fixtures/overview-zoom";
+import type { RefreshOperations } from "../../contracts/refresh";
 import { useOverview } from "./useOverview";
 import { OverviewFeature } from "./OverviewFeature";
 import { NationalMetricCards } from "./NationalMetricCards";
@@ -22,6 +24,74 @@ function setup(persona: "viewer" | "analyst" = "viewer") {
   return { fixture, runtime };
 }
 describe("Overview exact observation behavior", () => {
+  it("keeps long-range zoom local across cards/table pagination, draft dates, unchanged apply and compare", async () => {
+    const fixture = createFixtureOperations({ persona: "analyst", nationalSeries: syntheticZoomSeries() });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    const initialCaption = screen.getByText(/^Visible dates:/).textContent;
+    expect(screen.getByRole("checkbox", { name: "Zoom mode" })).not.toBeChecked();
+    fireEvent.change(screen.getByRole("combobox", { name: "Rows per page" }), { target: { value: "20" } });
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    const table = screen.getByRole("table").textContent;
+    const cards = [...document.querySelectorAll("dl")].map((card) => card.textContent);
+    const calls = fixture.callLog.read();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Zoom mode" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+    const narrowed = screen.getByText(/^Visible dates:/).textContent;
+    expect(narrowed).not.toBe(initialCaption);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    expect(screen.getByText(/^Visible dates:/).textContent).toBe(narrowed);
+    const chart = document.querySelector("svg[data-chart=national-trend]");
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-02-01" } });
+    expect(screen.getByText(/^Visible dates:/).textContent).toBe(narrowed);
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-01-01" } });
+    fireEvent.submit(screen.getByRole("form", { name: "Observation dates" }));
+    expect(screen.getByText(/^Visible dates:/).textContent).toBe(narrowed);
+    const region = screen.getByRole("region", { name: "National trend: scrollable chart" });
+    region.focus(); fireEvent.keyDown(region, { key: "ArrowRight" });
+    expect(screen.getByText(/^Visible dates:/).textContent).not.toBe(narrowed);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Zoom mode" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reset zoom" }));
+    expect(screen.getByText(/^Visible dates:/).textContent).toBe(initialCaption);
+    expect(screen.getByRole("table").textContent).toBe(table);
+    expect([...document.querySelectorAll("dl")].map((card) => card.textContent)).toEqual(cards);
+    expect(screen.getByRole("combobox", { name: "Rows per page" })).toHaveValue("20");
+    expect(fixture.callLog.read()).toEqual(calls);
+    expect(document.querySelector("svg[data-chart=national-trend]")).toBe(chart);
+    expect(screen.getByLabelText("Start date")).toHaveValue("2026-01-01");
+    expect(screen.getByLabelText("End date")).toHaveValue("2026-12-31");
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-02-01" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(screen.getByText("Visible dates: 2026-02-01 to 2026-12-31")).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "Zoom mode" })).not.toBeChecked();
+    expect(fixture.callLog.read().filter((call) => call.operation === "readNationalSeries")).toHaveLength(2);
+    view.unmount(); runtime.dispose();
+  });
+
+  it("starts a fresh disabled full viewport after published snapshot reload while preserving applied dates", async () => {
+    const fixture = createFixtureOperations({ persona: "admin", nationalSeries: syntheticZoomSeries() });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const refresh: RefreshOperations = {
+      admitRefresh: vi.fn(),
+      readRefresh: vi.fn<RefreshOperations["readRefresh"]>().mockResolvedValue({ ok: true, value: { runId: "synthetic-new-snapshot", status: "succeeded", interval: { start: "2026-01-01", end: "2026-12-31" } } }),
+    };
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} refreshOperations={refresh} onPublished={() => { fixture.publishSnapshot(); }} />);
+    await screen.findByRole("table");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Zoom mode" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+    const previous = document.querySelector("svg[data-chart=national-trend]");
+    fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+    await screen.findByText(/new data was published/);
+    await waitFor(() => { expect(screen.getByText("Visible dates: 2026-01-01 to 2026-12-31")).toBeVisible(); });
+    expect(screen.getByRole("checkbox", { name: "Zoom mode" })).not.toBeChecked();
+    expect(document.querySelector("svg[data-chart=national-trend]")).not.toBe(previous);
+    expect(screen.getByLabelText("Start date")).toHaveValue("2026-01-01");
+    expect(screen.getByLabelText("End date")).toHaveValue("2026-12-31");
+    expect(fixture.callLog.read().filter((call) => call.operation === "readNationalSeries")).toHaveLength(2);
+    view.unmount(); runtime.dispose();
+  });
   it("truncates long MW displays in cards and daily rows without losing exact precision", () => {
     const observation: NationalObservation = {
       status: "available", date: "2026-09-01",

@@ -9,15 +9,17 @@ import { ApplicationProvider } from "../../src/composition/ApplicationProvider";
 import { routeTitles, type ApplicationPath } from "../../src/composition/navigation";
 import { createSessionRuntime } from "../../src/session/session-runtime";
 import { createFixtureOperations } from "../fixtures/operations";
+import { syntheticZoomSeries } from "../fixtures/overview-zoom";
 
 export interface PageDemoProps {
   readonly initialPath: ApplicationPath;
   readonly mode?: "ready" | "signed-out" | "expired" | "pending" | "failure" | "viewer";
+  readonly zoomYears?: 1 | 2;
 }
 /** Test root owns all synthetic identity, lifecycle settings and controls. Actual routes are imported. */
-export function PageDemo({ initialPath, mode = "ready" }: PageDemoProps) {
+export function PageDemo({ initialPath, mode = "ready", zoomYears }: PageDemoProps) {
   const [setup] = useState(() => {
-    const fixture = createFixtureOperations({ persona: mode === "viewer" ? "viewer" : "analyst" });
+    const fixture = createFixtureOperations({ persona: mode === "viewer" ? "viewer" : "analyst", ...(zoomYears ? { nationalSeries: syntheticZoomSeries(zoomYears) } : {}) });
     const runtime = createSessionRuntime();
     const deferred = mode === "pending" ? fixture.deferNext("resolveSession") : null;
     if (mode === "signed-out") { void fixture.operations.logout(runtime.capture()); runtime.invalidate(); }

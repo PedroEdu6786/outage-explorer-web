@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SessionProvider } from "../../session/SessionProvider";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { createFixtureOperations } from "../../../tests/fixtures/operations";
+import { syntheticZoomSeries } from "../../../tests/fixtures/overview-zoom";
 import type { NavigationIntent } from "../../contracts/navigation";
 import { OverviewFeature } from "./OverviewFeature";
 import { useOverview } from "./useOverview";
@@ -145,6 +146,44 @@ describe("Overview retainedSeries (AC5)", () => {
 });
 
 describe("Overview feature dimming (AC5)", () => {
+  it.each(["logout", "expired", "pending", "capability"] as const)("withholds zoom inputs on retained long data and cannot revive it after %s", async (ending) => {
+    const fixture = createFixtureOperations({ persona: "viewer", nationalSeries: syntheticZoomSeries() });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table");
+    fireEvent.click(screen.getByRole("checkbox", { name: "Zoom mode" }));
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }));
+    const oldChart = document.querySelector("svg[data-chart=national-trend]");
+    const held = fixture.deferNext("readNationalSeries");
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-12-15" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
+    await waitFor(() => { expect(document.querySelectorAll("[inert][aria-hidden=true]")).toHaveLength(3); });
+    const controls = document.querySelector('[role="group"][aria-label="Chart zoom controls"]');
+    expect(controls).not.toBeNull();
+    for (const input of controls?.querySelectorAll("input,button") ?? []) expect(input).toBeDisabled();
+    const retainedChart = document.querySelector("svg[data-chart=national-trend]");
+    expect(retainedChart).not.toBeNull();
+    expect(retainedChart?.closest('[role="region"]')).toHaveAttribute("tabindex", "-1");
+    const wheel = new WheelEvent("wheel", { bubbles: true, cancelable: true, deltaY: -100, clientX: 465, clientY: 150 });
+    retainedChart?.dispatchEvent(wheel); expect(wheel.defaultPrevented).toBe(false);
+    const oldWheel = new WheelEvent("wheel", { cancelable: true, deltaY: -100 }); oldChart?.dispatchEvent(oldWheel);
+    expect(oldWheel.defaultPrevented).toBe(false);
+    act(() => {
+      if (ending === "capability") {
+        const resolution = fixture.sessionResolution();
+        if (resolution.status !== "authenticated") throw new Error("Authenticated fixture required");
+        runtime.setResolution({ ...resolution, session: { ...resolution.session, capabilities: { ...resolution.session.capabilities, canReadNationalSeries: false } } });
+      } else runtime.invalidate(ending === "logout" ? undefined : ending);
+    });
+    expect(document.querySelector("svg[data-chart=national-trend]")).toBeNull();
+    expect(screen.queryByText(/^Visible dates:/)).toBeNull();
+    await release(held);
+    expect(document.querySelector("svg[data-chart=national-trend]")).toBeNull();
+    expect(screen.queryByRole("table")).toBeNull();
+    expect(document.querySelector("[inert]")).toBeNull();
+    view.unmount(); runtime.dispose();
+  });
+
   async function dimmed(context: Setup) {
     const view = render(<OverviewFeature operations={context.fixture.operations} runtime={context.runtime} />);
     await screen.findByRole("table", { name: "Daily national observations" });
