@@ -14,30 +14,38 @@ export function useRefresh(operations: RefreshOperations | undefined, onPublishe
   const [denied, setDenied] = useState(false);
   // A status lookup cannot prove which run belongs to an unconfirmed POST.
   const unconfirmedAdmissionKey = useRef<string | null>(null);
-  const request = useRef<AbortController | null>(null);
-  const published = useRef<string | null>(null);
+  const activeRequestAbort = useRef<AbortController | null>(null);
+  const lastPublishedRunId = useRef<string | null>(null);
   useEffect(() => {
     const clear = () => {
-      request.current?.abort();
-      request.current = null;
+      activeRequestAbort.current?.abort();
+      activeRequestAbort.current = null;
       unconfirmedAdmissionKey.current = null;
-      published.current = null;
+      lastPublishedRunId.current = null;
       setRun(null);
       setMessage(null);
       setPending(false);
       setDenied(false);
     };
     const unregister = runtime.registerCleanup(clear);
-    return () => { unregister(); request.current?.abort(); request.current = null; };
+    return () => {
+      unregister();
+      activeRequestAbort.current?.abort();
+      activeRequestAbort.current = null;
+    };
   }, [runtime]);
   async function requestRefresh(action: "admit" | "status") {
     const currentSession = runtime.getSnapshot();
-    if (request.current || denied || currentSession.status !== "authenticated" || !currentSession.session.capabilities.canRefreshDatasets) return;
-    if (!operations) { setMessage("Refresh connection unavailable."); return; }
+    if (activeRequestAbort.current || denied || currentSession.status !== "authenticated"
+      || !currentSession.session.capabilities.canRefreshDatasets) return;
+    if (!operations) {
+      setMessage("Refresh connection unavailable.");
+      return;
+    }
     if (action === "admit" && !unconfirmedAdmissionKey.current && run && refreshActive(run.status)) return;
-    const abort = new AbortController();
-    request.current = abort;
-    const context = runtime.capture(abort.signal);
+    const requestAbort = new AbortController();
+    activeRequestAbort.current = requestAbort;
+    const context = runtime.capture(requestAbort.signal);
     setPending(true);
     setMessage(null);
     if (action === "admit") {
@@ -60,15 +68,32 @@ export function useRefresh(operations: RefreshOperations | undefined, onPublishe
         } else {
           setMessage(value ? null : "No refresh run has been recorded.");
         }
-        if (value?.status === "succeeded" && published.current !== value.runId) { published.current = value.runId; onPublished(); }
+        if (value?.status === "succeeded" && lastPublishedRunId.current !== value.runId) {
+          lastPublishedRunId.current = value.runId;
+          onPublished();
+        }
       },
-      onFailure: (failure) => { setMessage(failure.message); if (failure.kind === "forbidden") { setRun(null); setDenied(true); } },
-      onRejected: () => { setMessage("Refresh response unavailable. Check status or retry admission deliberately."); },
+      onFailure: (failure) => {
+        setMessage(failure.message);
+        if (failure.kind === "forbidden") {
+          setRun(null);
+          setDenied(true);
+        }
+      },
+      onRejected: () => {
+        setMessage("Refresh response unavailable. Check status or retry admission deliberately.");
+      },
     });
-    if (request.current === abort) { request.current = null; if (runtime.isCurrent(context)) setPending(false); }
+    if (activeRequestAbort.current === requestAbort) {
+      activeRequestAbort.current = null;
+      if (runtime.isCurrent(context)) setPending(false);
+    }
   }
   return {
-    run, message, pending, denied,
+    run,
+    message,
+    pending,
+    denied,
     retryAdmission: !pending && unconfirmedAdmissionKey.current !== null,
     canRefresh: session.status === "authenticated" && session.session.capabilities.canRefreshDatasets,
     start: () => requestRefresh("admit"),
