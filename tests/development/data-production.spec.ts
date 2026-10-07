@@ -30,8 +30,8 @@ for (const role of ["viewer", "analyst", "admin"] as const) {
       if (url.pathname === "/api/datasets") return route.fulfill({ status: 200, json: body(`catalog_${role}`) });
       if (url.pathname === "/api/datasets/national/preview") {
         reads.push(url.search);
-        expect(url.searchParams.get("page_size")).toBe("100");
-        return route.fulfill({ status: 200, json: { ...body("preview_national"), expires_at: expiry } });
+        expect(["10", "100"]).toContain(url.searchParams.get("page_size"));
+        return route.fulfill({ status: 200, json: { ...body("preview_national"), page_size: Number(url.searchParams.get("page_size")), expires_at: expiry } });
       }
       if (url.pathname === "/api/query" && request.method() === "POST") {
         posts.push({ url: url.search, sql: request.postData(), csrf: request.headers()["x-csrf-token"] });
@@ -117,4 +117,86 @@ test("configured production backend failures stay explicit without fallback or S
   await page.getByRole("link", { name: "SQL Workspace", exact: true }).click();
   await expect(page.getByRole("table")).toHaveCount(0);
   expect(posts).toBe(1);
+});
+
+test("both tables start at ten rows, resize and paginate without changing the Overview series", async ({ page }) => {
+  const expiry = new Date(Date.now() + 600_000).toISOString();
+  const preview = body("preview_national");
+  const first = (preview.rows as string[][])[0];
+  if (!first) throw new Error("Synthetic national row required");
+  const rows = Array.from({ length: 23 }, (_, index) => [
+    `2026-09-${String(23 - index).padStart(2, "0")}`, ...first.slice(1),
+  ]);
+  const reads: URL[] = [];
+  const errors: string[] = [];
+  page.on("pageerror", (error) => { errors.push(error.message); });
+  await page.route("**/api/**", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname === "/api/auth/session") return route.fulfill({ status: 200, json: {
+      user: { id: "controlled-user", email: "controlled@example.invalid", role: "analyst" }, expires_at: expiry, csrf_token: "controlled-csrf",
+    } });
+    if (url.pathname === "/api/datasets") {
+      const catalog = body("catalog_analyst");
+      const datasets = catalog.datasets as { coverage: { start_date: string; end_date: string } }[];
+      for (const dataset of datasets) dataset.coverage = { start_date: "2026-09-01", end_date: "2026-09-23" };
+      return route.fulfill({ status: 200, json: catalog });
+    }
+    if (url.pathname === "/api/datasets/national/preview") {
+      reads.push(url);
+      const cursor = url.searchParams.get("cursor");
+      if (cursor) expect([...url.searchParams.keys()]).toEqual(["cursor"]);
+      const [size, offset] = cursor ? cursor.split(":").map(Number) : [Number(url.searchParams.get("page_size")), 0];
+      if (!size || offset === undefined) throw new Error("Invalid controlled page request");
+      const end = offset + size;
+      return route.fulfill({ status: 200, json: {
+        ...preview, rows: rows.slice(offset, end), page_size: size,
+        page_cursor: `${String(size)}:${String(offset)}`,
+        next_cursor: end < rows.length ? `${String(size)}:${String(end)}` : null,
+        has_more: end < rows.length, expires_at: expiry,
+      } });
+    }
+    return route.fulfill({ status: 503, json: { error: "service_unavailable" } });
+  });
+  await page.goto("/overview");
+  const daily = page.getByRole("table", { name: "Daily national observations" });
+  await expect(daily.getByRole("row")).toHaveCount(11);
+  await expect(page.getByLabel("Rows per page", { exact: true })).toHaveValue("10");
+  const chart = page.locator("svg[data-chart=national-trend]");
+  await expect(chart.locator("circle")).toHaveCount(23);
+  const requestsAfterSeries = reads.length;
+  const dailyPages = page.getByRole("navigation", { name: "Daily observations pagination" });
+  await dailyPages.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(daily.getByRole("cell", { name: "2026-09-11", exact: true })).toBeVisible();
+  await dailyPages.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(daily.getByRole("row")).toHaveCount(4);
+  await expect(dailyPages.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
+  await page.getByLabel("Rows per page", { exact: true }).selectOption("20");
+  await expect(daily.getByRole("row")).toHaveCount(21);
+  await expect(dailyPages.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
+  await expect(chart.locator("circle")).toHaveCount(23);
+  expect(reads).toHaveLength(requestsAfterSeries);
+
+  await page.getByRole("button", { name: "Explore dataset", exact: true }).click();
+  await expect(page).toHaveURL(/\/datasets$/);
+  const explorer = page.getByRole("table");
+  await expect(explorer.getByRole("row")).toHaveCount(11);
+  await expect(page.getByLabel("Rows per page", { exact: true })).toHaveValue("10");
+  const previewPages = page.getByRole("navigation", { name: "Preview continuation" });
+  await previewPages.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(explorer.getByRole("cell", { name: "2026-09-13", exact: true })).toBeVisible();
+  await previewPages.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(explorer.getByRole("row")).toHaveCount(4);
+  await expect(previewPages.getByRole("button", { name: "Next", exact: true })).toBeDisabled();
+  await previewPages.getByRole("button", { name: "Previous", exact: true }).click();
+  await expect(explorer.getByRole("cell", { name: "2026-09-13", exact: true })).toBeVisible();
+  await page.getByLabel("Rows per page", { exact: true }).fill("20");
+  await page.getByRole("button", { name: "Apply filters", exact: true }).click();
+  await expect(explorer.getByRole("row")).toHaveCount(21);
+  await expect(previewPages.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
+  expect(reads.at(-1)?.searchParams.get("page_size")).toBe("20");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByLabel("Rows per page", { exact: true })).toBeVisible();
+  await previewPages.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(explorer.getByRole("row")).toHaveCount(4);
+  expect(errors).toEqual([]);
 });

@@ -38,6 +38,10 @@ the [fixtures](data-api-v1/fixtures.json) and backend supplemental HTTP referenc
 
 First page: `GET /api/datasets/{dataset}/preview`, with optional inclusive
 `start_date`, `end_date`, `page_size` (default 100, allowed 1–500).
+The October 6 web preference explicitly sends 10 initially in Dataset Explorer;
+its adjustable size starts a new sequence. Overview still assembles the complete
+national series through 100-row backend pages for its chart and cards, then
+presents the Daily observations table in adjustable pages starting at 10 rows.
 Either date side can be omitted; both omitted browse all stored coverage.
 Facility/generator ID filters are explicitly excluded initially and rejected,
 not ignored. A valid range without matching observations returns an empty page.

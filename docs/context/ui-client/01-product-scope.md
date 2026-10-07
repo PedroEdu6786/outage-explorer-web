@@ -102,10 +102,16 @@ Source-percentage differences alone do not invalidate an observation.
 As requested on October 6, Overview MW values in the Offline capacity and
 Reported fleet capacity cards and Daily observations table display at most two
 decimal places, truncating extra digits without changing exact source values.
-Percentage displays retain the two-decimal half-up behavior above. The requested
-20-row daily table pagination is deferred to a separate update.
+Percentage displays retain the two-decimal half-up behavior above.
 The same two-decimal truncation applies to decimal cells in Dataset Explorer
 previews, preserving exact values, opaque identifiers and missing values.
+
+The October 6 pagination follow-up starts both tables at 10 rows per page,
+superseding the earlier proposed 20-row limit. Overview offers 10, 20, 50, 100
+and 500 rows per page with Previous/Next controls over its complete loaded series;
+changing page or size does not limit the chart or latest-day cards. Dataset
+Explorer keeps its adjustable 1–500 row size and backend cursor pagination,
+starting a new sequence on size changes. SQL execution settings are independent.
 
 Use observation dates as calendar dates, without timezone shifts. Missing or
 excluded observations are unavailable, not zero. A valid zero outage displays

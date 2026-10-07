@@ -20,7 +20,7 @@ function Demo({ mode = "ready" }: { readonly mode?: "ready" | "viewer" | "empty"
     <ExplorerFeature operations={controller.operations} runtime={runtime} initialPageSize={1} onNavigate={(intent) => { globalThis.alert(`Synthetic in-memory handoff: ${intent.datasetId}. No SQL executed.`); }} />
   </div>;
 }
-const meta = { title: "Features/Explorer", component: Demo, parameters: { docs: { description: { component: "V3/O3 authorized catalog, Preview/Schema, metadata filters and snapshot-bound cursor browsing. Synthetic fixture adapter only; live backend authorization remains unverified. Page size 1 is a test choice for cursor demonstration; normal default is 100." } } } } satisfies Meta<typeof Demo>;
+const meta = { title: "Features/Explorer", component: Demo, parameters: { docs: { description: { component: "V3/O3 authorized catalog, Preview/Schema, metadata filters and snapshot-bound cursor browsing. Synthetic fixture adapter only; live backend authorization remains unverified. Page size 1 is a test choice for cursor demonstration; normal default is 10." } } } } satisfies Meta<typeof Demo>;
 export default meta;
 type Story = StoryObj<typeof meta>;
 const wrap = (options: FixtureOptions, mode: Parameters<typeof Demo>[0]["mode"] = "ready") => <FixtureProvider options={options}><Demo mode={mode} /></FixtureProvider>;

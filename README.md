@@ -227,7 +227,11 @@ Analytical data registration is complete; live acceptance remains separate.
 Backend-integration Phase 4 registers catalog, embedded schema, cursor previews,
 complete national metrics and retained SQL operations using the existing
 auth-owned session and memory-only CSRF transport. Preview and next-execution
-SQL settings are independent: default 100, maximum 500. Overview → Explorer →
+SQL settings are independent: preview starts at 10, SQL at 100, maximum 500.
+Overview's Daily observations table starts at 10 with an adjustable size and
+Previous/Next controls over its complete loaded series; the chart and latest-day
+cards retain the full selected range. Explorer uses backend cursor pagination.
+Overview → Explorer →
 SQL handoffs stay in memory and prepare unsent SQL; edited drafts still require
 consent. Viewer routes remain Overview only.
 

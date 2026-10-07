@@ -15,7 +15,7 @@ export interface ExplorerControllerOptions {
 }
 
 /** The controller owns one cursor sequence; adapters own transport and permissions. */
-export function createExplorerController({ operations, runtime, now = Date.now, initialPageSize = 100 }: ExplorerControllerOptions) {
+export function createExplorerController({ operations, runtime, now = Date.now, initialPageSize = 10 }: ExplorerControllerOptions) {
   let state = emptyExplorerState;
   let selectionVersion = 0;
   let catalogVersion = 0;

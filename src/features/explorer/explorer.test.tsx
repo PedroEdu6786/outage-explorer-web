@@ -77,14 +77,14 @@ describe("Explorer authorized cursor lifecycle", () => {
     expect(fixture.callLog.read().filter((call) => call.operation === "readSchema").map((call) => call.input)).toEqual([{ datasetId: "synthetic-national" }]);
     expect(controller.getSnapshot().schema?.columns.some((column) => column.kind === "identifier")).toBe(false);
   });
-  it("starts at 100 by default and refuses invalid calendars, ranges, unsupported facilities and sizes", async () => {
+  it("starts at 10 by default and refuses invalid calendars, ranges, unsupported facilities and sizes", async () => {
     const fixture = createFixtureOperations();
     const runtime = createSessionRuntime();
     runtime.setResolution(fixture.sessionResolution());
     const controller = createExplorerController({ operations: fixture.operations, runtime });
     releases.push(() => { runtime.dispose(); }, controller.connect());
     await ready(controller);
-    expect(controller.getSnapshot().selection?.pageSize).toBe(100);
+    expect(controller.getSnapshot().selection?.pageSize).toBe(10);
     const count = fixture.callLog.read().length;
     for (const [filters, size] of [
       [{ dates: { start: "2026-02-30", end: "2026-09-03" } }, 100],

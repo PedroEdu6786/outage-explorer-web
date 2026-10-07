@@ -57,8 +57,10 @@ before requesting data, then respect backend validation. Changes to dataset,
 filters or page size start a new browsing sequence. Ignore stale responses
 from the previous selection.
 
-Preview pagination defaults to 100 rows, with an initial configurable maximum
-of 500. The continuation cursor belongs to the original caller, dataset,
+The web preview starts at 10 rows per page as requested on October 6, with an
+adjustable maximum of 500; the API's omitted-size default remains 100. Overview's
+Daily observations table also starts at 10, paging through the complete series
+already loaded for its chart and cards. The continuation cursor belongs to the original caller, dataset,
 filters, ordering and snapshot. It expires 15 minutes after the first page;
 continuation does not renew it. Refresh publication must not mix newer rows
 into that sequence. On expiry, explain that browsing must restart and provide

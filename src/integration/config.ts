@@ -1,7 +1,7 @@
 export type LiveConfiguration = { readonly status: "unavailable" } | { readonly status: "configured"; readonly apiOrigin: string };
 
 /** Independent public request settings; each API enforces its own 1–500 bound. */
-export const productionPreviewSettings = { initialPageSize: 100, maximumPageSize: 500 } as const;
+export const productionPreviewSettings = { initialPageSize: 10, maximumPageSize: 500 } as const;
 export const productionQuerySettings = { initialPageSize: 100, maximumPageSize: 500 } as const;
 
 /** Server configuration only. Never serialize the backend address or secrets to clients. */

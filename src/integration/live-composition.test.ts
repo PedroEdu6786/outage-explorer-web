@@ -6,7 +6,7 @@ import { createAuthService } from "../features/auth/service";
 import fixtures from "../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 
 it("supplies independent preview and SQL request settings", () => {
-  expect(productionPreviewSettings).toEqual({ initialPageSize: 100, maximumPageSize: 500 });
+  expect(productionPreviewSettings).toEqual({ initialPageSize: 10, maximumPageSize: 500 });
   expect(productionQuerySettings).toEqual({ initialPageSize: 100, maximumPageSize: 500 });
   expect(productionPreviewSettings).not.toBe(productionQuerySettings);
 });
