@@ -154,6 +154,29 @@ and backend [challenge criteria index](../outage-explorer/docs/challenge/README.
 for details. The latter paraphrases the original challenge PDF and requires the
 sibling backend checkout.
 
+### Submission documentation
+
+The documentation is shared across the two projects. Backend documents own the
+data model, findings and service decisions; the Engineering Notes cover work on
+both repositories.
+
+| Document | Scope |
+| --- | --- |
+| [PRODUCT.md](PRODUCT.md) | One-page frontend summary: added stories, UX choices, omissions and next steps. |
+| [Engineering Notes](../outage-explorer/NOTES.md) | Human and AI contributions, AI mistakes and verification beyond running generated code. |
+| [DECISIONS.md](../outage-explorer/DECISIONS.md) | Required challenge decisions, with choices, rejected alternatives and reasons. |
+| [Frontend decisions](docs/specs/web-client/council/03-decisions.md) | Component/workflow boundaries, session races, pagination and fixture isolation; newer [auth](docs/specs/web-client/contracts/auth.md) and [data](docs/specs/web-client/contracts/data-api.md) contracts record subsequent integration choices. |
+| [FINDINGS.md](../outage-explorer/FINDINGS.md) | Reconciliation and real anomalies, linked to reproducible evidence. |
+| [Data model and ER diagrams](../outage-explorer/docs/context/data-model.md) | Backend-owned schema, keys, relationships and diagrams. |
+
+Cross-project links assume sibling `outage-explorer-web` and `outage-explorer`
+checkouts; the backend files are not included in a frontend-only checkout.
+This repository supplies Part 4; the API repository supplies Parts 1–3.
+The challenge requests **one Git repository containing all four parts and their
+incremental history**. The current two-repository arrangement leaves that
+submission packaging requirement unresolved. Final delivery must reconcile it
+while preserving both histories; these links alone do not satisfy it.
+
 ## Checks
 
 ```sh
