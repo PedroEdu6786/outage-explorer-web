@@ -183,3 +183,13 @@ and actual gates are in [verification/phase-4.md](verification/phase-4.md).
 
 - Named-target live acceptance remains separate from this authorized motion work.
 - Human [motion visual sign-off](verification/visual-signoff.md) remains pending, separate from Figma fidelity evidence.
+
+
+## October 7 accepted chart viewport extension
+
+The subsequent [Overview zoom requirement](../overview-chart-zoom/spec.md)
+(FR21/AC24) adds smooth zoom/pan/reset timeline projection using the existing
+movement token. The exclusion of chart value/series interpolation still applies:
+only horizontal projection moves; original y values, gaps and marker shape do
+not morph. CSS-only, reduced-motion and immediate protected-state removal
+principles remain in force.

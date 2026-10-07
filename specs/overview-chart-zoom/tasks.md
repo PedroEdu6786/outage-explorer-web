@@ -50,3 +50,13 @@
 ## Open decisions
 
 - None. Live environment/account and real-device availability are verification prerequisites, not unresolved product choices. The documented plan assumptions remain explicit.
+
+
+## Authorized viewport-motion follow-up — October 7
+
+- [x] **M1:** Add shared CSS horizontal projection transitions and synchronous
+  lifecycle cancellation; preserve exact values/gaps and existing chart ownership.
+- [x] **M2:** Verify intermediate/final geometry, retarget/reset, reduced-motion,
+  lifecycle and native narrow-wheel settling; run relevant regression/build gates.
+  Evidence: [viewport motion](verification/viewport-motion.md) (FR21/AC24).
+- Physical-device/human and user-owned live gates T4.3/T4.4/T4.C remain pending.

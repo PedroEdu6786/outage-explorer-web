@@ -186,3 +186,10 @@ See the [expected-versus-available proposal and implementation record](../../spe
 Controlled tests do not establish live acceptance. Backend auth is ready per the
 user; the earlier expectation of no API responses now applies to data services.
 Earlier fixture milestones remain historical evidence.
+
+
+October 7 zoom follow-up: user-requested smooth zoom/pan/reset moves only the
+chart's time projection over the shared 200ms movement duration. Daily values,
+vertical scale, missing-data gaps and round markers remain unchanged; reduced
+motion places the requested window immediately. Inputs and inspection do not
+wait for motion. See [motion evidence](../../../specs/overview-chart-zoom/verification/viewport-motion.md).

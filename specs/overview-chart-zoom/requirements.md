@@ -76,3 +76,9 @@ keys, visible + / − buttons, horizontal touch swipes, a shared visible Reset
 zoom button, and a toggle reachable with Tab and operated with Space or touch.
 Zoom and movement require Zoom mode; switching it off preserves the current
 window and restores ordinary page scrolling.
+
+
+October 7 follow-up: after trying zoom, the user requested visible graph
+animation. Zoom, pan and reset now require smooth timeline movement, preserving
+original daily values and gaps and honoring reduced motion. This extends the
+previously agreed viewport behavior; it does not authorize value interpolation.

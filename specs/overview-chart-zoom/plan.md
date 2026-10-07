@@ -76,7 +76,7 @@ Grounded at revision `5507fe7`: NationalTrend uses a 920×300 SVG, a horizontal 
 
 - Replace the SVG with a zoom-enabled chart library — rejected because the existing exact-label, missing-data and lifecycle behavior would require migration for a bounded local interaction. (FR9, TR1, TR3)
 - Reapply page date filters for zoom — rejected because it changes cards/table scope and triggers data workflows. (FR8)
-- Use CSS magnification — rejected because it enlarges labels and geometry rather than laying out fewer days over the existing chart width. (FR2, FR9)
+- Use whole-chart CSS magnification — rejected because it enlarges labels and geometry rather than laying out fewer days over the existing chart width. (FR2, FR9)
 
 ## Test strategy
 
@@ -100,3 +100,29 @@ Grounded at revision `5507fe7`: NationalTrend uses a 920×300 SVG, a horizontal 
 ## Open decisions
 
 _None._
+
+
+## October 7 viewport-motion extension (FR21 / AC24)
+
+Use the existing 200ms movement and ease-out tokens for CSS transitions of two
+registered, inherited horizontal projection numbers. Stable full-applied-range
+line segments retain source gap topology; only x is transformed, with non-scaling
+strokes. Target-window circles inherit the same projection for cx; cy and radius
+stay unchanged. Clip the plot with marker-radius padding. Axis labels and
+inspection choices reflect the requested window immediately while presentation
+settles, with no service/state work waiting for animation completion.
+
+Native CSS transitions retarget from their current position. Mode/availability
+changes synchronously suppress and restore transitions to place the accepted
+target; Reset while mode is off can still animate. Applied-bound or snapshot
+identity replaces only the projection group, preventing old movement continuing.
+The SVG entrance identity is unchanged. Existing global reduced-motion and
+Storybook motion-off durations make placement immediate. No animation runtime,
+frame tween, chart dependency or metric interpolation is introduced.
+
+Validate actual intermediate circle and line geometry, round markers and exact
+labels; rapid pan/reset, mode-off Reset, unavailable/identity changes, natural
+wheel settling at a narrow viewport, and reduced-motion/off end states. Keep the
+existing page-scope, input ownership, missing-data and protected-state suites.
+This interaction extends the supplied static Overview Figma evidence; it does
+not claim a new animation was specified by those captures.

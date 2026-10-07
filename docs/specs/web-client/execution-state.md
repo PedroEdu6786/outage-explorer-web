@@ -368,3 +368,25 @@ performed by this documentation update.
   [Manual checklist](../../../specs/overview-chart-zoom/verification/live.md).
 - All independent implementation/tests/docs complete. Only owned servers were
   stopped; no credentials, external runtime edits, push or deployment.
+
+## Overview viewport motion follow-up — October 7 assignment
+
+- User requests visible zoom/pan/reset animation after trying the chart.
+  `overview_zoom_spec` owns rendering-only CSS projection, tests/evidence,
+  scoped contract updates and local commit; coordinator reviews read-only.
+- Preserve source values, y geometry, missing-data gaps, chart-only state and
+  native input ownership. Use existing 200ms movement/easing tokens, immediate
+  reduced-motion/motion-off, cancellation on unavailable/identity changes.
+- Existing physical-device/human and user-owned live acceptance remain pending.
+
+## Overview viewport motion follow-up — completed automated checks
+
+- M1/M2 and FR21/AC24 implemented with CSS timeline projection and lifecycle
+  cancellation. [Evidence](../../../specs/overview-chart-zoom/verification/viewport-motion.md)
+  records 487 units, 33 boundary tests, type/lint/build/source/artifact checks,
+  26 existing affected browser passes and five new actual-geometry motion passes.
+- Normal/reduced/motion-off, intermediate retarget, unavailable/identity cleanup
+  and naturally settling native narrow-wheel input verified. Source values and
+  original chart/page/protected-state contracts remain intact.
+- Coordinator source/test review found no blockers. Live/device/human gates
+  remain user-owned/pending; only owned servers stopped, no push/deployment.

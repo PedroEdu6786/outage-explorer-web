@@ -33,6 +33,8 @@ dates and restore the full applied range within the Overview graph.
 - **FR19:** WHEN the user swipes horizontally over the plot with Zoom mode enabled THE SYSTEM SHALL move the visible window toward neighboring dates in the requested direction without changing its span, up to the applied-date bounds.
 - **FR20:** WHILE Zoom mode is disabled THE SYSTEM SHALL prevent zoom and window-movement inputs from changing the visible window, with Reset zoom remaining available.
 
+- **FR21:** WHEN zooming, moving or resetting the chart window THE SYSTEM SHALL smoothly move the timeline projection, with immediate placement when reduced motion is requested.
+
 ### Technical / Non-functional
 - **TR1:** Zoom preserves the existing daily observations and their original values; magnification does not introduce finer-grained observations.
 - **TR2:** Observation dates retain their calendar-date meaning without timezone shifts.
@@ -83,6 +85,8 @@ dates and restore the full applied range within the Overview graph.
 - [ ] **AC21:** Tapping or keyboard-activating the visible + / − buttons with Zoom mode enabled narrows / widens the window within its limits. (verifies FR18)
 - [ ] **AC22:** A horizontal touch swipe with Zoom mode enabled moves the window toward neighboring dates without changing its span or passing the applied bounds. (verifies FR19)
 - [ ] **AC23:** With Zoom mode disabled, zoom keys/buttons and window-movement keys/gestures leave the visible window unchanged while Reset zoom remains usable. (verifies FR20)
+
+- [ ] **AC24:** Zoom, pan and reset visibly pass through intermediate horizontal positions, retarget promptly on new input and settle at the requested window; source values, vertical positions, marker shape and gaps remain unchanged. Reduced motion places the projection immediately. (verifies FR21, TR1, TR3)
 
 ## Open Clarifications
 _None._

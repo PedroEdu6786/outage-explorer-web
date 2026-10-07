@@ -270,3 +270,34 @@
   transition-duration: var(--duration-move);
   transition-timing-function: var(--ease-out);
 }
+
+/* One inherited projection keeps lines and round markers synchronized without
+   interpolating values, gaps or dates. Registered numbers retarget natively. */
+@property --chart-x-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --chart-x-offset {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 60;
+}
+
+@utility motion-chart-viewport {
+  transition-property: --chart-x-scale, --chart-x-offset;
+  transition-duration: var(--duration-move);
+  transition-timing-function: var(--ease-out);
+
+  &[data-interactive="false"] { transition-duration: 0s; }
+}
+
+@utility chart-projected-line {
+  transform: matrix(var(--chart-x-scale), 0, 0, 1, var(--chart-x-offset), 0);
+  transform-origin: 0 0;
+}
+
+@utility chart-projected-point {
+  cx: calc((var(--chart-day) * var(--chart-x-scale) + var(--chart-x-offset)) * 1px);
+}

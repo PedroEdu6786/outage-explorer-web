@@ -1,5 +1,5 @@
 "use client";
-import { useId, useMemo, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { NationalSeries } from "../../contracts/observations";
 import type { DateBounds } from "../../contracts/catalog";
 import { Checkbox } from "../../components/atoms/Checkbox";
@@ -25,8 +25,8 @@ export function NationalTrend({ series, range = series.range, interactive = true
   const viewport = useChartViewport(full, range, interactive);
   const window = viewport.window;
   const rows = useMemo(() => window ? appliedRows.filter((row) => row.date >= window.start && row.date <= window.end) : [], [appliedRows, window]);
-  const calculated = useMemo(() => plotSegments(rows, "calculatedPercentage"), [rows]);
-  const reported = useMemo(() => plotSegments(rows, "reportedPercentage"), [rows]);
+  const calculated = useMemo(() => plotSegments(appliedRows, "calculatedPercentage"), [appliedRows]);
+  const reported = useMemo(() => plotSegments(appliedRows, "reportedPercentage"), [appliedRows]);
   const scale = useMemo(() => {
     const points = [...plotSegments(appliedRows, "calculatedPercentage").flat(), ...(compare ? plotSegments(appliedRows, "reportedPercentage").flat() : [])];
     return { max: Math.max(1, ...points.map((point) => point.value)), min: Math.min(0, ...points.map((point) => point.value)) };
@@ -36,6 +36,22 @@ export function NationalTrend({ series, range = series.range, interactive = true
   const endDate = window?.end ?? "";
   const start = dayCoordinate(startDate);
   const span = Math.max(1, dayCoordinate(endDate) - start);
+  const projectionRef = useRef<SVGGElement>(null);
+  const origin = dayCoordinate(full?.start ?? "");
+  const projectionStyle = {
+    "--chart-x-scale": 810 / span,
+    "--chart-x-offset": 60 - (start - origin) * 810 / span,
+  } as CSSProperties;
+  // Cancel presentation movement synchronously when input ownership changes.
+  // Reset remains animated even with Zoom mode off; no data state waits on CSS.
+  useLayoutEffect(() => {
+    const projection = projectionRef.current;
+    if (projection) {
+      projection.style.transitionProperty = "none";
+      getComputedStyle(projection).getPropertyValue("--chart-x-scale");
+      projection.style.removeProperty("transition-property");
+    }
+  }, [viewport.enabled, interactive]);
   const x = (date: string) => 60 + (dayCoordinate(date) - start) / span * 810;
   // Once an inspected day leaves the window, returning to it must not revive it.
   if (selected !== null && !rows.some((row) => row.date === selected)) setSelected(null);
@@ -59,9 +75,27 @@ export function NationalTrend({ series, range = series.range, interactive = true
           const value = min + (max - min) * index / 3;
           return <g key={index}><line x1="60" x2="870" y1={y(value)} y2={y(value)} stroke="#dce3e7" /><text x="48" y={y(value) + 4} textAnchor="end" fontSize="11" fill="#5f707a">{value.toFixed(1)}%</text></g>;
         })}
-        {([calculated, ...(compare ? [reported] : [])]).map((segments, seriesIndex) => <g key={seriesIndex} className={seriesIndex === 1 ? "animate-fade-in" : undefined} fill="none" stroke={seriesIndex === 0 ? "#087d82" : "#246b9e"} strokeWidth="2" data-series={seriesIndex === 0 ? "calculated" : "reported"}>
-          {segments.map((segment, index) => <g key={index}><polyline data-segment="observed" points={segment.map((point) => `${String(x(point.date))},${String(y(point.value))}`).join(" ")} />{segment.map((point) => <circle key={point.date} cx={x(point.date)} cy={y(point.value)} r="4" fill="white" onMouseEnter={() => { if (interactive) setSelected(point.date); }}><title>{point.date}: {seriesIndex === 0 ? "Calculated" : "EIA reported"} {point.label}</title></circle>)}</g>)}
-        </g>)}
+        <defs><clipPath id={`${id}-plot`}><rect x="56" y="61" width="818" height="193" /></clipPath></defs>
+        <g clipPath={`url(#${id}-plot)`}>
+          <g key={`${range.start ?? ""}:${range.end ?? ""}:${full?.start ?? ""}:${full?.end ?? ""}:${series.provenance.snapshotId}`} ref={projectionRef}
+            className="motion-chart-viewport" data-interactive={interactive} style={projectionStyle}>
+            {([calculated, ...(compare ? [reported] : [])]).map((segments, seriesIndex) => <g key={seriesIndex}
+              className={seriesIndex === 1 ? "animate-fade-in" : undefined} fill="none"
+              stroke={seriesIndex === 0 ? "#087d82" : "#246b9e"} strokeWidth="2"
+              data-series={seriesIndex === 0 ? "calculated" : "reported"}>
+              {segments.map((segment, index) => <g key={index}>
+                <polyline className="chart-projected-line" vectorEffect="non-scaling-stroke" data-segment="observed"
+                  points={segment.map((point) => `${String(dayCoordinate(point.date) - origin)},${String(y(point.value))}`).join(" ")} />
+                {segment.filter((point) => point.date >= startDate && point.date <= endDate).map((point) => <circle
+                  key={point.date} className="chart-projected-point" style={{ "--chart-day": dayCoordinate(point.date) - origin } as CSSProperties}
+                  cx={x(point.date)} cy={y(point.value)} r="4" fill="white"
+                  onMouseEnter={() => { if (interactive) setSelected(point.date); }}>
+                  <title>{point.date}: {seriesIndex === 0 ? "Calculated" : "EIA reported"} {point.label}</title>
+                </circle>)}
+              </g>)}
+            </g>)}
+          </g>
+        </g>
         <text x="60" y="285" fontSize="11" fill="#5f707a">{startDate}</text><text x="870" y="285" textAnchor="end" fontSize="11" fill="#5f707a">{endDate}</text>
       </svg>
       </div>
