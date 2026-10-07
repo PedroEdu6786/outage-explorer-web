@@ -7,7 +7,6 @@ import { createSessionRuntime } from "../../session/session-runtime";
 import { ExplorerFeature } from "./ExplorerFeature";
 import { DatasetSchema } from "./DatasetSchema";
 import { DatasetPreview } from "./DatasetPreview";
-import { isCalendarDate } from "./preview-state";
 import { createExplorerController, type ExplorerOperations } from "./service";
 
 const releases: (() => void)[] = [];
@@ -89,13 +88,12 @@ describe("Explorer authorized cursor lifecycle", () => {
     const count = fixture.callLog.read().length;
     for (const [filters, size] of [
       [{ dates: { start: "2026-02-30", end: "2026-09-03" } }, 100],
+      [{ dates: { start: "0000-02-29" } }, 100],
       [{ dates: { start: "2026-09-04", end: "2026-09-01" } }, 100],
       [{ facilityId: "0012" }, 100], [{}, 501], [{}, 0], [{}, 1.5],
     ] as const) controller.select("synthetic-national", filters, size);
     expect(fixture.callLog.read()).toHaveLength(count);
     expect(controller.getSnapshot().failure?.kind).toBe("invalid-input");
-    expect(isCalendarDate("2024-02-29")).toBe(true);
-    expect(isCalendarDate("2100-02-29")).toBe(false);
   });
   it("accepts optional bounds and empty results outside coverage while forbidding facility filters for Analysts", async () => {
     const { controller, fixture } = setup(); await ready(controller);

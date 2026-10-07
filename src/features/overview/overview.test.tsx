@@ -11,7 +11,7 @@ import { NationalMetricCards } from "./NationalMetricCards";
 import { DailyObservations } from "./DailyObservations";
 import { NationalTrend } from "./NationalTrend";
 import { observationTable, plotSegments } from "./presentation";
-import { validCalendarDate, validRange } from "./service";
+import { validRange } from "./service";
 import type { NavigationIntent } from "../../contracts/navigation";
 import type { NationalObservation } from "../../contracts/observations";
 
@@ -52,9 +52,11 @@ describe("Overview exact observation behavior", () => {
     expect(screen.getAllByText("Unavailable")).toHaveLength(3);
   });
   it("rejects nonexistent calendar dates and reversed ranges without timezone conversion", () => {
-    expect(validCalendarDate("2026-02-29")).toBe(false);
-    expect(validCalendarDate("2024-02-29")).toBe(true);
-    expect(validCalendarDate("2026-09-01")).toBe(true);
+    expect(validRange({ start: "2026-02-29" })).toBe(false);
+    expect(validRange({ start: "2024-02-29" })).toBe(true);
+    expect(validRange({ end: "2026-09-01" })).toBe(true);
+    expect(validRange({})).toBe(true);
+    expect(validRange({ start: "0000-02-29" })).toBe(true);
     expect(validRange({ start: "2026-09-03", end: "2026-09-01" })).toBe(false);
   });
   it("breaks lines across explicit and omitted dates, never treats unavailable as zero", () => {

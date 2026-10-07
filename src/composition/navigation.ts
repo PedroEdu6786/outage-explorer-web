@@ -2,6 +2,7 @@ import type { NavigationData } from "../components/organisms/AppNavigation";
 import type { NavigationIntent, NavigationOperations } from "../contracts/navigation";
 import type { SessionState } from "../contracts/session";
 import type { SessionRuntime } from "../session/session-runtime";
+import { isCalendarDate } from "../lib/calendar-date";
 
 export type ApplicationPath = "/sign-in" | "/overview" | "/datasets" | "/query";
 export const routeTitles: Record<ApplicationPath, string> = { "/sign-in": "Sign in", "/overview": "Overview", "/datasets": "Dataset Explorer", "/query": "SQL Workspace" };
@@ -29,14 +30,13 @@ export function acceptsIntent(runtime: SessionRuntime, intent: NavigationIntent)
 /** Fixed public relation names from the accepted catalog contract; unsent text only. */
 export function createNavigationOperations(runtime: SessionRuntime): NavigationOperations {
   const relations: Record<string, string | undefined> = { national: "national", facilities: "facilities", generators: "generators" };
-  const validDate = (value: string | undefined) => value === undefined || (/^\d{4}-\d{2}-\d{2}$/.test(value)
-    && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value);
   return { consumeNavigationIntent(context, intent) {
     const relation = Object.hasOwn(relations, intent.datasetId) ? relations[intent.datasetId] : undefined;
     if (context.signal?.aborted || context.generation !== intent.generation || !acceptsIntent(runtime, intent)
       || relation === undefined) return { ok: false, failure: { kind: "forbidden", message: "Dataset context is unavailable." } };
     const { dates, facilityId } = intent.filters;
-    if (facilityId !== undefined || !validDate(dates?.start) || !validDate(dates?.end)
+    if (facilityId !== undefined || (dates?.start !== undefined && !isCalendarDate(dates.start))
+      || (dates?.end !== undefined && !isCalendarDate(dates.end))
       || (dates?.start !== undefined && dates.end !== undefined && dates.start > dates.end)) {
       return { ok: false, failure: { kind: "invalid-input", message: "Invalid navigation filters." } };
     }

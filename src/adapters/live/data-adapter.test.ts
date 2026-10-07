@@ -4,7 +4,7 @@ import { syntheticCatalogCachePolicy } from "../../../tests/fixtures/operations"
 import { describe, expect, it, vi } from "vitest";
 import fixtures from "../../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 import { decodeCatalog, decodePreview, decodeQuery } from "./data-mapping";
-import { columnSchema, columnsSchema } from "./data-schema";
+import { columnSchema, columnsSchema, dateSchema } from "./data-schema";
 import { createDataAdapter, type DataTransport } from "./data-adapter";
 import { decodeFailure } from "./error-mapping";
 import { mapNationalRows } from "./metric-mapping";
@@ -254,7 +254,14 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
     expect(backend.request.mock.calls[0]?.[1]).toBe("/api/datasets/national/preview?page_size=100&end_date=2026-10-01");
     expect(await adapter.startPreview(context, { ...selection, filters: { facilityId: "0012" } })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
     expect(await adapter.startPreview(context, { ...selection, filters: { dates: { start: "2026-02-30" } } })).toMatchObject({ ok: false });
+    expect(await adapter.startPreview(context, { ...selection, filters: { dates: { start: "0000-02-29" } } })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
     expect(backend.request).toHaveBeenCalledTimes(1);
+  });
+  it("keeps the data API's positive-year restriction for decoded calendar values", () => {
+    for (const value of ["0001-01-01", "2000-02-29", "9999-12-31"]) expect(dateSchema.safeParse(value).success).toBe(true);
+    for (const value of ["0000-01-01", "0000-02-29", "1900-02-29", "2026-04-31", "2026-01-01T00:00:00Z", null, 20260101]) {
+      expect(dateSchema.safeParse(value).success).toBe(false);
+    }
   });
   it("never repeats a POST after a lost response; retained pages contain no SQL", async () => {
     const backend = transport([]);

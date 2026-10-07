@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isCalendarDate } from "../../lib/calendar-date";
 
 const columnTypes = ["integer", "decimal", "float", "boolean", "string", "date", "time", "timestamp", "timestamp_tz", "binary", "list", "struct", "map", "null"] as const;
 const valueEncodings = ["integer-string", "decimal-string", "number-or-special-string", "boolean", "string", "iso-date", "iso-time", "iso-local-datetime", "iso-utc-datetime", "base64", "array", "field-array", "pair-array", "null"] as const;
@@ -44,10 +45,8 @@ const childSchema: z.ZodType<Descriptor> = z.object(descriptorFields).strict().r
 export const columnSchema = z.object({ ...descriptorFields, index: z.number().int().nonnegative(), nullable: z.boolean().nullable(), unit: z.string().nullable() }).strict().refine(validDescriptor);
 export const columnsSchema = z.array(columnSchema).refine((columns) => columns.every((column, index) => column.index === index));
 export const opaqueSchema = z.string().min(1).max(256);
-export const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => {
-  const date = new Date(`${value}T00:00:00Z`);
-  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value && !value.startsWith("0000");
-});
+// The data API excludes year zero in addition to ordinary calendar validation.
+export const dateSchema = z.string().refine((value) => isCalendarDate(value) && !value.startsWith("0000"));
 export const instantSchema = z.iso.datetime();
 const coverageSchema = z.object({ start_date: dateSchema.nullable(), end_date: dateSchema.nullable() }).strict().refine((range) => (range.start_date === null && range.end_date === null) || (range.start_date !== null && range.end_date !== null && range.start_date <= range.end_date));
 export const datasetIdSchema = z.enum(["national", "facilities", "generators"]);
