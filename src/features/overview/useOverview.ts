@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { DatasetSummary, DateBounds } from "../../contracts/catalog";
 import type { OperationFailure } from "../../contracts/failures";
 import type { NationalSeries } from "../../contracts/observations";
 import type { NavigationIntent } from "../../contracts/navigation";
 import { useSessionRuntime, useSessionState } from "../../session/SessionProvider";
 import { guardCurrent, guardOperation } from "../../session/guard-operation";
-import { createOverviewService, validRange, type OverviewOperations } from "./service";
+import { validRange, type OverviewOperations } from "./service";
 
 /**
  * Presentation-only memory of the series a range change is replacing. It is
@@ -21,7 +21,6 @@ interface RetainedSeries {
 export function useOverview(operations: OverviewOperations, onNavigate?: (intent: NavigationIntent) => void) {
   const runtime = useSessionRuntime();
   const session = useSessionState();
-  const service = useMemo(() => createOverviewService(runtime, operations), [runtime, operations]);
   const [dataset, setDataset] = useState<DatasetSummary | null>(null);
   const [series, setSeries] = useState<NationalSeries | null>(null);
   const [range, setRange] = useState<DateBounds>({});
@@ -50,7 +49,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     if (session.status !== "authenticated" || !session.session.capabilities.canReadNationalSeries) return;
     const abort = new AbortController();
     const context = runtime.capture(abort.signal);
-    void guardOperation(runtime, context, () => service.operations.listDatasets(context), {
+    void guardOperation(runtime, context, () => operations.listDatasets(context), {
       onSuccess: (catalog) => {
         const currentSession = runtime.getSnapshot();
         const national = catalog.find((item) => item.grain === "national"
@@ -74,7 +73,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     return () => {
       abort.abort();
     };
-  }, [runtime, service, session.generation, session.status, catalogReloadRevision]);
+  }, [runtime, operations, session.generation, session.status, catalogReloadRevision]);
   useEffect(() => {
     if (session.status !== "authenticated" || !session.session.capabilities.canReadNationalSeries || !dataset || !validRange(range)) {
       setPreviousSeries(null);
@@ -89,7 +88,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     setSeries(null);
     setFailure(null);
     const isCurrentSeriesRequest = () => requestVersion === seriesRequestVersion.current;
-    void guardOperation(runtime, context, () => service.operations.readNationalSeries(context, range), {
+    void guardOperation(runtime, context, () => operations.readNationalSeries(context, range), {
       onSuccess: (value) => {
         if (!isCurrentSeriesRequest()) return;
         setSeries(value);
@@ -113,7 +112,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     return () => {
       abort.abort();
     };
-  }, [dataset, range, seriesRetryRevision, runtime, service, session.generation, session.status]);
+  }, [dataset, range, seriesRetryRevision, runtime, operations, session.generation, session.status]);
   function changeRange(next: DateBounds) {
     setDraftRange(next);
     if (next.start === range.start && next.end === range.end) return;

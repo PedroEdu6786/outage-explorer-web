@@ -57,5 +57,3 @@ export const querySchema = z.object({
   && page.truncated === (page.truncation_reason !== null)
   && page.rows.length === Math.min(page.page_size, Math.max(0, page.retained_row_count - (page.page - 1) * page.page_size)));
 export type WireColumn = z.infer<typeof columnSchema>;
-export type WireCatalog = z.infer<typeof catalogSchema>;
-export type WirePreview = z.infer<typeof previewSchema>;
