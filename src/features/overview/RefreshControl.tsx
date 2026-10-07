@@ -18,9 +18,12 @@ const descriptions: Record<RefreshStatus, string> = {
 export function RefreshControl({ operations, onPublished }: { readonly operations?: RefreshOperations | undefined; readonly onPublished: () => void }) {
   const model = useRefresh(operations, onPublished);
   if (!model.canRefresh) return null;
+  const activeRun = model.run !== null && refreshActive(model.run.status);
+  // Same-key replay recovers an admission; it does not request a new run.
+  const admissionDisabled = model.pending || model.denied || (activeRun && !model.retryAdmission);
   return <section aria-label="Admin data refresh" className="mt-3 grid gap-3">
     <div className="flex flex-wrap gap-2">
-      <Button variant="secondary" disabled={model.pending || model.denied || !!(model.run && refreshActive(model.run.status))} onClick={() => { void model.start(); }}>{model.retryAdmission ? "Retry refresh admission" : "Refresh data"}</Button>
+      <Button variant="secondary" disabled={admissionDisabled} onClick={() => { void model.start(); }}>{model.retryAdmission ? "Retry refresh admission" : "Refresh data"}</Button>
       <Button variant="ghost" loading={model.pending} loadingLabel="Contacting refresh…" disabled={model.denied} onClick={() => { void model.check(); }}>Check refresh status</Button>
     </div>
     {model.run && <StatusMessage title={descriptions[model.run.status]} description={`Refresh interval: ${model.run.interval.start} – ${model.run.interval.end}${model.run.stage ? ` · Stage: ${model.run.stage}` : ""}`} pending={refreshActive(model.run.status)} icon={<Icon name={model.run.status === "succeeded" ? "check" : "warning"} size={16} />} tone={model.run.status === "succeeded" ? "success" : model.run.status === "failed" || model.run.status === "interrupted" ? "warning" : "neutral"} />}

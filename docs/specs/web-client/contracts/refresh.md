@@ -23,7 +23,8 @@ separate. Missing refresh configuration never substitutes fixture data.
 **Refresh data** explicitly submits the empty body and a new UUID idempotency
 key. Pending and active runs disable new admission. Uncertain admission offers
 **Retry refresh admission**, retaining the same key. **Check refresh status**
-reads the current run, or latest when no run is known; it never submits a POST.
+reads the confirmed current run, or latest when no run is known or admission is
+unconfirmed; it never submits a POST.
 Status distinguishes accepted/running, published success, retained data,
 failure/interruption and nonterminal unknown publication. There is no automatic
 POST retry, implicit source interval selector or invented progress percentage.
@@ -90,3 +91,24 @@ Polling uses status resources and advisory Retry-After, not a completion promise
 Cross-origin transport must allow Idempotency-Key and expose Location/Retry-After.
 Worker ownership, interruption reconciliation and runtime resource isolation
 remain backend implementation/verification gates.
+
+## Unconfirmed admission recovery — October 7 (review D2)
+
+Starting a new admission clears the previously displayed run. Its idempotency
+key is tracked separately until a successful admission response identifies the
+run. Failed or rejected admission retains that key. Status checks during this
+uncertainty use `/latest`, which is global across Admin requesters; no returned
+run, terminal status or empty lookup can confirm this admission or discard its
+key. The UI explicitly labels that uncertainty even when latest reports success.
+
+**Retry refresh admission** remains available after a status check, including
+when latest reports an active run or unknown publication. This action replays
+the same key, rather than starting a distinct request; backend conflict and busy
+checks remain authoritative. A successful replay identifies this admission and
+releases the key. Subsequent status reads use that confirmed run ID. A later new
+admission requires a terminal confirmed run and generates a fresh key.
+
+Session/access changes and unmount retain their existing cleanup and stale
+response protection. There is no automatic POST retry or durable key storage.
+Verification is recorded in [D2 evidence](../verification/refresh-recovery.md);
+controlled behavior does not establish connected backend idempotency.

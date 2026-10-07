@@ -30,6 +30,7 @@ it("keeps admission explicit, disables double clicks and checks status without r
   expect(screen.getByRole("button", { name: "Refresh data" })).toBeDisabled();
   operations.readRefresh.mockResolvedValueOnce({ ok: true, value: run("publication_unknown") });
   fireEvent.click(screen.getByRole("button", { name: "Check refresh status" })); await screen.findByText(/Publication outcome is not yet confirmed/);
+  expect(operations.readRefresh.mock.calls[0]?.[1]).toBe("synthetic-run");
   expect(screen.getByRole("button", { name: "Refresh data" })).toBeDisabled(); expect(onPublished).not.toHaveBeenCalled();
   operations.readRefresh.mockResolvedValue({ ok: true, value: run("succeeded") });
   fireEvent.click(screen.getByRole("button", { name: "Check refresh status" })); await screen.findByText(/new data was published/);
@@ -44,6 +45,60 @@ it("preserves the idempotency key across an uncertain admission retry", async ()
   fireEvent.click(screen.getByRole("button", { name: "Refresh data" })); await screen.findByText("Admission uncertain");
   fireEvent.click(screen.getByRole("button", { name: "Retry refresh admission" })); await screen.findByText(/Refresh accepted/);
   expect(operations.admitRefresh.mock.calls[0]?.[1]).toBe(operations.admitRefresh.mock.calls[1]?.[1]);
+});
+it.each(["previous", "running", "publication_unknown", "succeeded", "none", "unavailable"] as const)("preserves a new uncertain admission across a %s status lookup", async (lookup) => {
+  const { operations } = setup();
+  const previousRun = { ...run("succeeded"), runId: "previous-run" };
+  const newRun = { ...run("succeeded"), runId: "new-run" };
+  operations.admitRefresh
+    .mockResolvedValueOnce({ ok: true, value: previousRun })
+    .mockResolvedValueOnce({ ok: false, failure: { kind: "service-failure", message: "New admission uncertain" } })
+    .mockResolvedValueOnce({ ok: true, value: newRun })
+    .mockResolvedValueOnce({ ok: true, value: { ...run("accepted"), runId: "following-run" } });
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText(/new data was published/);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText("New admission uncertain");
+  expect(screen.queryByText(/new data was published/)).toBeNull();
+  expect(screen.getByRole("button", { name: "Retry refresh admission" })).toBeEnabled();
+
+  if (lookup === "unavailable") {
+    operations.readRefresh.mockResolvedValue({ ok: false, failure: { kind: "service-failure", message: "Status unavailable" } });
+  } else {
+    const latest = lookup === "none" ? null : lookup === "previous" ? previousRun : { ...run(lookup), runId: "another-admin-run" };
+    operations.readRefresh.mockResolvedValue({ ok: true, value: latest });
+  }
+  fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+  await waitFor(() => { expect(screen.getByRole("button", { name: "Retry refresh admission" })).toBeEnabled(); });
+  expect(operations.readRefresh).toHaveBeenCalledTimes(1);
+  expect(operations.readRefresh.mock.calls[0]?.[1]).toBeUndefined();
+  expect(operations.admitRefresh).toHaveBeenCalledTimes(2);
+
+  fireEvent.click(screen.getByRole("button", { name: "Retry refresh admission" }));
+  await waitFor(() => { expect(screen.getByRole("button", { name: "Refresh data" })).toBeEnabled(); });
+  const previousKey = operations.admitRefresh.mock.calls[0]?.[1];
+  const uncertainKey = operations.admitRefresh.mock.calls[1]?.[1];
+  expect(uncertainKey).toEqual(expect.any(String));
+  expect(uncertainKey).not.toBe(previousKey);
+  expect(operations.admitRefresh.mock.calls[2]?.[1]).toBe(uncertainKey);
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText(/Refresh accepted/);
+  expect(operations.admitRefresh.mock.calls[3]?.[1]).not.toBe(uncertainKey);
+});
+
+it("discards an uncertain admission key when the authoritative session changes", async () => {
+  const { fixture, runtime, operations } = setup();
+  operations.admitRefresh.mockResolvedValueOnce({ ok: false, failure: { kind: "service-failure", message: "Admission uncertain" } });
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText("Admission uncertain");
+  const oldKey = operations.admitRefresh.mock.calls[0]?.[1];
+  act(() => { fixture.setPersona("viewer"); runtime.setResolution(fixture.sessionResolution()); });
+  expect(screen.queryByRole("button", { name: "Retry refresh admission" })).toBeNull();
+  act(() => { fixture.setPersona("admin"); runtime.setResolution(fixture.sessionResolution()); });
+  operations.admitRefresh.mockResolvedValueOnce({ ok: true, value: run("accepted") });
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText(/Refresh accepted/);
+  expect(operations.admitRefresh.mock.calls[1]?.[1]).not.toBe(oldKey);
 });
 it("clears protected run state and ignores late responses when Admin becomes Viewer", async () => {
   const { fixture, runtime, operations, onPublished } = setup();

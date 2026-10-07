@@ -14,6 +14,50 @@ function queryBody(name: string) {
     { index: 1, name: "untrusted_text", type: "string", encoding: "string", nullable: null, unit: null },
   ], rows: [[name === "query_second" ? "-9007199254740993" : "9007199254740993", '<img src=x onerror="alert(1)">']] };
 }
+test("refresh recovery preserves a newer admission key across unrelated latest status", async ({ page }) => {
+  const admissionKeys: string[] = [];
+  const statusReads: string[] = [];
+  const receipt = { run_id: "previous-run", status: "succeeded", effective_interval: { start_date: "2026-04-02", end_date: "2026-10-01" } };
+  await page.route("**/api/**", (route) => {
+    const request = route.request();
+    const path = new URL(request.url()).pathname;
+    if (path === "/api/auth/session") return route.fulfill({ json: {
+      user: { id: "controlled-admin", email: "admin@example.invalid", role: "admin" }, expires_at: new Date(Date.now() + 600_000).toISOString(), csrf_token: "controlled-csrf",
+    } });
+    if (path === "/api/refresh" && request.method() === "POST") {
+      const key = request.headers()["idempotency-key"];
+      if (!key) throw new Error("Controlled admission key required");
+      admissionKeys.push(key);
+      if (admissionKeys.length === 2) return route.fulfill({ status: 503, json: { error: "service_unavailable" } });
+      return route.fulfill({ json: { ...receipt, run_id: admissionKeys.length === 1 ? "previous-run" : "new-run" } });
+    }
+    if (path.startsWith("/api/refresh/")) {
+      statusReads.push(path);
+      return route.fulfill({ json: { run: { ...receipt, run_id: "another-admin-run", status: "publication_unknown" } } });
+    }
+    return route.fulfill({ status: 503, json: { error: "service_unavailable" } });
+  });
+  await page.goto("/overview");
+  await page.getByRole("button", { name: "Refresh data", exact: true }).click();
+  await expect(page.getByText(/new data was published/)).toBeVisible();
+  await page.getByRole("button", { name: "Refresh data", exact: true }).click();
+  await expect(page.getByText(/Refresh admission was not confirmed/)).toBeVisible();
+  await expect(page.getByText(/new data was published/)).toHaveCount(0);
+  await page.getByRole("button", { name: "Check refresh status", exact: true }).click();
+  await expect(page.getByText(/Latest status may belong to another request/)).toBeVisible();
+  const retry = page.getByRole("button", { name: "Retry refresh admission", exact: true });
+  await expect(retry).toBeEnabled();
+  expect(statusReads).toEqual(["/api/refresh/latest"]);
+  expect(admissionKeys).toHaveLength(2);
+  await retry.click();
+  await expect(page.getByRole("button", { name: "Refresh data", exact: true })).toBeEnabled();
+  expect(admissionKeys).toHaveLength(3);
+  expect(admissionKeys[2]).toBe(admissionKeys[1]);
+  expect(admissionKeys[1]).not.toBe(admissionKeys[0]);
+  await page.getByRole("button", { name: "Refresh data", exact: true }).click();
+  await expect.poll(() => admissionKeys.length).toBe(4);
+  expect(admissionKeys[3]).not.toBe(admissionKeys[1]);
+});
 for (const pendingQuery of [false, true]) {
   test(`current denial clears off-route SQL until explicit session recovery (pending: ${String(pendingQuery)})`, async ({ page }) => {
     const expiry = new Date(Date.now() + 600_000).toISOString();
