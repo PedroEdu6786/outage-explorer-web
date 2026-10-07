@@ -108,7 +108,8 @@ IDs are stable references for tasks and evidence.
   and ready states.
 - **D2 Overview:** staggered metric-card entrance; range-change refetch dims old
   content (about 50%) and fades new content in; trend-chart left-to-right
-  clip-path wipe; hover/compare-series fade-in; inspected-observation card
+  clip-path wipe (0.5s at an even pace, tuned after October 7 user feedback);
+  hover/compare-series fade-in; inspected-observation card
   slides open; refresh status uses B8 and a successful publication pulses the
   coverage date once.
 - **D3 Explorer:** dataset row hover and selected-accent transition; dataset

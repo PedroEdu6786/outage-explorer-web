@@ -105,6 +105,8 @@
   --duration-appear: 150ms;
   --duration-base: 200ms;
   --duration-enter: 260ms;
+  /* Chart entrance progresses evenly so the full timeline reveal is visible. */
+  --duration-chart-reveal: 500ms;
   /* Movement-class alias: collapses to zero under reduced motion. */
   --duration-move: var(--duration-base);
   --motion-rise: 4px;

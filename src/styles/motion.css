@@ -11,7 +11,7 @@
   --animate-settle: settle var(--duration-enter) var(--ease-out);
   --animate-nudge: nudge var(--duration-base) var(--ease-out);
   --animate-expand: expand var(--duration-enter) var(--ease-out);
-  --animate-chart-wipe: chart-wipe 700ms var(--ease-out) backwards;
+  --animate-chart-wipe: chart-wipe var(--duration-chart-reveal) linear backwards;
   --animate-progress: progress 1.4s var(--ease-out) infinite;
   --animate-dot-pulse: dot-pulse 1.2s var(--ease-out);
   --animate-spinner: spinner 0.8s linear infinite;
