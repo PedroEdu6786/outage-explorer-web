@@ -1,5 +1,29 @@
 # Reproducible checks and evidence
 
+## Overview chart zoom verification — October 7
+
+The zoom [phase record](../../specs/overview-chart-zoom/verification/phase-4.md)
+links source-bound foundation, isolated chart and actual-page evidence. Run the
+following affected suites after a fresh Storybook build (browser cache/port
+prerequisites below still apply):
+
+```sh
+npm test -- src/features/overview
+npm run build-storybook
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npm run test:e2e -- tests/browser/overview-chart-zoom.spec.ts tests/browser/overview-page.spec.ts tests/motion/features.spec.ts --workers=2
+```
+
+Chart input checks exercise real Chromium wheel delivery/scrolling and CDP-driven
+emulated touch/swipe/pinch, including visible-viewport scale changes. They do not
+establish physical-device or Safari behavior. Motion checks distinguish the
+SVG's own wipe from bubbled comparison-series animation events. Long synthetic
+fixtures remain isolated; no zoom action should request observations.
+The [live checklist](../../specs/overview-chart-zoom/verification/live.md) is
+user-owned and pending. Final acceptance remains open until those live and
+[manual input/visual gates](../../specs/overview-chart-zoom/verification/visual-input.md)
+have recorded results. Run the full unit/type/lint/boundary/build/artifact gates
+below for release verification; structural registration never implies live success.
+
 Use [current status](current-status.md) for implemented behavior and open release
 gates. Dated command outcomes below describe their recorded checkpoint; they
 are not expected results for every later configured build.

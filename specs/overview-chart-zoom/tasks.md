@@ -1,5 +1,5 @@
 # Tasks: Overview chart zoom
-> Status: phases 1–3 complete; phase 4 pending · Slug: overview-chart-zoom · Plan: ./plan.md · Spec: ./spec.md
+> Status: implementation/automated checks complete; manual acceptance pending · Slug: overview-chart-zoom · Plan: ./plan.md · Spec: ./spec.md
 
 ## Overview
 
@@ -34,12 +34,18 @@
 
 ## Phase 4: Browser, visual and live acceptance (plan phase 4)
 
-- [ ] **T4.1** [P] Add real browser chart-input regression checks — `tests/browser/overview-chart-zoom.spec.ts` (**new**). Test desktop/narrow wheel zoom, pointer anchoring after SVG scroll/resize, limits/reset, horizontal movement, focus-isolated shortcuts, touch buttons and off-mode page scrolling. Cover modifier pass-through and native-scroll behavior where the browser harness supports it; reserve real touch/pinch claims for T4.3. Depends: T3.C. (FR1–FR20, TR1–TR3; AC1–AC23)
-- [ ] **T4.2** [P] Extend motion regressions for zoom — `tests/motion/features.spec.ts` (existing). Assert a stable SVG/no repeated entrance wipe, preserved gaps/values and enabled/reduced-motion behavior across zoom and compare. Depends: T3.C; independent of T4.1. (FR9, TR1, TR3; AC9, AC12, AC14)
+- [x] **T4.1** [P] Add real browser chart-input regression checks — `tests/browser/overview-chart-zoom.spec.ts` (**new**). Test desktop/narrow wheel zoom, pointer anchoring after SVG scroll/resize, limits/reset, horizontal movement, focus-isolated shortcuts, touch buttons and off-mode page scrolling. Cover modifier pass-through and native-scroll behavior where the browser harness supports it; reserve real touch/pinch claims for T4.3. Depends: T3.C. (FR1–FR20, TR1–TR3; AC1–AC23)
+- [x] **T4.2** [P] Extend motion regressions for zoom — `tests/motion/features.spec.ts` (existing). Assert a stable SVG/no repeated entrance wipe, preserved gaps/values and enabled/reduced-motion behavior across zoom and compare. Depends: T3.C; independent of T4.1. (FR9, TR1, TR3; AC9, AC12, AC14)
 - [ ] **T4.3** Record prototype-extension and real-input review — `specs/overview-chart-zoom/verification/visual-input.md` (**new**), `docs/specs/web-client/design-inventory.md` (existing). Compare desktop/narrow controls to supplied Overview evidence, label the extension, assess two-year responsiveness, and record mouse/trackpad/actual-touch vertical scroll, horizontal swipe, pinch and browser-zoom results with device/browser/revision. Mark unperformed device checks pending rather than claim synthetic pointer tests prove them. Depends: T4.1, T4.2. (FR4, FR5, FR6, FR11, FR19, FR20; AC1, AC4, AC5, AC6, AC11, AC21, AC22, AC23)
 - [ ] **T4.4** Record a named live Overview smoke — `specs/overview-chart-zoom/verification/live.md` (**new**). Verify an authorized long range, unchanged exact observations/cards/table and no extra requests from zoom/pan/reset. Record target/version and privacy-safe request observations. Depends: T3.C and configured reachable backend/authenticated account; can proceed independently of visual review. Missing live inputs leave this task open with the concrete missing input, without undoing fixture acceptance. (FR8, FR9, TR1, TR3; AC8, AC9, AC12, AC14)
-- [ ] **T4.5** Synchronize user and verification documentation — `README.md`, `docs/context/ui-client/02-web-experience.md`, `docs/development/current-status.md`, `docs/development/verification.md` (existing). Document accepted chart-only controls, limits and reset behavior; link feature evidence and distinguish actual fixture/live/visual outcomes, including pending gates. Depends: T4.1, T4.2; consume current T4.3/T4.4 status without requiring missing external inputs to be resolved first. (FR1–FR20, TR1–TR3)
+- [x] **T4.5** Synchronize user and verification documentation — `README.md`, `docs/context/ui-client/02-web-experience.md`, `docs/development/current-status.md`, `docs/development/verification.md` (existing). Document accepted chart-only controls, limits and reset behavior; link feature evidence and distinguish actual fixture/live/visual outcomes, including pending gates. Depends: T4.1, T4.2; consume current T4.3/T4.4 status without requiring missing external inputs to be resolved first. (FR1–FR20, TR1–TR3)
 - [ ] **T4.C** Checkpoint: close feature acceptance only with complete evidence — `specs/overview-chart-zoom/verification/phase-4.md` (**new**). Depends: T4.1–T4.5. Verify AC1–AC23 through linked phase/browser/device/live records; run repository typecheck/lint/tests, boundary suites, serialized production build and artifact scans, fresh Storybook and affected browser/motion suites. Record remaining visual/live/device gates and leave this checkpoint unchecked if any required evidence is missing; completed independent tasks remain accepted.
+
+## Remaining acceptance evidence
+
+- T4.3: automated Chromium input and agent visual review complete; physical-device and named human visual review remain pending.
+- T4.4: user explicitly chose to perform authenticated live testing; see `verification/live.md`.
+- T4.C: all available automated gates passed; final acceptance waits for those manual records. See `verification/phase-4.md`.
 
 ## Open decisions
 

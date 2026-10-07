@@ -119,3 +119,17 @@ layout checks pass; final visual comparison and human sign-off remain open.
 
 The subsequent October 7 request extends this same input to Generators. It reuses
 the Facilities filter strip without a new visual pattern or generator-ID filter.
+
+## October 7 Overview chart zoom extension
+
+The supplied Overview desktop/mobile captures informed a wrapping control row
+above the existing SVG, using Checkbox/Button atoms and existing panel tokens.
+Zoom mode, + / −, Reset and the visible date caption are accepted extensions;
+the prototype does not supply these states. Comparison stays in the header;
+chart controls stay outside horizontal overflow. Empty-window text overlays the
+plot without taking input or moving the SVG underneath the pointer.
+
+Agent inspection and automated 1440px/390px specimens found contained controls,
+legible wrapping and visible focus; actual-page captures include long and zoomed
+two-year ranges. See the [input/visual record](../../../specs/overview-chart-zoom/verification/visual-input.md).
+This is implementation-review evidence, not Figma fidelity or human sign-off.

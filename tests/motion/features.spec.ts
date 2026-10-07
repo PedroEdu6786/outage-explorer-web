@@ -4,6 +4,29 @@ import { openMotionStory, readMotion, seconds, type MotionPreference } from "./s
 for (const preference of ["no-preference", "reduce"] as const satisfies readonly MotionPreference[]) {
   const reduce = preference === "reduce";
   test.describe(`feature micro-interactions with ${preference}`, () => {
+    test("chart zoom preserves SVG animation identity and exact gap semantics", async ({ page }) => {
+      await openMotionStory(page, "features-overview-nationaltrend--one-year", preference);
+      const chart = page.locator("svg[data-chart=national-trend]"); await expect(chart).toBeVisible();
+      await chart.evaluate((node) => {
+        node.setAttribute("data-persistent", "yes");
+        node.addEventListener("animationstart", (event) => {
+          if (event.target === node) node.setAttribute("data-restarted", "yes");
+        });
+      });
+      // Finish the mount wipe before interacting; zoom must not create a new one.
+      await chart.evaluate(async (node) => { await Promise.all(node.getAnimations().map((animation) => animation.finished)); });
+      await chart.evaluate((node) => { node.removeAttribute("data-restarted"); });
+      await page.getByRole("checkbox", { name: "Zoom mode" }).check();
+      for (let step = 0; step < 5; step += 1) await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+      await page.getByRole("checkbox", { name: "Compare EIA reported %" }).check();
+      await expect(chart).toHaveAttribute("data-persistent", "yes"); await expect(chart).not.toHaveAttribute("data-restarted");
+      await expect(chart.locator("g[data-series=calculated] title").filter({ hasText: "2026-06-09:" })).toHaveText("2026-06-09: Calculated 1.01%");
+      await expect(chart.locator("g[data-series=calculated] title").filter({ hasText: "2026-06-11:" })).toHaveText("2026-06-11: Calculated 0.00%");
+      await expect(chart.locator("g[data-series=calculated] title").filter({ hasText: /2026-06-(10|12|13):/ })).toHaveCount(0);
+      expect(await chart.locator("g[data-series=calculated] polyline").count()).toBeGreaterThan(1);
+      await expect(chart).toHaveCSS("clip-path", "none");
+      await page.getByRole("button", { name: "Reset zoom" }).click(); await expect(chart).not.toHaveAttribute("data-restarted");
+    });
     test("compare only fades the new series; inspected observation enters without changing points or gaps", async ({ page }) => {
       await openMotionStory(page, "features-overview--ready", preference);
       const chart = page.locator("svg[data-chart=national-trend]");

@@ -67,6 +67,26 @@ backend request. An empty selected chart window shows an empty state rather
 than points outside the requested dates. Table pagination does not set the
 chart's date window.
 
+### Overview chart zoom — accepted October 7 extension
+
+Zoom mode starts disabled. Enabling it allows plot-scoped vertical wheel zoom
+around the pointer and horizontal scroll/swipe navigation. Chart-focused + / −
+keys and visible buttons zoom; Left / Right keys move the window. Tab/Space or a
+tap operates the toggle. Reset zoom is available with mode on or off. Disabling
+mode retains the window and restores normal scrolling; changed applied dates
+reset it, while draft edits and unchanged submissions preserve it.
+
+The viewport stays within applied bounds with a 15-calendar-day minimum; the
+implemented interpretation uses inclusive days and shows an entire shorter
+applied range without further zoom-in. These interpretations retain their
+documented assumption provenance in the [spec](../../../specs/overview-chart-zoom/spec.md).
+Cards, table pagination, filters and requests remain outside zoom ownership.
+Both graph series and inspection share the window, retain exact daily values
+and gaps, and keep Reset/navigation available over empty subwindows. Browser
+zoom/pinch and vertical touch page scrolling coexist with enabled chart input.
+See [verification](../../../specs/overview-chart-zoom/verification/phase-4.md)
+for automated results and pending user-owned live/device/human review.
+
 The web preview starts at 10 rows per page as requested on October 6, with an
 adjustable maximum of 500; the API's omitted-size default remains 100. Overview's
 Daily observations table also starts at 10, paging through the complete series

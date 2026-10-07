@@ -344,3 +344,27 @@ performed by this documentation update.
 - Chart-only operation counts, cards/table/date isolation, snapshot/date reset
   and late-response/session/access safety are controlled fixture evidence.
   Phase 4 may proceed; user-owned live and physical-device/human gates remain.
+
+## Overview chart zoom — phase 4 assignment, October 7
+
+- Coordinator accepts phase-3 assembly at `a3f9a92`; `overview_zoom_spec` owns
+  T4.1–T4.C browser/motion tests, visual/live/checkpoint evidence, user/verification
+  documentation and task/ledger/journal updates under all-phases authorization.
+- Run available automated gates; user owns authenticated live testing. Record
+  physical-device and human review that was not performed as pending. Final T4.C
+  stays open until every required external gate has real evidence. No credentials,
+  external runtime edits, push or deployment; serialize owned builds/servers.
+
+## Overview chart zoom — automated implementation complete, October 7
+
+- T4.1/T4.2/T4.5 complete; [final record](../../../specs/overview-chart-zoom/verification/phase-4.md)
+  binds 487 passing unit tests, 33 boundary tests, typecheck/lint, production
+  build, source/artifact/required-live structural checks (285 emitted files),
+  fresh Storybook and 22 chart/motion browser tests. Phase 3 adds four actual-page
+  checks at the same application source. Final page screenshots reviewed.
+- Native Chromium wheel and CDP-emulated touch/vertical-scroll/pinch checks
+  passed. T4.3 remains pending physical devices/human sign-off; T4.4 is the
+  user-owned authenticated live test; T4.C remains open for those manual gates.
+  [Manual checklist](../../../specs/overview-chart-zoom/verification/live.md).
+- All independent implementation/tests/docs complete. Only owned servers were
+  stopped; no credentials, external runtime edits, push or deployment.

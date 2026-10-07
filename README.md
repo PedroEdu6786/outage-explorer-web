@@ -110,6 +110,21 @@ facilities within the selected dataset; unmatched IDs show an empty preview. Exp
 preview cursors. SQL pages reuse one execution with a fixed page size; paging
 never runs the query again. Expired results require an explicit rerun.
 
+On Overview, enable **Zoom mode** above the graph to inspect a smaller date
+window. Scroll up/down over the plot to zoom around the pointer; scroll sideways
+or swipe horizontally to move through neighboring dates. With the chart focused,
+use **+ / −** to zoom and **Left / Right** to move. The visible + / − buttons and
+**Reset zoom** also work with keyboard and touch.
+
+Zoom affects only the graph and its observation selector; cards, daily table and
+applied date filters stay unchanged. The minimum window is 15 calendar days;
+shorter applied ranges stay fully visible. Switching Zoom mode off retains the
+window and restores ordinary scrolling. Reset restores the full applied range;
+applying changed dates starts a fresh full-range view with Zoom mode off.
+Browser zoom/pinch and vertical touch page scrolling remain available.
+Automated fixture checks passed; [live and physical-device review](specs/overview-chart-zoom/verification/phase-4.md)
+remain separate pending acceptance gates.
+
 ### Where the code lives
 
 | Folder | Contains |

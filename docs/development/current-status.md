@@ -36,6 +36,7 @@ backend behavior or visual fidelity.
 | Admin refresh | Overview controls with explicit admission/status and same-key retry for uncertain admission. Separate Admin page and new-data card are outside current scope. | [Refresh hook](../../src/features/overview/useRefresh.ts), [contract](../specs/web-client/contracts/refresh.md) |
 | Catalog cache | One typed bundle, 256 KiB UTF-8 serialized cap, shared pending request; session/access/publication invalidation and reload end reuse. Oversized successes are usable without retention. | [Cache](../../src/resources/catalog-cache.ts), [M3 evidence](../../specs/data-reuse/verification/catalog-cache.md) |
 | Dates/pagination | Apply dates/filters submits local edits. Overview/Explorer start at 10 rows; Overview pages its complete loaded series, Explorer uses cursors. SQL starts at 100, maximum 500, fixed per execution. | [Settings](../../src/integration/config.ts), [date evidence](../../specs/data-reuse/verification/navigation-and-dates.md), [experience](../context/ui-client/02-web-experience.md) |
+| Overview graph zoom | Opt-in pointer-centered wheel zoom, horizontal scroll/swipe movement, focused keyboard and visible touch controls; bounded to applied dates with 15-day minimum. Disable retains, Reset restores full range and changed applied dates reset. Cards/table/requests remain unchanged. | [Specification](../../specs/overview-chart-zoom/spec.md), [automated and pending acceptance](../../specs/overview-chart-zoom/verification/phase-4.md) |
 | Denial | A current data denial clears all protected state and blocks old responses. Explicit Check session recovery neither claims backend logout nor replays SQL. | [Runtime](../../src/session/session-runtime.ts), [D1 evidence](../../specs/data-reuse/verification/access-denial.md) |
 | Design/motion | Published prototype inspected; motion implemented with automated evidence. Human visual sign-off remains separate. | [Inventory](../specs/web-client/design-inventory.md), [motion sign-off](../../specs/ui-motion/verification/visual-signoff.md) |
 
@@ -44,6 +45,11 @@ registration cannot establish the current backend deployment, permissions, SQL
 safety or ingestion behavior.
 
 ## Open evidence and deferred scope
+
+- Overview zoom implementation and automated fixture/browser/motion checks are
+  complete. User-owned authenticated live testing, physical mouse/trackpad/touch
+  and final human visual review remain pending; Chromium touch emulation is
+  recorded separately in the [input review](../../specs/overview-chart-zoom/verification/visual-input.md).
 
 - Full authenticated Cognito lifecycle and named-target data/permission,
   pagination, refresh and failure acceptance remain open. See
