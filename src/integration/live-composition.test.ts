@@ -43,7 +43,7 @@ it.each([false, true])("clears retained SQL and blocks late publication after an
     await composition.dataOperations.startPreview(oldContext, { datasetId: "facilities", filters: {}, pageSize: 10 });
     expect(runtime.getSnapshot().status).toBe("access-denied");
     expect(queries.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, handoff: null, context: null });
-    expect(composition.resources.accounting()).toMatchObject({ entries: 0, pending: 0 });
+    expect(composition.catalogCache.accounting()).toMatchObject({ entries: 0, pending: 0 });
     expect(composition.csrfToken()).toBeNull();
     releaseQuery();
     await execution;
@@ -51,7 +51,7 @@ it.each([false, true])("clears retained SQL and blocks late publication after an
     expect(fetch.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
     // An obsolete denial cannot revoke a newly resolved identity.
     runtime.setResolution({ status: "authenticated", session: { identity: { subject: "new-viewer", displayName: "Viewer" }, capabilities: { datasetIds: ["national"], canReadNationalSeries: true, canExploreDatasets: false, canExecuteQuery: false, canRefreshDatasets: false }, expiresAt: new Date(Date.now() + 600_000).toISOString() } });
-    composition.resources.reportFailure(oldContext, { kind: "forbidden", message: "Old denial" });
+    composition.catalogCache.reportFailure(oldContext, { kind: "forbidden", message: "Old denial" });
     expect(runtime.getSnapshot().status).toBe("authenticated");
   } finally {
     queries.dispose();
@@ -142,7 +142,7 @@ it("default live policy shares completed catalog and schemas until invalidation"
   const composition = createLiveComposition({ runtime, fetch, navigate: vi.fn(), authEnabled: true });
   if (!composition) throw new Error("Configured composition required");
   try {
-    expect(composition.resources.policy).toMatchObject({ retention: "enabled", maximumEntries: 1, maximumBytes: 256 * 1024 });
+    expect(composition.catalogCache.policy).toMatchObject({ retention: "enabled", maximumBytes: 256 * 1024 });
     fetch.mockResolvedValueOnce(new Response(JSON.stringify({ user: { id: "synthetic-user", email: "synthetic@example.invalid", role: "analyst" }, expires_at: new Date(Date.now() + 3600_000).toISOString(), csrf_token: "synthetic-memory" }), { status: 200 }));
     await createAuthService(composition.operations, runtime).perform("resolve", { onSuccess: vi.fn(), onFailure: vi.fn() });
     const catalog = fixtures.fixtures.find((item) => item.name === "catalog_analyst"); if (!catalog) throw new Error("Catalog required");
@@ -152,10 +152,10 @@ it("default live policy shares completed catalog and schemas until invalidation"
     expect(fetch).toHaveBeenCalledTimes(2);
     await composition.dataOperations.readSchema(context, "national"); expect(fetch).toHaveBeenCalledTimes(2);
     await composition.dataOperations.listDatasets(context); expect(fetch).toHaveBeenCalledTimes(2);
-    expect(composition.resources.accounting().entries).toBe(1);
-    composition.resources.invalidate({ reason: "published-refresh", kind: "catalog" });
+    expect(composition.catalogCache.accounting().entries).toBe(1);
+    composition.catalogCache.invalidate({ reason: "published-refresh" });
     await composition.dataOperations.listDatasets(context); expect(fetch).toHaveBeenCalledTimes(3);
     runtime.beginLogout();
-    expect(composition.resources.accounting().entries).toBe(0);
+    expect(composition.catalogCache.accounting().entries).toBe(0);
   } finally { composition.dispose(); runtime.dispose(); }
 });

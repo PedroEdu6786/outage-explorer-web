@@ -1,5 +1,19 @@
 # Plan: Reuse already fetched data
 
+## October 7 implementation simplification (M3)
+
+The current seam is `src/contracts/catalog-cache.ts`, implemented by
+`src/resources/catalog-cache.ts`. One typed catalog bundle replaces the generic
+resource maps and casts. One pending transport and an invalidation version guard
+preserve shared reads and late-response protection. SessionRuntime advances its
+generation for every identity/capability resolution, so the cache uses that
+authority instead of serializing duplicate permission snapshots. Production
+keeps its 256 KiB byte budget; the one-entry limit is structural. There is no
+freshness callback, clock or selective request-key invalidation. Existing
+cleanup, denial, unavailable-data, publication and disposal boundaries remain.
+Fixtures use the same typed seam. This supersedes generic implementation details
+below, not accepted behavior. See [M3 evidence](verification/catalog-cache.md).
+
 ## October 7 correction
 
 Production catalog reuse is now enabled under the existing one-entry / 256 KiB

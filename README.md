@@ -179,6 +179,10 @@ cleanup and explicit invalidation. Broader row retention remains deferred. Overv
 **Apply dates** submits a valid changed range; unchanged or invalid submissions
 make no request. See the [navigation/date correction](specs/data-reuse/verification/navigation-and-dates.md).
 
+The shared memory implementation is now a catalog-specific `CatalogCache`:
+one typed bundle, one pending read and the existing 256 KiB admission cap.
+See [the simplification and its checks](specs/data-reuse/verification/catalog-cache.md).
+
 ## Connected local auth — October 5, 2026
 
 Set the server-only `OUTAGE_API_ORIGIN=http://localhost:8000` in `.env.local`

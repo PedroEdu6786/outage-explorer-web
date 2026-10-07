@@ -1,6 +1,6 @@
-import { createResourceRepository } from "../../resources/resource-repository";
+import { createCatalogCache } from "../../resources/catalog-cache";
 import { createSessionRuntime } from "../../session/session-runtime";
-import { syntheticResourcePolicy } from "../../../tests/fixtures/operations";
+import { syntheticCatalogCachePolicy } from "../../../tests/fixtures/operations";
 import { describe, expect, it, vi } from "vitest";
 import fixtures from "../../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 import { decodeCatalog, decodePreview, decodeQuery } from "./data-mapping";
@@ -264,14 +264,14 @@ describe("decoded catalog reuse only (explicit synthetic policy)", () => {
   function owned() {
     const runtime = createSessionRuntime();
     runtime.setResolution({ status: "authenticated", session: { identity: { subject: "synthetic", displayName: "Synthetic" }, capabilities: { datasetIds: ["national", "facilities", "generators"], canReadNationalSeries: true, canExploreDatasets: true, canExecuteQuery: true, canRefreshDatasets: false }, expiresAt: new Date(Date.now() + 3600_000).toISOString() } });
-    return { runtime, resources: createResourceRepository({ runtime, policy: syntheticResourcePolicy }) };
+    return { runtime, catalogCache: createCatalogCache({ runtime, policy: syntheticCatalogCachePolicy }) };
   }
   it("shares listing, embedded schemas and hidden national metadata while row reads repeat", async () => {
-    const { runtime, resources } = owned();
+    const { runtime, catalogCache } = owned();
     try {
       const raw = { ...previewExample(), page_size: 100, generation_id: "newer-preview", next_cursor: null, has_more: false };
       const backend = transport([example("catalog_analyst"), raw, raw, example("query_reference_free"), example("query_reference_free")]);
-      const adapter = createDataAdapter(backend, beforePreviewExpiry, resources); const context = runtime.capture();
+      const adapter = createDataAdapter(backend, beforePreviewExpiry, catalogCache); const context = runtime.capture();
       const [listing, schema, national] = await Promise.all([adapter.listDatasets(context), adapter.readSchema(context, "national"), adapter.readNationalSeries(context, {})]);
       expect(listing.ok && schema.ok && national.ok).toBe(true);
       const again = await adapter.readSchema(context, "national"); expect(again).toEqual(schema);
@@ -283,51 +283,51 @@ describe("decoded catalog reuse only (explicit synthetic policy)", () => {
       expect(paths.filter((path) => path === "/api/datasets")).toHaveLength(1);
       expect(paths.filter((path) => path.includes("/preview"))).toHaveLength(2);
       expect(backend.request.mock.calls.filter((call) => call[2]?.method === "POST")).toHaveLength(2);
-      expect(resources.accounting().entries).toBe(1);
-    } finally { resources.dispose(); runtime.dispose(); }
+      expect(catalogCache.accounting().entries).toBe(1);
+    } finally { catalogCache.dispose(); runtime.dispose(); }
   });
   it("does not retain malformed catalog responses and permits deliberate retry", async () => {
-    const { runtime, resources } = owned();
+    const { runtime, catalogCache } = owned();
     try {
-      const backend = transport([{ private: "invalid" }, example("catalog_viewer")]); const adapter = createDataAdapter(backend, beforePreviewExpiry, resources);
+      const backend = transport([{ private: "invalid" }, example("catalog_viewer")]); const adapter = createDataAdapter(backend, beforePreviewExpiry, catalogCache);
       expect(await adapter.listDatasets(runtime.capture())).toMatchObject({ ok: false, failure: { kind: "service-failure" } });
       expect((await adapter.readSchema(runtime.capture(), "national")).ok).toBe(true);
       expect((await adapter.listDatasets(runtime.capture())).ok).toBe(true);
       expect(backend.request).toHaveBeenCalledTimes(2);
-    } finally { resources.dispose(); runtime.dispose(); }
+    } finally { catalogCache.dispose(); runtime.dispose(); }
   });
   it("retains successful empty catalog and explicit invalidation fetches the next generation", async () => {
-    const { runtime, resources } = owned();
+    const { runtime, catalogCache } = owned();
     try {
-      const backend = transport([{ ...example("catalog_viewer"), datasets: [] }, example("catalog_viewer")]); const adapter = createDataAdapter(backend, beforePreviewExpiry, resources);
+      const backend = transport([{ ...example("catalog_viewer"), datasets: [] }, example("catalog_viewer")]); const adapter = createDataAdapter(backend, beforePreviewExpiry, catalogCache);
       expect(await adapter.listDatasets(runtime.capture())).toEqual({ ok: true, value: [] });
       expect(await adapter.readSchema(runtime.capture(), "national")).toMatchObject({ ok: false, failure: { kind: "data-unavailable" } });
       expect(backend.request).toHaveBeenCalledTimes(1);
-      resources.invalidate({ reason: "published-refresh", kind: "catalog" });
+      catalogCache.invalidate({ reason: "published-refresh" });
       expect((await adapter.readSchema(runtime.capture(), "national")).ok).toBe(true); expect(backend.request).toHaveBeenCalledTimes(2);
-    } finally { resources.dispose(); runtime.dispose(); }
+    } finally { catalogCache.dispose(); runtime.dispose(); }
   });
   it("leaves repeated retained SQL page reads and preview requests uncached", async () => {
-    const { runtime, resources } = owned();
+    const { runtime, catalogCache } = owned();
     try {
       const backend = transport([example("query_reference_free"), example("query_reference_free"), { ...previewExample(), page_size: 100 }, { ...previewExample(), page_size: 100 }]);
-      const adapter = createDataAdapter(backend, beforePreviewExpiry, resources); const context = runtime.capture();
+      const adapter = createDataAdapter(backend, beforePreviewExpiry, catalogCache); const context = runtime.capture();
       await Promise.all([adapter.readQueryPage(context, { queryId: "query-synthetic-1", page: 1, pageSize: 1 }), adapter.readQueryPage(context, { queryId: "query-synthetic-1", page: 1, pageSize: 1 })]);
       await Promise.all([adapter.startPreview(context, selection), adapter.startPreview(context, selection)]);
-      expect(backend.request).toHaveBeenCalledTimes(4); expect(resources.accounting().entries).toBe(0);
-    } finally { resources.dispose(); runtime.dispose(); }
+      expect(backend.request).toHaveBeenCalledTimes(4); expect(catalogCache.accounting().entries).toBe(0);
+    } finally { catalogCache.dispose(); runtime.dispose(); }
   });
   it("a current unavailable dataset invalidates catalog metadata for deliberate revalidation", async () => {
-    const { runtime, resources } = owned();
+    const { runtime, catalogCache } = owned();
     try {
       const backend = transport([]); backend.request.mockResolvedValueOnce({ ok: true, value: example("catalog_viewer") }).mockResolvedValueOnce({ ok: false, failure: { kind: "data-unavailable", message: "Unavailable" } }).mockResolvedValueOnce({ ok: true, value: example("catalog_viewer") });
-      const adapter = createDataAdapter(backend, beforePreviewExpiry, resources);
+      const adapter = createDataAdapter(backend, beforePreviewExpiry, catalogCache);
       await adapter.listDatasets(runtime.capture());
       expect(await adapter.startPreview(runtime.capture(), selection)).toMatchObject({ ok: false, failure: { kind: "data-unavailable" } });
-      expect(resources.accounting().entries).toBe(0);
+      expect(catalogCache.accounting().entries).toBe(0);
       expect((await adapter.readSchema(runtime.capture(), "national")).ok).toBe(true);
       expect(backend.request.mock.calls.filter((call) => call[1] === "/api/datasets")).toHaveLength(2);
-    } finally { resources.dispose(); runtime.dispose(); }
+    } finally { catalogCache.dispose(); runtime.dispose(); }
   });
 
 });

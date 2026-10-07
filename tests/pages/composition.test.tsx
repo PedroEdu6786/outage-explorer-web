@@ -1,7 +1,7 @@
 import { FixtureProvider, useFixtureController } from "../fixtures/FixtureProvider";
 import { StrictMode } from "react";
-import { createResourceRepository } from "../../src/resources/resource-repository";
-import { syntheticResourcePolicy } from "../fixtures/operations";
+import { createCatalogCache } from "../../src/resources/catalog-cache";
+import { syntheticCatalogCachePolicy } from "../fixtures/operations";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { ApplicationProvider, useApplication } from "../../src/composition/ApplicationProvider";
@@ -130,43 +130,43 @@ it("registers configured production data with current auth CSRF and independent 
 
 it("keeps catalog ownership through route consumer remounts and aborts replacement work", async () => {
   const { runtime } = setup();
-  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
-  const fixture = createFixtureOperations({ resources });
+  const catalogCache = createCatalogCache({ runtime, policy: syntheticCatalogCachePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ catalogCache });
   const observer: { app: ReturnType<typeof useApplication> | null } = { app: null };
   function Observe() { observer.app = useApplication(); return <p>Catalog consumer</p>; }
   function Root({ shown = true, replacement = false }: { shown?: boolean; replacement?: boolean }) {
     return <ApplicationProvider operations={replacement ? next.operations : fixture.operations} runtime={runtime} path={shown ? "/query" : "/overview"} go={vi.fn()} querySettings={null}>{shown ? <Observe /> : <p>Away</p>}</ApplicationProvider>;
   }
-  const nextResources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
-  const next = createFixtureOperations({ resources: nextResources });
+  const nextCatalogCache = createCatalogCache({ runtime, policy: syntheticCatalogCachePolicy, attachOnCreate: false });
+  const next = createFixtureOperations({ catalogCache: nextCatalogCache });
   const view = render(<Root />); const delayed = fixture.deferNext("listDatasets");
   const first = fixture.operations.listDatasets(runtime.capture()); await Promise.resolve();
   view.rerender(<Root shown={false} />); view.rerender(<Root />);
   const schema = fixture.operations.readSchema(runtime.capture(), "synthetic-national");
-  expect(observer.app?.resources).toBe(resources);
+  expect(observer.app?.catalogCache).toBe(catalogCache);
   delayed.release(); expect((await first).ok).toBe(true); expect((await schema).ok).toBe(true);
   expect(fixture.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
-  resources.invalidate({ reason: "published-refresh" });
+  catalogCache.invalidate({ reason: "published-refresh" });
   const delayedOld = fixture.deferNext("listDatasets");
   const old = fixture.operations.listDatasets(runtime.capture()); await Promise.resolve();
   view.rerender(<Root replacement />);
-  expect(observer.app?.resources).toBe(nextResources); expect((await old).ok).toBe(false);
-  expect(resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
-  delayedOld.release(); await Promise.resolve(); expect(resources.accounting().entries).toBe(0);
+  expect(observer.app?.catalogCache).toBe(nextCatalogCache); expect((await old).ok).toBe(false);
+  expect(catalogCache.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+  delayedOld.release(); await Promise.resolve(); expect(catalogCache.accounting().entries).toBe(0);
   expect((await next.operations.listDatasets(runtime.capture())).ok).toBe(true);
-  view.unmount(); expect(nextResources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+  view.unmount(); expect(nextCatalogCache.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
 });
 
 it("reattaches shared catalog cleanup under Strict Mode without retaining discarded ownership", async () => {
   const { runtime } = setup();
-  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
-  const fixture = createFixtureOperations({ resources });
+  const catalogCache = createCatalogCache({ runtime, policy: syntheticCatalogCachePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ catalogCache });
   const view = render(<StrictMode><ApplicationProvider operations={fixture.operations} runtime={runtime} path="/overview" go={vi.fn()} querySettings={null}><p>Strict catalog</p></ApplicationProvider></StrictMode>);
   expect((await fixture.operations.listDatasets(runtime.capture())).ok).toBe(true);
   expect((await fixture.operations.readSchema(runtime.capture(), "synthetic-national")).ok).toBe(true);
   expect(fixture.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
-  act(() => { runtime.invalidate(); }); expect(resources.accounting().entries).toBe(0);
-  view.unmount(); expect(resources.accounting().pending).toBe(0);
+  act(() => { runtime.invalidate(); }); expect(catalogCache.accounting().entries).toBe(0);
+  view.unmount(); expect(catalogCache.accounting().pending).toBe(0);
 });
 
 
@@ -178,14 +178,14 @@ it("fixture ownership reattaches before route readers under Strict Mode and clea
   expect((await fixture.controller.operations.listDatasets(fixture.runtime.capture())).ok).toBe(true);
   expect((await fixture.controller.operations.readSchema(fixture.runtime.capture(), "synthetic-national")).ok).toBe(true);
   expect(fixture.controller.callLog.read().filter((call) => call.operation === "listDatasets")).toHaveLength(1);
-  view.unmount(); expect(fixture.resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
+  view.unmount(); expect(fixture.catalogCache.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 });
 });
 
 
 it.each(["accepted", "running", "retained", "failed", "interrupted", "publication_unknown", "succeeded"] as const)("only published refresh status %s invalidates catalog before Overview reload", async (status) => {
   const runtime = createSessionRuntime(); runtimes.push(runtime);
-  const resources = createResourceRepository({ runtime, policy: syntheticResourcePolicy, attachOnCreate: false });
-  const fixture = createFixtureOperations({ resources, persona: "admin" });
+  const catalogCache = createCatalogCache({ runtime, policy: syntheticCatalogCachePolicy, attachOnCreate: false });
+  const fixture = createFixtureOperations({ catalogCache, persona: "admin" });
   runtime.setResolution(fixture.sessionResolution());
   const readSeries = vi.spyOn(fixture.operations, "readNationalSeries");
   const refresh = {
@@ -193,9 +193,9 @@ it.each(["accepted", "running", "retained", "failed", "interrupted", "publicatio
     readRefresh: vi.fn().mockResolvedValue({ ok: true, value: { runId: "synthetic-publication", status, interval: { start: "2026-09-01", end: "2026-09-04" } } }),
   };
   const operations = { ...fixture.operations, refresh };
-  const invalidated = vi.fn(() => { expect(resources.accounting().entries).toBe(0); });
-  const unsubscribe = resources.subscribe(invalidated);
-  const view = render(<ApplicationProvider operations={operations} runtime={runtime} resources={resources} path="/overview" go={vi.fn()} querySettings={null}><OverviewEntry /></ApplicationProvider>);
+  const invalidated = vi.fn(() => { expect(catalogCache.accounting().entries).toBe(0); });
+  const unsubscribe = catalogCache.subscribe(invalidated);
+  const view = render(<ApplicationProvider operations={operations} runtime={runtime} catalogCache={catalogCache} path="/overview" go={vi.fn()} querySettings={null}><OverviewEntry /></ApplicationProvider>);
   await screen.findByRole("table", { name: "Daily national observations" });
   fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
   fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
@@ -208,7 +208,7 @@ it.each(["accepted", "running", "retained", "failed", "interrupted", "publicatio
   await waitFor(() => { expect(screen.getByRole("button", { name: "Check refresh status" })).toBeEnabled(); });
   if (status === "succeeded") {
     await screen.findByRole("table", { name: "Daily national observations" });
-    expect(invalidated).toHaveBeenCalledExactlyOnceWith({ reason: "published-refresh", kind: "catalog" });
+    expect(invalidated).toHaveBeenCalledExactlyOnceWith({ reason: "published-refresh" });
     expect(catalogReads()).toBe(2);
     expect(readSeries).toHaveBeenCalledTimes(beforeRows + 1);
     expect(readSeries.mock.calls.at(-1)?.[1]).toEqual({ start: "2026-09-01", end: "2026-09-03" });

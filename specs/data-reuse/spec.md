@@ -1,5 +1,15 @@
 # Spec: Reuse already fetched data
 
+## October 7 implementation simplification (M3)
+
+The accepted catalog-only scope now uses a typed `CatalogCache` with one retained
+bundle and one shared pending read. The 256 KiB serialized UTF-8 admission cap,
+session/access/publication invalidation, independent reader cancellation and
+rejection of late responses are unchanged. Generic request keys, multi-entry
+budgets and injectable freshness decisions have been removed; no row cache,
+TTL or polling was added. See [M3 evidence](verification/catalog-cache.md).
+Earlier resource-repository contracts and task paths below describe prior work.
+
 ## October 7 correction
 
 Production catalog reuse is now enabled under the existing one-entry / 256 KiB

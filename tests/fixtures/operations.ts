@@ -1,5 +1,4 @@
-import type { CatalogBundle } from "../../src/contracts/catalog";
-import type { ResourcePolicy, ResourceRepository } from "../../src/contracts/resources";
+import type { CatalogCachePolicy, CatalogCache } from "../../src/contracts/catalog-cache";
 import type { CatalogOperations, DateBounds } from "../../src/contracts/catalog";
 import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from "../../src/contracts/failures";
 import type { NavigationOperations } from "../../src/contracts/navigation";
@@ -11,12 +10,12 @@ import type { TableData } from "../../src/contracts/table";
 import { createFixtureCallLog, type FixtureOperationName } from "./call-log";
 import { syntheticCatalog, syntheticObservations, syntheticPreviewTable, syntheticQueryTable, syntheticSchema, syntheticSettings, type FixtureDataState, type FixturePersona } from "./scenarios";
 
-export const syntheticResourcePolicy: ResourcePolicy = { retention: "enabled", maximumEntries: 16, maximumBytes: 1_048_576, decide: () => "reuse" };
+export const syntheticCatalogCachePolicy: CatalogCachePolicy = { retention: "enabled", maximumBytes: 1_048_576 };
 
-export type FixtureOperations = { readonly resources?: ResourceRepository } & SessionOperations & CatalogOperations & ObservationOperations & PreviewOperations & QueryOperations & NavigationOperations;
+export type FixtureOperations = { readonly catalogCache?: CatalogCache } & SessionOperations & CatalogOperations & ObservationOperations & PreviewOperations & QueryOperations & NavigationOperations;
 
 export interface FixtureOptions {
-  readonly resources?: ResourceRepository;
+  readonly catalogCache?: CatalogCache;
   readonly persona?: FixturePersona;
   readonly dataState?: FixtureDataState;
   readonly now?: () => number;
@@ -110,14 +109,18 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
   }
 
   const catalog = (context: OperationContext) => {
-    if (!options.resources) throw new Error("Explicit fixture repository required");
-    return options.resources.read<CatalogBundle>({ context, identity: { kind: "catalog", requestKey: "authorized-catalog" },
-    load: (owned) => invoke("listDatasets", owned, null, () => sessionFailure() ?? success({ generationId: `synthetic-snapshot-${String(snapshot)}`, datasets: syntheticCatalog.filter((item) => allowed(item.id)), schemas: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => syntheticSchema(item.id)) })),
-    describe: (bundle) => ({ dataGeneration: bundle.generationId }),
+    if (!options.catalogCache) throw new Error("Explicit fixture catalog cache required");
+    return options.catalogCache.read({
+      context,
+      load: (owned) => invoke("listDatasets", owned, null, () => sessionFailure() ?? success({
+        generationId: `synthetic-snapshot-${String(snapshot)}`,
+        datasets: syntheticCatalog.filter((item) => allowed(item.id)),
+        schemas: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => syntheticSchema(item.id)),
+      })),
     });
   };
   const operations: FixtureOperations = {
-    ...(options.resources ? { resources: options.resources } : {}),
+    ...(options.catalogCache ? { catalogCache: options.catalogCache } : {}),
     resolveSession: (context) => invoke("resolveSession", context, null, () => success(sessionResolution())),
     beginLogin: (context) => invoke("beginLogin", context, null, () => {
       signedIn = true;
@@ -131,17 +134,17 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       return success(undefined);
     }),
     listDatasets: async (context) => {
-      if (!options.resources) return invoke("listDatasets", context, null, () => sessionFailure() ?? success(syntheticCatalog.filter((item) => allowed(item.id))));
+      if (!options.catalogCache) return invoke("listDatasets", context, null, () => sessionFailure() ?? success(syntheticCatalog.filter((item) => allowed(item.id))));
       const result = await catalog(context); return result.ok ? success(result.value.datasets) : result;
     },
     readSchema: async (context, datasetId) => {
-      if (!options.resources) return invoke("readSchema", context, { datasetId }, () => datasetFailure(datasetId) ?? success(syntheticSchema(datasetId)));
+      if (!options.catalogCache) return invoke("readSchema", context, { datasetId }, () => datasetFailure(datasetId) ?? success(syntheticSchema(datasetId)));
       const result = await catalog(context); if (!result.ok) return result;
       const schema = result.value.schemas.find((item) => item.datasetId === datasetId);
       return schema ? success(schema) : failure("data-unavailable");
     },
     readNationalSeries: async (context, range) => {
-      if (options.resources) { const metadata = await catalog(context); if (!metadata.ok) return metadata; }
+      if (options.catalogCache) { const metadata = await catalog(context); if (!metadata.ok) return metadata; }
       return invoke("readNationalSeries", context, range, () => {
       const denied = datasetFailure("synthetic-national");
       if (denied) return denied;
