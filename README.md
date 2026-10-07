@@ -244,5 +244,6 @@ persona/lifecycle scenarios are verified.
 Subtle animations and micro-interactions across views and components are
 accepted in scope but **not implemented**; the catalog, exclusions (no count-up
 metrics, no chart interpolation, no hover-lift), assumptions and acceptance
-criteria are in the [motion spec](specs/ui-motion/spec.md). Implementation
-awaits an explicit request.
+criteria are in the [motion spec](specs/ui-motion/spec.md), with a design
+[plan](specs/ui-motion/plan.md) and a phased [task list](specs/ui-motion/tasks.md)
+(136 tasks, 4 phases). Implementation awaits an explicit request.

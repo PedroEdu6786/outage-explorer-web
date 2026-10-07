@@ -174,8 +174,9 @@ not assumptions:
 4. **Feature micro-interactions:** remaining D2–D4 items, E1 left off.
 
 Each step is a separate commit with the checks in AC6 and a reduced-motion
-browser check. A task breakdown (`tasks.md`) and design plan (`plan.md`) are
-produced when implementation is requested.
+browser check. The design plan is [plan.md](plan.md) and the task breakdown is
+[tasks.md](tasks.md) (hybrid layout, per-phase files under `tasks/`), both
+drafted October 6, 2026 and not yet implemented.
 
 ## Open items
 
