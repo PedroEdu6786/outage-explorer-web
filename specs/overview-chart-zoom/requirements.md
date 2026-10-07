@@ -32,7 +32,15 @@ An explicit Zoom mode toggle makes scrolling behavior deliberate.
 - The minimum zoom window is 15 days.
 - With Zoom mode enabled, horizontal scrolling moves the zoomed window left or
   right to inspect neighboring dates.
-- Reset zoom restores the full applied date range.
+- With the chart focused and Zoom mode enabled, + / − keys zoom in / out and
+  Left / Right arrow keys move the window toward earlier / later dates.
+- Visible + / − buttons support keyboard and touch zoom; horizontal touch
+  swipes move the window while Zoom mode is enabled.
+- Tab reaches the toggle and chart controls with visible focus; Space operates
+  the focused toggle, and touch users can tap it.
+- Zoom and window-movement controls operate only with Zoom mode enabled.
+- A shared visible Reset zoom button restores the full applied date range and
+  supports keyboard and touch operation.
 - Applying changed page-level date bounds resets zoom to the full new range.
 - Zoom affects only the graph. The daily table, metric cards and page-level date
   filters retain their existing scope.
@@ -45,9 +53,7 @@ An explicit Zoom mode toggle makes scrolling behavior deliberate.
 
 ## Open questions
 
-- What keyboard and touch controls should accompany scrolling? Alternative
-  controls were proposed; the repository requires keyboard access, but their
-  exact behavior remains to be specified. The user requested a recommendation.
+_None._
 
 ## Assumption for planning
 
@@ -65,4 +71,8 @@ discussion; implementation and verification have not started.
 In the subsequent clarification, the user selected a 15-day minimum, horizontal
 scrolling for left/right navigation, Zoom mode initially disabled with the
 current zoom retained when switched off, and zoom reset when applied dates
-change. Keyboard and touch controls await agreement after a recommendation.
+change. The user subsequently accepted chart-focused + / − and Left / Right
+keys, visible + / − buttons, horizontal touch swipes, a shared visible Reset
+zoom button, and a toggle reachable with Tab and operated with Space or touch.
+Zoom and movement require Zoom mode; switching it off preserves the current
+window and restores ordinary page scrolling.
