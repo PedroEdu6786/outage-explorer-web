@@ -103,9 +103,9 @@ synthetic data. These fixtures are excluded from production.
 or Admin access.
 
 Dates apply when you submit **Apply dates** or the preview filters. Overview and
-Explorer tables start at 10 rows; SQL starts at 100. Facilities offers an optional exact Facility ID for Analyst/Admin; it combines
+Explorer tables start at 10 rows; SQL starts at 100. Facilities and Generators offer an optional exact Facility ID for Analyst/Admin; it combines
 with dates. IDs preserve leading zeros and case. Clear the field to browse all
-facilities; unmatched IDs show an empty preview. Explorer follows backend
+facilities within the selected dataset; unmatched IDs show an empty preview. Explorer follows backend
 preview cursors. SQL pages reuse one execution with a fixed page size; paging
 never runs the query again. Expired results require an explicit rerun.
 

@@ -1,8 +1,8 @@
 # Current implementation and evidence — October 7, 2026
 
-October 7 facility-preview update: Facilities now offers Analyst/Admin an
-optional exact facility-ID input combined with dates. Catalog decoding and the
-adapter also support Generators' facility capability; Viewer restrictions remain.
+October 7 facility-preview update, including the Generators follow-up: Facilities
+and Generators now offer Analyst/Admin an optional exact facility-ID input
+combined with dates. Viewer restrictions remain.
 See the [contract and verification](../specs/web-client/verification/facility-filter.md). Runtime acceptance requires a
 matching protocol-v2 worker image and remains open.
 

@@ -45,9 +45,9 @@ its adjustable size starts a new sequence. Overview still assembles the complete
 national series through 100-row backend pages for its chart and cards, then
 presents the Daily observations table in adjustable pages starting at 10 rows.
 Either date side can be omitted; both omitted browse all stored coverage.
-The October 7 update adds one exact facility-ID input to Facilities for
-Analyst/Admin, combining its value with the selected date bounds. Generators
-retains adapter/catalog support without a new UI control. No selector/discovery
+The October 7 update adds one exact facility-ID input to Facilities and Generators
+for Analyst/Admin, combining its value with the selected date bounds. Both use
+the same validation and cursor lifecycle. No selector/discovery
 endpoint is available. Clearing the field omits `facility`; a supplied value must
 be 1–256 UTF-8 bytes, with no surrounding Unicode whitespace, Cc controls or
 malformed Unicode. Preserve case, leading zeros, quotes and internal spaces;

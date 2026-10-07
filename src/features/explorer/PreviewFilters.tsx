@@ -13,7 +13,7 @@ export function PreviewFilters({ dataset, selection, onApply }: { readonly datas
   const [start, setStart] = useState(selection.filters.dates?.start ?? "");
   const [end, setEnd] = useState(selection.filters.dates?.end ?? "");
   const [facility, setFacility] = useState(selection.filters.facilityId ?? "");
-  const supportsFacility = dataset.grain === "facility" && dataset.filters.facilityId;
+  const supportsFacility = dataset.grain !== "national" && dataset.filters.facilityId;
   const [size, setSize] = useState(String(selection.pageSize));
   const [error, setError] = useState<string | null>(null);
   function apply() {

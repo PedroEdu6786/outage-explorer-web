@@ -36,8 +36,9 @@ into `data-api-v1/`; previous hashes below identify historical snapshots.
 
 The catalog expands detail datasets to include `facility`. Initial previews
 combine an exact opaque facility ID and optional dates; continuation sends only
-cursor. The web adds the input to Facilities only, preserving Generators adapter
-compatibility and legacy date-only catalog decoding. The current backend handoff
+cursor. The web initially added the input to Facilities only; the subsequent
+October 7 user request enables the same input on Generators. Legacy date-only
+catalog decoding remains supported. The current backend handoff
 also specifies fixed 60-second expiry; the client uses returned expiry timestamps.
 See [preview semantics](catalog-preview.md) and
 [verification](../verification/facility-filter.md).

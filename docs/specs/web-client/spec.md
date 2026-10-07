@@ -6,14 +6,14 @@ Original acceptance checkboxes below are not closed by registration or controlle
 
 ## October 7 facility-preview extension
 
-The user-authorized Facilities preview now accepts one optional exact facility-ID
+The user-authorized Facilities and Generators previews now accept one optional exact facility-ID
 filter for Analyst/Admin, combined with independently optional dates. Validate
 1–256 UTF-8 bytes without normalization, trimming or numeric conversion; reject
 empty supplied IDs, surrounding whitespace, controls and malformed Unicode.
 Clearing the input omits the parameter. An unmatched valid ID is a normal empty
 preview. Filter changes reset pagination and invalidate older responses;
 continuation sends cursor only. Catalog decoding supports the expanded Facilities
-and Generators capabilities; this UI extension targets Facilities. Viewer access
+and Generators capabilities; both detail previews expose the control. Viewer access
 remains Overview-only. These requirements supersede date-only scope below.
 See [contract](contracts/catalog-preview.md) and
 [verification](verification/facility-filter.md). The current source contract uses

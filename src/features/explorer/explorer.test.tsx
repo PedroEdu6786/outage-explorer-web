@@ -495,21 +495,21 @@ it("preserves schema scroll focus while replacing only presentational table cont
 });
 
 describe("facility-filtered preview behavior", () => {
-  it.each(["analyst", "admin"] as const)("lets %s apply combined filters, clear the ID, and see unmatched results", async (persona) => {
+  it.each([["analyst", "facility"], ["admin", "facility"], ["analyst", "generator"], ["admin", "generator"]] as const)("lets %s filter %s previews, clear the ID, and see unmatched results", async (persona, grain) => {
     const user = userEvent.setup();
     const fixture = createFixtureOperations({ persona });
     const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
     render(<ExplorerFeature operations={fixture.operations} runtime={runtime} />);
     await screen.findByRole("table", { name: "Synthetic national observations preview" });
     expect(screen.queryByLabelText("Facility ID (optional)")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Synthetic facility observations/ }));
-    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    await user.click(screen.getByRole("button", { name: new RegExp(`Synthetic ${grain} observations`) }));
+    await screen.findByRole("table", { name: `Synthetic ${grain} observations preview` });
     fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-09-01" } });
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-30" } });
     await user.type(screen.getByLabelText("Facility ID (optional)"), "0012");
     await user.click(screen.getByRole("button", { name: "Apply filters" }));
-    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
-    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-facility", filters: { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
+    await screen.findByRole("table", { name: `Synthetic ${grain} observations preview` });
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: `synthetic-${grain}`, filters: { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
     expect(screen.getAllByText("0012").length).toBeGreaterThan(0);
     await user.clear(screen.getByLabelText("Facility ID (optional)"));
     await user.type(screen.getByLabelText("Facility ID (optional)"), "MissingCaseID");
@@ -518,8 +518,8 @@ describe("facility-filtered preview behavior", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText("Facility ID (optional)"));
     await user.click(screen.getByRole("button", { name: "Apply filters" }));
-    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
-    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-facility", filters: { dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
+    await screen.findByRole("table", { name: `Synthetic ${grain} observations preview` });
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: `synthetic-${grain}`, filters: { dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
     await user.type(screen.getByLabelText("Facility ID (optional)"), " 0012");
     const before = fixture.callLog.read().length;
     await user.click(screen.getByRole("button", { name: "Apply filters" }));
@@ -527,7 +527,7 @@ describe("facility-filtered preview behavior", () => {
     expect(screen.getByLabelText("Facility ID (optional)")).toHaveValue(" 0012");
     expect(fixture.callLog.read()).toHaveLength(before);
     await user.click(screen.getByRole("button", { name: "Reset" }));
-    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    await screen.findByRole("table", { name: `Synthetic ${grain} observations preview` });
     expect(screen.getByLabelText("Facility ID (optional)")).toHaveValue("");
     expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toMatchObject({ filters: {} });
   });

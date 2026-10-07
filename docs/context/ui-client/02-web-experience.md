@@ -49,9 +49,9 @@ distinguishable. Render source strings as text, never trusted HTML.
 
 The October 5 [preview contract](../../specs/web-client/contracts/catalog-preview.md)
 now includes an exact optional facility-ID input for Analyst/Admin Facilities
-previews, independently optional inclusive date bounds and page revisit cursors.
-The date-only October 5 intake is historical; Generators retains backend capability
-without a new UI control. Historical frontend facility/date differences are recorded in
+and Generators previews, independently optional inclusive date bounds and page revisit cursors.
+The date-only October 5 intake is historical. Both detail datasets use the same
+facility-ID control and validation. Historical frontend facility/date differences are recorded in
 [comparison F1/F2](../../specs/web-client/contracts/contract-review.md).
 
 Preview filters are applied by the backend. Validate date input and ranges

@@ -82,3 +82,27 @@ The supplied desktop Explorer reference was inspected. The new input is a
 recorded behavioral extension using existing primitives/layout. Browser checks
 cover responsive behavior; no new screenshot promotion, full Figma comparison
 or human visual sign-off is claimed. Review remains pending.
+
+## Generators UI follow-up — October 7, 2026
+
+The subsequent user request extends the same Facility ID input to Generators.
+This supersedes the Facilities-only UI scope of the original checkpoint above.
+`PreviewFilters` now admits either detail grain when the authorized catalog
+advertises facility filtering. Existing ID validation, combined dates, clearing,
+cursor-only transport and sequence guards are reused; no adapter/backend change.
+National and Viewer exclusions remain. Legacy date-only catalogs still hide it.
+
+Feature interaction coverage now runs for both Analyst/Admin and both detail
+grains: exact `0012`, dates, unmatched empty results, clearing, Reset and invalid
+whitespace. The composed Explorer browser scenario runs for each detail grain,
+including paging and reset after a facility change. Existing adapter tests already
+verify Generators' combined request and cursor-only continuation.
+
+Checks rerun for this follow-up: typecheck, lint, 448 Vitest tests (33 files),
+33 boundary tests, source boundaries (110 modules/15 roots), fresh Next build,
+production-fixture/release-boundary checks (178 emitted files), fresh Storybook
+build and 13 affected Chromium checks passed. Browser command is the affected
+Storybook command above. `git diff --check` passed. Storybook retains its existing
+module-directive warnings. The eight controlled production tests above were not
+rerun for this one-condition UI extension. No live API/Cognito verification,
+backend edits, deployment or service activation; runtime/visual gaps remain open.

@@ -56,7 +56,7 @@ decision; the backend authorizes every request. See the
 3. Preview authorized records using backend pagination. The original UI scope
    included date and applicable facility filters; the user accepted date-only
    v1 on October 5; the October 7 update restores an exact optional facility-ID
-   input for Analyst/Admin Facilities previews, combined with dates. Start/end dates are independently optional; valid ranges
+   input for Analyst/Admin Facilities and Generators previews, combined with dates. Start/end dates are independently optional; valid ranges
    outside coverage may return no rows. See the [accepted adaptation](../../specs/web-client/contracts/frontend-adaptation.md).
 4. Present the ready-made national daily offline-capacity metric within the
    relevant Figma screen. A separate dashboard/chart page is not mandated.

@@ -115,3 +115,7 @@ text input on Facilities, reusing `FormField`/`Input` and the existing wrap/stac
 layout. No facility selector or discovery endpoint is evidenced. The input is a
 user-requested behavioral extension, not an observed prototype control. Browser
 layout checks pass; final visual comparison and human sign-off remain open.
+
+
+The subsequent October 7 request extends this same input to Generators. It reuses
+the Facilities filter strip without a new visual pattern or generator-ID filter.
