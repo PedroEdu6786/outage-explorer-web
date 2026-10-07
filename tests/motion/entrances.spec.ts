@@ -3,6 +3,47 @@ import { openMotionStory, readMotion, rootToken, seconds, type MotionPreference 
 
 const preferences: readonly MotionPreference[] = ["no-preference", "reduce"];
 
+test("Overview opening and reloading progressively reveal the chart without moving data", async ({ page }) => {
+  // Catch the real mount animation before navigation/font waits can consume it.
+  await page.addInitScript(() => {
+    document.addEventListener("animationstart", (event) => {
+      if (event.animationName !== "chart-wipe" || !(event.target instanceof SVGSVGElement)) return;
+      event.target.getAnimations().forEach((animation) => { animation.pause(); });
+    });
+  });
+  await openMotionStory(page, "pages-overview--long-range-zoom");
+  for (const reload of [false, true]) {
+    if (reload) await page.reload();
+    const chart = page.locator("svg[data-chart=national-trend]");
+    await expect(chart).toBeVisible();
+    await expect.poll(() => chart.evaluate((svg) => svg.getAnimations().some((animation) => animation.playState === "paused"))).toBe(true);
+    const frames = await chart.evaluate((svg) => {
+      const animation = svg.getAnimations().find((item) => (item as CSSAnimation).animationName === "chart-wipe");
+      if (!animation?.effect) throw new Error("Mounted chart wipe required");
+      const duration = Number(animation.effect.getTiming().duration);
+      const source = () => Array.from(svg.querySelectorAll("polyline")).map((line) => line.getAttribute("points"));
+      const before = source();
+      const clips = [0.25, 0.5, 0.75].map((fraction) => {
+        animation.currentTime = duration * fraction;
+        return getComputedStyle(svg).clipPath;
+      });
+      animation.finish();
+      return { before, after: source(), clips };
+    });
+    const rightInsets = frames.clips.map((clip) => {
+      expect(clip).toMatch(/^inset\(0px [\d.]+% 0px 0px\)$/);
+      return Number.parseFloat(clip.split(" ")[1] ?? "NaN");
+    });
+    const [first = NaN, second = NaN, third = NaN] = rightInsets;
+    expect(first).toBeLessThan(100);
+    expect(first).toBeGreaterThan(second);
+    expect(second).toBeGreaterThan(third);
+    expect(third).toBeGreaterThan(0);
+    expect(frames.after).toEqual(frames.before);
+    await expect(chart).toHaveCSS("clip-path", "none");
+  }
+});
+
 /** Open a story with the `motion` global explicitly on or off (the default) and wait for fonts. */
 async function openStory(page: Page, id: string, motion: "on" | "off") {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -176,15 +217,16 @@ for (const preference of preferences) {
       const chart = page.locator("svg[data-chart=national-trend]");
       await expect(chart).toBeVisible();
       await expect(chart).toHaveCSS("animation-name", reduce ? "none" : "chart-wipe");
-      // The wipe only clips (never moves points): its single keyframe is a left-to-right clip inset.
+      // Both endpoints must be insets: interpolating to `none` jumps instead of wiping.
       const keyframe = await page.evaluate(() => {
         for (const sheet of Array.from(document.styleSheets)) for (const rule of Array.from(sheet.cssRules)) {
           if (rule instanceof CSSKeyframesRule && rule.name === "chart-wipe") return Array.from(rule.cssRules).map((frame) => (frame as CSSKeyframeRule).cssText.replace(/\s+/g, " "));
         }
         return [];
       });
-      expect(keyframe).toHaveLength(1);
+      expect(keyframe).toHaveLength(2);
       expect(keyframe[0]).toMatch(/^(?:from|0%) \{ clip-path: inset\(0(?:px)? 100% 0(?:px)? 0(?:px)?\); \}$/);
+      expect(keyframe[1]).toMatch(/^(?:to|100%) \{ clip-path: inset\(0(?:px)?\); \}$/);
       // The end state is the unclipped chart: reduce has no wipe at all, motion shows it fully revealed.
       await expect(chart).toHaveCSS("clip-path", "none");
       expect(await chart.locator("polyline[data-segment=observed]").count()).toBeGreaterThan(0);

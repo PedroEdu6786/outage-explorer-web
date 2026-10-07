@@ -87,3 +87,21 @@ phase introduces; the phase 2 row in the manifest now reads "verified and commit
 - The snapshot component of the chart's remount key is covered by code review of the key, not an isolated test.
 - Scroll-driven header shadow depends on Chromium's scroll timelines; other engines show no shadow.
 - The `check:production-fixtures` file count is inflated by the pre-existing `next dev` process on port 3000 (left running).
+
+## October 7 correction — visible entrance on opening/reload
+
+The user confirmed zoom motion worked but the opening/reload entrance did not.
+Earlier checks proved the animation name and final state, not its intermediate
+appearance. A Chromium probe at `03fa237` found the implicit `clip-path: none`
+endpoint caused a discrete jump: fully clipped at 0/70ms, fully visible at
+175/350/699ms. An explicit `to { clip-path: inset(0); }` now permits a continuous
+wipe over the existing 700ms duration. SVG identity, source geometry, zoom motion
+and reduced-motion behavior are unchanged.
+
+The new assembled Overview browser regression catches the real mount animation
+on opening and reload, samples 25/50/75% of its duration, and requires strictly
+decreasing partial clipping with identical source coordinates. Checks passed:
+30 entrance/viewport browser scenarios, 97 focused Overview/motion-guard unit
+tests, typecheck, lint, fresh Storybook and production builds, and release source
+and fixture-exclusion scans (113 modules/15 roots, 361 emitted files). Evidence
+is synthetic Chromium; authenticated user acceptance remains separate.

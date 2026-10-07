@@ -45,6 +45,8 @@
 
   @keyframes chart-wipe {
     from { clip-path: inset(0 100% 0 0); }
+    /* `none` cannot interpolate with an inset, so both endpoints need a shape. */
+    to { clip-path: inset(0); }
   }
 
   @keyframes progress {
