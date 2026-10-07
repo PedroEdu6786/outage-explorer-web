@@ -1,5 +1,5 @@
+import { captureScreenshot } from "../support/capture-screenshot";
 import { test, expect, type Page } from "@playwright/test";
-import { mkdir } from "node:fs/promises";
 
 async function story(page: Page, id: string) {
   await page.goto(`/iframe.html?id=${id}&viewMode=story`);
@@ -14,9 +14,8 @@ const specimens = [
   ["queries", "features-queries--ready", "SQL Workspace"],
 ] as const;
 
-test("four isolated features capture desktop/narrow and retain controls across source breakpoints", async ({ page }) => {
+test("four isolated features retain desktop/narrow controls across source breakpoints", async ({ page }, testInfo) => {
   test.setTimeout(120_000);
-  await mkdir("docs/specs/web-client/evidence/phase-4", { recursive: true });
   const errors: string[] = [];
   page.on("pageerror", (error) => { errors.push(error.message); });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -29,13 +28,13 @@ test("four isolated features capture desktop/narrow and retain controls across s
       if (name === "explorer") await expect(page.getByRole("tab", { name: "Preview", exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
       expect(await page.evaluate(() => document.fonts.check('650 25px "Inter"'))).toBe(true);
-      if (width === 1440 || width === 390) await page.screenshot({ path: `docs/specs/web-client/evidence/phase-4/${name}-${String(width)}.png`, animations: "disabled" });
+      if (width === 1440 || width === 390) await captureScreenshot(page, testInfo, `phase-4/${name}-${String(width)}.png`);
     }
   }
   expect(errors).toEqual([]);
 });
 
-test("Overview exact inspection, comparison and missing gaps work in Chromium", async ({ page }) => {
+test("Overview exact inspection, comparison and missing gaps work in Chromium", async ({ page }, testInfo) => {
   await story(page, "features-overview--ready");
   await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
   const compare = page.getByRole("checkbox", { name: "Compare EIA reported %" });
@@ -56,7 +55,7 @@ test("Overview exact inspection, comparison and missing gaps work in Chromium", 
   await page.getByLabel("End date", { exact: true }).fill("2026-09-01");
   await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await expect(page.getByText(/EIA reported: 1.01%/)).toBeVisible();
-  await page.screenshot({ path: "docs/specs/web-client/evidence/phase-4/overview-exact-390.png", fullPage: true, animations: "disabled" });
+  await captureScreenshot(page, testInfo, "phase-4/overview-exact-390.png", { fullPage: true });
 });
 
 test("Auth managed entry contains no credentials or persona controls", async ({ page }) => {
@@ -68,7 +67,7 @@ test("Auth managed entry contains no credentials or persona controls", async ({ 
   await expect(page.getByText("Complete managed sign-in", { exact: true })).toBeVisible();
 });
 
-test("Explorer Viewer cursor continuation and keyboard schema tab retain permitted metadata", async ({ page }) => {
+test("Explorer Viewer cursor continuation and keyboard schema tab retain permitted metadata", async ({ page }, testInfo) => {
   await story(page, "features-explorer--viewer");
   await expect(page.getByRole("table", { name: "Synthetic national observations preview" })).toBeVisible();
   await expect(page.getByText("Synthetic facility observations", { exact: true })).toHaveCount(0);
@@ -82,7 +81,7 @@ test("Explorer Viewer cursor continuation and keyboard schema tab retain permitt
   await preview.focus(); await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("tab", { name: "Schema", exact: true })).toBeFocused();
   await expect(page.getByRole("table", { name: "Authorized dataset schema" })).toBeVisible();
-  await page.screenshot({ path: "docs/specs/web-client/evidence/phase-4/explorer-schema-1440.png", animations: "disabled" });
+  await captureScreenshot(page, testInfo, "phase-4/explorer-schema-1440.png");
   await page.getByRole("button", { name: "Invalidate synthetic session" }).click();
   await expect(page.getByRole("table")).toHaveCount(0);
 });
@@ -105,11 +104,10 @@ test("SQL single keyboard Run, edited draft, numbered retained pages and positio
   await expect(page.getByText("Page 1 of 2 · Fixed 2 rows per page", { exact: true })).toBeVisible();
 });
 
-test("required state specimens capture synthetic expiry, denial, unavailable, truncation and uncertainty", async ({ page }) => {
-  await mkdir("docs/specs/web-client/evidence/phase-4", { recursive: true });
+test("required state specimens display synthetic expiry, denial, unavailable, truncation and uncertainty", async ({ page }, testInfo) => {
   const states = [
     ["auth-expired", "features-auth--expired", "Session expired"],
-    ["overview-denied", "features-overview--denied", "National data access denied"],
+    ["overview-denied", "features-overview--denied", "Sign in to view national observations"],
     ["overview-unavailable", "features-overview--unavailable", "Synthetic fixture: data-unavailable."],
     ["explorer-expired", "features-explorer--expired", "Preview expired"],
     ["queries-truncated", "features-queries--short-truncated-page", "Whole execution truncated"],
@@ -119,7 +117,11 @@ test("required state specimens capture synthetic expiry, denial, unavailable, tr
   for (const [name, id, title] of states) {
     await story(page, id);
     await expect(page.getByText(title, { exact: true })).toBeVisible();
+    if (name === "overview-denied") {
+      await expect(page.getByRole("table")).toHaveCount(0);
+      await expect(page.getByRole("heading", { name: "U.S. Nuclear Outage Overview", exact: true })).toHaveCount(0);
+    }
     if (name === "queries-truncated") await expect(page.getByText("Page 2 of 2 · Fixed 2 rows per page", { exact: true })).toBeVisible();
-    await page.screenshot({ path: `docs/specs/web-client/evidence/phase-4/${name}-1440.png`, animations: "disabled" });
+    await captureScreenshot(page, testInfo, `phase-4/${name}-1440.png`);
   }
 });

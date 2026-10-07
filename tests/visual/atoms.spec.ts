@@ -1,4 +1,4 @@
-import { mkdir } from "node:fs/promises";
+import { captureScreenshot } from "../support/capture-screenshot";
 import { expect, test, type Page } from "@playwright/test";
 
 async function story(page: Page, id: string, globals = "") {
@@ -87,8 +87,7 @@ test("A3 status semantics and reduced-motion ring retain exact token styles", as
   await expect(page.getByRole("heading", { name: "Preview panel" })).toHaveCSS("font-weight", "650");
 });
 
-test("A1–A3 specimens capture loaded local fonts at both reference viewports", async ({ page }) => {
-  await mkdir("docs/specs/web-client/evidence/phase-2", { recursive: true });
+test("A1–A3 specimens load local fonts at both reference viewports", async ({ page }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
@@ -105,7 +104,7 @@ test("A1–A3 specimens capture loaded local fonts at both reference viewports",
     await page.setViewportSize({ width, height: 1100 });
     for (const [name, id] of specimens) {
       await story(page, id);
-      await page.screenshot({ path: `docs/specs/web-client/evidence/phase-2/${name}-${String(width)}.png`, animations: "disabled" });
+      await captureScreenshot(page, testInfo, `phase-2/${name}-${String(width)}.png`);
     }
   }
   await story(page, "atoms-status-and-surfaces--panel");

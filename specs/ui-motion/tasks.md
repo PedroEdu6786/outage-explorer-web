@@ -8,7 +8,7 @@
 - Each phase is a separate commit, created when `/implement` is requested for that phase (one phase per run). Per AGENTS.md, every commit needs a descriptive multiline body and the staged devlog entry (`docs/devlog/<commit-date>.md`, append-only; the final doc task of each phase). Pushing needs separate authorization.
 - Checkboxes are ticked only with evidence from commands actually run; fixture/synthetic evidence is never presented as live or Figma-fidelity evidence. Motion visual sign-off is a separate record (T4.26).
 - `[P]` = independent of sibling tasks once its stated predecessors are done, and touching disjoint files. Shared configuration (`tokens.css`, `motion.css`, `globals.css`, Playwright/Vitest/Storybook config) stays under one writer. Tasks editing the same file are sequential.
-- Paths marked **(new)** are created; all others exist (verified against the repo October 6, 2026). Existing visual specs write captures directly to `docs/specs/web-client/evidence/phase-{2,3,4,6}/`.
+- Paths marked **(new)** are created; all others exist (verified against the repo October 6, 2026). At that checkpoint visual specs wrote directly to saved evidence. October 7 M7 supersedes that workflow: `npm run capture:evidence` writes ignored candidates; ordinary tests leave evidence untouched. See [capture guidance](../../docs/development/verification.md#deliberate-screenshot-capture).
 
 ## Phases
 | Phase | File | Scope | Status |
@@ -33,7 +33,7 @@ Run in this order at each checkpoint; serialize builds and port-bound servers. B
 - `npm run build-storybook`, then `npm run test:e2e` (default `motion:off`; includes affected `tests/visual`, `tests/browser`, `tests/e2e`)
 - Reduced-motion check: `npm run test:e2e -- tests/motion --workers=1` (motion on; `emulateMedia` reduce vs no-preference)
 - Real-route configs when changed or affected: `playwright.controlled.config.ts` (configured build); phase 1 also `playwright.production.config.ts` (build with `OUTAGE_API_ORIGIN=''`, rebuild configured afterward)
-- Captures: regenerated with motion off, compared file-by-file (byte hash, then visual review of differing files) against T1.1; intentional differences listed in the phase record
+- Captures: run `npm run capture:evidence` with motion off; compare candidates by phase/filename (byte hash, then visual review of differing files) against T1.1 before copying reviewed replacements into evidence. List intentional differences in the phase record.
 - AC6 hygiene: `git diff --exit-code package.json package-lock.json`; record `git rev-parse HEAD` and the working-tree digest with the build result
 - Record every phase in `specs/ui-motion/verification/phase-N.md`
 

@@ -17,6 +17,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "capture:evidence": "playwright test --config playwright.capture.config.ts",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "check:boundaries": "node scripts/check-boundaries.mjs",

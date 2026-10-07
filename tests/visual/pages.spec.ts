@@ -1,5 +1,5 @@
+import { captureScreenshot } from "../support/capture-screenshot";
 import { test, expect } from "@playwright/test";
-import { mkdir } from "node:fs/promises";
 import { openPage } from "../browser/support/page-boundary";
 const specimens = [
   ["sign-in", "sign-in--signed-out", "Sign in to your workspace"],
@@ -7,10 +7,9 @@ const specimens = [
   ["explorer", "explorer--ready", "Dataset Explorer"],
   ["query", "query--ready", "SQL Workspace"],
 ] as const;
-test("four final page compositions preserve reference widths and inclusive breakpoint controls", async ({ page }) => {
+test("four final page compositions preserve reference widths and inclusive breakpoint controls", async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const errors: string[] = []; page.on("pageerror", (error) => { errors.push(error.message); });
-  await mkdir("docs/specs/web-client/evidence/phase-6", { recursive: true });
   await page.clock.setFixedTime(new Date("2026-10-04T12:00:00Z"));
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const width of [1440, 390, 479, 480, 481, 759, 760, 761, 999, 1000, 1001]) {
@@ -30,22 +29,22 @@ test("four final page compositions preserve reference widths and inclusive break
       expect(overflows, `${name} outer document overflow at ${String(width)}`).toBe(false);
       if (width === 1440 || width === 390) {
         await page.getByTestId("fixture-controls").evaluate((element) => { element.setAttribute("hidden", ""); });
-        await page.screenshot({ path: `docs/specs/web-client/evidence/phase-6/${name}-${String(width)}.png`, fullPage: true, animations: "disabled" });
+        await captureScreenshot(page, testInfo, `phase-6/${name}-${String(width)}.png`, { fullPage: true });
         if (name === "explorer") {
           await page.getByRole("tab", { name: "Schema", exact: true }).click();
           await expect(page.getByRole("table", { name: "Authorized dataset schema" })).toBeVisible();
-          await page.screenshot({ path: `docs/specs/web-client/evidence/phase-6/explorer-schema-${String(width)}.png`, fullPage: true, animations: "disabled" });
+          await captureScreenshot(page, testInfo, `phase-6/explorer-schema-${String(width)}.png`, { fullPage: true });
         }
         if (name === "query") {
           await page.getByRole("textbox", { name: "SQL statement" }).fill("SELECT * FROM synthetic_national");
           await page.getByRole("button", { name: "Run query", exact: true }).click();
           await expect(page.getByText("Query succeeded", { exact: true })).toBeVisible();
-          await page.screenshot({ path: `docs/specs/web-client/evidence/phase-6/query-results-${String(width)}.png`, fullPage: true, animations: "disabled" });
+          await captureScreenshot(page, testInfo, `phase-6/query-results-${String(width)}.png`, { fullPage: true });
         }
         if (name === "overview" && width === 390) {
           await page.getByRole("button", { name: "Open navigation", exact: true }).click();
           await expect(page.getByRole("dialog", { name: "Application navigation" })).toBeVisible();
-          await page.screenshot({ path: "docs/specs/web-client/evidence/phase-6/navigation-390.png", fullPage: true, animations: "disabled" });
+          await captureScreenshot(page, testInfo, "phase-6/navigation-390.png", { fullPage: true });
         }
       }
     }

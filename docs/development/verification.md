@@ -34,7 +34,8 @@ official compatibility evidence and the supported webpack choice are in
 | `npm run check:release-boundaries` | Source/artifact checks with mandatory structural production registration; no live acceptance inferred |
 | `npm run storybook` | Isolated Next/Vite previews on port 6006 |
 | `npm run build-storybook` | Serialize build into `storybook-static`; required before browser smoke |
-| `npm run test:e2e` | Chromium browser/visual fixture scenarios against static Storybook server on port 6007 |
+| `npm run test:e2e` | Chromium behavior/layout fixture checks against Storybook on port 6007; no saved-evidence writes |
+| `npm run capture:evidence` | Opt-in visual suite; fresh Storybook required; PNGs under ignored `playwright-report/capture-results/` |
 
 The general browser setup is `npx playwright install chromium`, followed by
 `npm run build-storybook` and `npm run test:e2e`. On this workspace, Chromium
@@ -45,6 +46,32 @@ removed by the host; reinstall if the browser executable is absent. Linux hosts
 may additionally require Playwright's documented system dependencies. Browser
 download, server binding and browser launch need their actual environment's
 network/permission support; a skipped or blocked browser check is not a pass.
+
+## Deliberate screenshot capture
+
+`npm run test:e2e` keeps the visual suite's behavior, font, responsive and
+accessibility assertions, but screenshot calls are disabled. Neither ordinary
+runs nor capture runs write into `docs/specs/web-client/evidence/`.
+
+To generate review candidates, build Storybook and run the separate project:
+
+```sh
+npm run build-storybook
+PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npm run capture:evidence
+```
+
+The capture project opts in through `metadata.captureScreenshots`, runs one
+worker, and saves PNGs inside per-test directories under
+`playwright-report/capture-results/`, retaining `phase-N/<filename>.png` names.
+Normal runs use `test-results/`; they do not clean or overwrite capture output.
+Capture reruns clean their own output, so preserve pending review candidates
+elsewhere before rerunning. Serialize runs sharing the Storybook server port6007.
+
+Compare candidates with the corresponding committed images and inspect meaningful
+differences. Copy only reviewed, intentional replacements into the evidence
+folder, record the reason and reviewer, then stage those selected files. The
+capture command neither promotes candidates nor approves visual fidelity.
+Keep synthetic captures, live integration and human visual sign-off separate.
 
 ## Verification sequence and shared resources
 
@@ -137,8 +164,8 @@ Phase 5 browser scenarios live in `tests/browser/`; Playwright discovers this ro
 Phase 6 fixture routes use `tests/pages/*Page.stories.tsx` and PageDemo, importing
 actual thin route/layout modules with injected synthetic operations. The page
 browser suites are sign-in-page, overview-page, explorer-page, query-page and
-navigation; `tests/visual/pages.spec.ts` captures all four pages plus schema/results/
-drawer states and checks the eleven-width matrix. See [Phase 6](../specs/web-client/verification/phase-6.md).
+navigation; `tests/visual/pages.spec.ts` checks the eleven-width matrix and,
+under the capture project, emits all four pages plus schema/results/drawer states. See [Phase 6](../specs/web-client/verification/phase-6.md).
 
 After a fresh `npm run build`, run the separate actual-production scenario:
 
@@ -256,14 +283,13 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   `tests/components/motion-guard.test.ts`.
 - **Real-route configs** (development, controlled, production, auth) set
   `use.reducedMotion: "reduce"`; they assert behavior only and capture nothing.
-- **Capture comparison (AC7).** Regenerate the committed evidence PNGs with motion
-  off (the default `npm run test:e2e`), hash every file under
-  `docs/specs/web-client/evidence/` and compare with the phase-1 baseline run
-  (`specs/ui-motion/verification/baseline.md`), then review each differing file
-  visually. Capture specs are not byte-deterministic for some Overview/Explorer
-  files even on an unmodified tree; the baseline lists them. Keep regenerated
-  PNGs only when the differences are intentional and recorded; otherwise restore
-  them with `git restore` after review.
+- **Capture comparison (AC7).** Use `npm run capture:evidence` with motion off
+  to create ignored candidates, then compare matching phase/filename images with
+  committed evidence and the phase-1 baseline (`specs/ui-motion/verification/baseline.md`).
+  Review differing files visually before copying intentional replacements into
+  the evidence folder. Some Overview/Explorer captures are not byte-deterministic
+  even on an unmodified tree; the baseline lists them. Ordinary tests leave the
+  committed PNGs untouched; no restore step is needed after an ordinary run.
 
 ### Skeleton and loading conventions
 
@@ -353,9 +379,10 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   not supply coverage. E1 shimmer remains unused at all call sites.
 - Run all [phase gate commands](../../specs/ui-motion/tasks.md#phase-gate-commands),
   including the configured real-route controlled config, with builds and capture
-  runs serialized. The complete committed phase-2/3/4/6 PNG set is regenerated
-  with `motion:off` plus `animations: "disabled"`, compared by SHA-256 to T1.1,
-  and differing images visually inspected. Record intentional catalog differences,
+  runs serialized. `npm run capture:evidence` creates candidates for the complete
+  phase-2/3/4/6 PNG set with `motion:off` plus `animations: "disabled"`. Compare
+  candidates by phase/filename and SHA-256 to T1.1, then visually inspect
+  differing images before promotion. Record intentional catalog differences,
   earlier committed product changes, fixture corrections and capture noise
   separately. Do not replace intended SQL/Explorer captures with forbidden screens.
 - Final machine evidence is [phase-4.md](../../specs/ui-motion/verification/phase-4.md).

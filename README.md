@@ -173,6 +173,10 @@ npm run build-storybook
 npm run test:e2e
 ```
 
+Normal tests leave saved screenshots untouched. Use `npm run capture:evidence`
+after building Storybook to generate ignored review candidates under
+`playwright-report/capture-results/`; copy only reviewed images into saved evidence.
+
 Run artifact checks after a fresh production build. See the
 [verification guide](docs/development/verification.md) for additional browser
 suites, temporary browser-cache settings and environment prerequisites.
