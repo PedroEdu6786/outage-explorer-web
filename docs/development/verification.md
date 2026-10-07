@@ -316,3 +316,10 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   on) withholds the session right after a range change and asserts no protected content
   or dim remains; the held-dim state itself is shown by the `Features/Overview`
   `RangeChangeRefetch` story and asserted in `tests/motion/entrances.spec.ts`.
+  The chart now consumes the selected range directly, filtering retained rows and
+  updating axis dates during refetch. The controlled production pagination scenario
+  holds the replacement HTTP response and asserts the chart narrows from 23 points
+  to five before release, then checks completion and expansion back to 23. Overview
+  component regressions additionally cover both bounds, compare, inspection, open
+  bounds and empty windows against broader supplied data. These remain synthetic
+  behavior checks, with no live API or visual-comparison acceptance implied.

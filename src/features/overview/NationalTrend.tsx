@@ -1,23 +1,28 @@
 "use client";
 import { useId, useState } from "react";
 import type { NationalSeries } from "../../contracts/observations";
+import type { DateBounds } from "../../contracts/catalog";
 import { Checkbox } from "../../components/atoms/Checkbox";
 import { Surface } from "../../components/atoms/Surface";
 import { PanelHeader } from "../../components/molecules/PanelHeader";
+import { EmptyState } from "../../components/molecules/EmptyState";
 import { percentageLabel, dayCoordinate, plotSegments } from "./presentation";
 
-export function NationalTrend({ series }: { readonly series: NationalSeries }) {
+export function NationalTrend({ series, range = series.range }: { readonly series: NationalSeries; readonly range?: DateBounds }) {
   const [compare, setCompare] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const id = useId();
-  const rows = [...series.observations].sort((a, b) => a.date.localeCompare(b.date));
+  // The selected calendar window controls both plotted points and inspection,
+  // including while a broader, superseded response is retained during refetch.
+  const rows = series.observations.filter((row) => (range.start === undefined || row.date >= range.start)
+    && (range.end === undefined || row.date <= range.end)).sort((a, b) => a.date.localeCompare(b.date));
   const calculated = plotSegments(rows, "calculatedPercentage");
   const reported = plotSegments(rows, "reportedPercentage");
   const points = [...calculated.flat(), ...(compare ? reported.flat() : [])];
   const max = Math.max(1, ...points.map((point) => point.value));
   const min = Math.min(0, ...points.map((point) => point.value));
-  const startDate = series.range.start ?? rows[0]?.date ?? "";
-  const endDate = series.range.end ?? rows.at(-1)?.date ?? startDate;
+  const startDate = range.start ?? rows[0]?.date ?? "";
+  const endDate = range.end ?? rows.at(-1)?.date ?? startDate;
   const start = dayCoordinate(startDate);
   const span = Math.max(1, dayCoordinate(endDate) - start);
   const x = (date: string) => 60 + (dayCoordinate(date) - start) / span * 810;
@@ -26,6 +31,7 @@ export function NationalTrend({ series }: { readonly series: NationalSeries }) {
   return <Surface>
     <PanelHeader title="Daily fleet capacity offline" description="Daily share of EIA-reported nuclear capacity out of service" actions={<label className="flex items-center gap-2 text-[12px]"><Checkbox checked={compare} onChange={(event) => { setCompare(event.currentTarget.checked); }} />Compare EIA reported %</label>} />
     <div className="p-[18px]">
+      {rows.length === 0 ? <EmptyState title="No observations in this chart range" /> : <>
       <div role="region" aria-label="National trend: scrollable chart" tabIndex={0} className="max-w-full overflow-x-auto">
       <svg role="img" aria-labelledby={id} viewBox="0 0 920 300" className="block w-full min-w-[920px] animate-chart-wipe" data-chart="national-trend">
         <title id={id}>National offline capacity trend. Missing observations remain gaps; exact values are in the Daily observations table.</title>
@@ -44,6 +50,7 @@ export function NationalTrend({ series }: { readonly series: NationalSeries }) {
         <select className="rounded border border-border bg-surface p-2" value={selected ?? ""} onChange={(event) => { setSelected(event.currentTarget.value); }}><option value="">Select date</option>{rows.map((row) => <option key={row.date} value={row.date}>{row.date}</option>)}</select>
       </label>
       {active && <div role="status" className="mt-2 rounded bg-sidebar p-3 text-[12px] text-white"><strong>{active.date}</strong><p>Calculated offline: {percentageLabel(active.status === "available" ? active.calculatedPercentage : null)}</p>{compare && <p>EIA reported: {percentageLabel(active.status === "available" ? active.reportedPercentage : null)}</p>}<p>Offline capacity: {active.status === "available" && active.outageMw ? `${active.outageMw.display} MW` : "Unavailable"}</p><p>Fleet capacity: {active.status === "available" && active.capacityMw ? `${active.capacityMw.display} MW` : "Unavailable"}</p></div>}
+      </>}
     </div>
   </Surface>;
 }

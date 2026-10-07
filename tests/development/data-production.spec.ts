@@ -129,8 +129,10 @@ test("both tables start at ten rows, resize and paginate without changing the Ov
   ]);
   const reads: URL[] = [];
   const errors: string[] = [];
+  let releaseRange: (() => void) | undefined;
+  const heldRange = new Promise<void>((resolve) => { releaseRange = resolve; });
   page.on("pageerror", (error) => { errors.push(error.message); });
-  await page.route("**/api/**", (route) => {
+  await page.route("**/api/**", async (route) => {
     const url = new URL(route.request().url());
     if (url.pathname === "/api/auth/session") return route.fulfill({ status: 200, json: {
       user: { id: "controlled-user", email: "controlled@example.invalid", role: "analyst" }, expires_at: expiry, csrf_token: "controlled-csrf",
@@ -148,11 +150,15 @@ test("both tables start at ten rows, resize and paginate without changing the Ov
       const [size, offset] = cursor ? cursor.split(":").map(Number) : [Number(url.searchParams.get("page_size")), 0];
       if (!size || offset === undefined) throw new Error("Invalid controlled page request");
       const end = offset + size;
+      const startDate = url.searchParams.get("start_date");
+      const endDate = url.searchParams.get("end_date");
+      const filtered = rows.filter(([date]) => date !== undefined && (!startDate || date >= startDate) && (!endDate || date <= endDate));
+      if (endDate === "2026-09-05") await heldRange;
       return route.fulfill({ status: 200, json: {
-        ...preview, rows: rows.slice(offset, end), page_size: size,
+        ...preview, rows: filtered.slice(offset, end), page_size: size,
         page_cursor: `${String(size)}:${String(offset)}`,
-        next_cursor: end < rows.length ? `${String(size)}:${String(end)}` : null,
-        has_more: end < rows.length, expires_at: expiry,
+        next_cursor: end < filtered.length ? `${String(size)}:${String(end)}` : null,
+        has_more: end < filtered.length, expires_at: expiry,
       } });
     }
     return route.fulfill({ status: 503, json: { error: "service_unavailable" } });
@@ -175,6 +181,20 @@ test("both tables start at ten rows, resize and paginate without changing the Ov
   await expect(dailyPages.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
   await expect(chart.locator("circle")).toHaveCount(23);
   expect(reads).toHaveLength(requestsAfterSeries);
+
+  // Requested dates immediately constrain the consumed chart data while HTTP is held.
+  await page.getByLabel("End date", { exact: true }).fill("2026-09-05");
+  await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(5);
+  await expect(chart.locator("text").last()).toHaveText("2026-09-05");
+  await expect(chart.locator("xpath=ancestor::*[@inert]")).toHaveAttribute("aria-hidden", "true");
+  await expect(page.getByRole("status")).toContainText("Loading national observations");
+  expect(reads.at(-1)?.searchParams.get("end_date")).toBe("2026-09-05");
+  releaseRange?.();
+  await expect(daily.getByRole("row")).toHaveCount(6);
+  await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(5);
+  await page.getByLabel("End date", { exact: true }).fill("2026-09-23");
+  await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(23);
+  await expect(page.getByRole("button", { name: "Explore dataset", exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Explore dataset", exact: true }).click();
   await expect(page).toHaveURL(/\/datasets$/);

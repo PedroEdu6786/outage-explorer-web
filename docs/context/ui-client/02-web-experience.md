@@ -57,6 +57,14 @@ before requesting data, then respect backend validation. Changes to dataset,
 filters or page size start a new browsing sequence. Ignore stale responses
 from the previous selection.
 
+Overview's selected dates also directly bound the national chart's axis,
+plotted observations, comparison series and inspection options. During a
+range refetch, the dimmed retained chart immediately filters its already-loaded
+observations to those inclusive dates; fresh observations still come from the
+backend request. An empty selected chart window shows an empty state rather
+than points outside the requested dates. Table pagination does not set the
+chart's date window.
+
 The web preview starts at 10 rows per page as requested on October 6, with an
 adjustable maximum of 500; the API's omitted-size default remains 100. Overview's
 Daily observations table also starts at 10, paging through the complete series

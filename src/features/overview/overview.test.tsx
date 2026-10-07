@@ -72,6 +72,52 @@ describe("Overview exact observation behavior", () => {
     await user.selectOptions(screen.getByLabelText("Inspect observation"), "2026-09-03");
     expect(screen.getByText("Calculated offline: 0.00%")).toBeVisible();
   });
+  it("uses the selected chart window for points, both series and inspection even when the supplied data is broader", async () => {
+    const user = userEvent.setup();
+    const series = { range: { start: "2026-09-01", end: "2026-09-04" }, coverage: { status: "unavailable" as const }, provenance: { source: "Synthetic", snapshotId: "fixture" }, observations: syntheticObservations };
+    const { container, rerender } = render(<NationalTrend series={series} />);
+    await user.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    await user.selectOptions(screen.getByLabelText("Inspect observation"), "2026-09-01");
+    rerender(<NationalTrend series={series} range={{ start: "2026-09-02", end: "2026-09-03" }} />);
+    expect(container.querySelector("svg")).toHaveTextContent("2026-09-02");
+    expect(container.querySelector("svg")).toHaveTextContent("2026-09-03");
+    expect(screen.queryByRole("option", { name: "2026-09-01" })).toBeNull();
+    expect(screen.queryByRole("option", { name: "2026-09-04" })).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+    for (const name of ["calculated", "reported"]) {
+      const circles = container.querySelectorAll(`g[data-series=${name}] circle`);
+      expect(circles).toHaveLength(1);
+      expect(circles[0]?.querySelector("title")).toHaveTextContent("2026-09-03");
+    }
+    // Removing a bound restores loaded observations; dates outside them stay empty.
+    rerender(<NationalTrend series={series} range={{ end: "2026-09-03" }} />);
+    expect(screen.getByRole("option", { name: "2026-09-01" })).toBeVisible();
+    expect(container.querySelectorAll("g[data-series=calculated] polyline")).toHaveLength(2);
+    rerender(<NationalTrend series={series} range={{ start: "2027-01-01" }} />);
+    expect(screen.getByText("No observations in this chart range")).toBeVisible();
+    expect(container.querySelector("svg")).toBeNull();
+    expect(series.observations).toEqual(syntheticObservations);
+  });
+  it("updates plotted dates immediately while the selected range response is held", async () => {
+    const { runtime, fixture } = setup();
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(document.querySelectorAll("g[data-series=calculated] circle")).toHaveLength(2);
+    const deferred = fixture.deferNext("readNationalSeries");
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-01" } });
+    await waitFor(() => { expect(screen.getByRole("status")).toHaveTextContent("Loading national observations"); });
+    const chart = document.querySelector("svg[data-chart=national-trend]");
+    expect(chart?.closest("[inert][aria-hidden=true]")).not.toBeNull();
+    expect(chart?.querySelectorAll("g[data-series=calculated] circle")).toHaveLength(1);
+    expect(chart).not.toHaveTextContent("2026-09-03");
+    expect(chart?.querySelectorAll("text")[4]).toHaveTextContent("2026-09-01");
+    expect(chart?.querySelectorAll("text")[5]).toHaveTextContent("2026-09-01");
+    await act(async () => { deferred.release(); await Promise.resolve(); });
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(document.querySelector("[inert]")).toBeNull();
+    expect(document.querySelectorAll("g[data-series=calculated] circle")).toHaveLength(1);
+    view.unmount(); runtime.dispose();
+  });
   it("wipes only the persistent svg: points, segments and gaps are untouched by the wipe and the compare toggle", async () => {
     const user = userEvent.setup();
     const series = { range: { start: "2026-09-01", end: "2026-09-04" }, coverage: { status: "unavailable" as const }, provenance: { source: "Synthetic", snapshotId: "fixture" }, observations: syntheticObservations };
