@@ -1,22 +1,38 @@
 import { z } from "zod";
 
-const types = ["integer", "decimal", "float", "boolean", "string", "date", "time", "timestamp", "timestamp_tz", "binary", "list", "struct", "map", "null"] as const;
-const encodings = ["integer-string", "decimal-string", "number-or-special-string", "boolean", "string", "iso-date", "iso-time", "iso-local-datetime", "iso-utc-datetime", "base64", "array", "field-array", "pair-array", "null"] as const;
+const columnTypes = ["integer", "decimal", "float", "boolean", "string", "date", "time", "timestamp", "timestamp_tz", "binary", "list", "struct", "map", "null"] as const;
+const valueEncodings = ["integer-string", "decimal-string", "number-or-special-string", "boolean", "string", "iso-date", "iso-time", "iso-local-datetime", "iso-utc-datetime", "base64", "array", "field-array", "pair-array", "null"] as const;
 export interface Descriptor {
   readonly name: string;
-  readonly type: typeof types[number];
-  readonly encoding: typeof encodings[number];
+  readonly type: typeof columnTypes[number];
+  readonly encoding: typeof valueEncodings[number];
   readonly precision?: number | undefined;
   readonly scale?: number | undefined;
   readonly children?: readonly Descriptor[] | undefined;
 }
+const encodingByType: Record<Descriptor["type"], Descriptor["encoding"]> = {
+  integer: "integer-string",
+  decimal: "decimal-string",
+  float: "number-or-special-string",
+  boolean: "boolean",
+  string: "string",
+  date: "iso-date",
+  time: "iso-time",
+  timestamp: "iso-local-datetime",
+  timestamp_tz: "iso-utc-datetime",
+  binary: "base64",
+  list: "array",
+  struct: "field-array",
+  map: "pair-array",
+  null: "null",
+};
 const descriptorFields = {
-  name: z.string(), type: z.enum(types), encoding: z.enum(encodings),
+  name: z.string(), type: z.enum(columnTypes), encoding: z.enum(valueEncodings),
   precision: z.number().int().min(1).max(38).optional(), scale: z.number().int().min(0).max(38).optional(),
   children: z.lazy((): z.ZodType<Descriptor[]> => z.array(childSchema)).optional(),
 };
 function validDescriptor(value: Descriptor): boolean {
-  if (value.encoding !== encodings[types.indexOf(value.type)]) return false;
+  if (value.encoding !== encodingByType[value.type]) return false;
   if (value.type === "decimal") return value.precision !== undefined && value.scale !== undefined && value.scale <= value.precision && value.children === undefined;
   if (value.precision !== undefined || value.scale !== undefined) return false;
   if (value.type === "list") return value.children?.length === 1;

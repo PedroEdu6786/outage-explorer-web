@@ -4,6 +4,7 @@ import { syntheticCatalogCachePolicy } from "../../../tests/fixtures/operations"
 import { describe, expect, it, vi } from "vitest";
 import fixtures from "../../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
 import { decodeCatalog, decodePreview, decodeQuery } from "./data-mapping";
+import { columnSchema, columnsSchema } from "./data-schema";
 import { createDataAdapter, type DataTransport } from "./data-adapter";
 import { decodeFailure } from "./error-mapping";
 import { mapNationalRows } from "./metric-mapping";
@@ -194,15 +195,32 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
     expect(truncated.table.rows).toEqual([]);
     expect(truncated.execution).toMatchObject({ retainedRowCount: 0, truncation: { truncated: true, reason: "byte-limit" }, limits: { maxRows: 1000, maxBytes: 1048576 } });
   });
-  it("rejects malformed rows, unsafe numeric coercion, wrong type encoding and paging counters", () => {
+  it("rejects malformed rows, unsafe numeric coercion and paging counters", () => {
     const original = example("query_lossless_types");
     expect(() => decodeQuery({ ...original, rows: [[1]] })).toThrow();
     expect(() => decodeQuery({ ...original, total_pages: 2 })).toThrow();
     const body = JSON.parse(JSON.stringify(original)) as { columns: { encoding: string }[]; rows: unknown[][] };
     if (body.rows[0]) body.rows[0][0] = 9007199254740992;
     expect(() => decodeQuery(body)).toThrow();
-    if (body.columns[0]) body.columns[0].encoding = "string";
-    expect(() => decodeQuery(body)).toThrow();
+  });
+  it("rejects mismatched encodings for each supplied column type and the null type", () => {
+    const original = example("query_lossless_types");
+    if (!("columns" in original)) throw new Error("Missing query columns");
+    const columns = columnsSchema.parse(original.columns);
+    const nullColumn = columnSchema.parse({ index: columns.length, name: "nil", type: "null", encoding: "null", nullable: true, unit: null });
+    for (const column of [...columns, nullColumn]) {
+      const wrongEncoding = column.encoding === "string" ? "integer-string" : "string";
+      expect(columnSchema.safeParse({ ...column, encoding: wrongEncoding }).success).toBe(false);
+    }
+  });
+  it("rejects a nested encoding mismatch even when the outer descriptor is valid", () => {
+    const original = example("query_lossless_types");
+    if (!("columns" in original)) throw new Error("Missing query columns");
+    const list = columnsSchema.parse(original.columns).find((column) => column.type === "list");
+    const child = list?.children?.[0];
+    if (!list || !child) throw new Error("Missing list descriptor");
+    const wrongEncoding = child.encoding === "string" ? "integer-string" : "string";
+    expect(columnSchema.safeParse({ ...list, children: [{ ...child, encoding: wrongEncoding }] }).success).toBe(false);
   });
   it("keeps exact percentage fractions and authoritative labels; only plot coordinates approximate", () => {
     const raw = previewExample();
