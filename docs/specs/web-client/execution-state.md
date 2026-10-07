@@ -274,3 +274,28 @@ performed by this documentation update.
   named enabled backend resources/personas/lifecycle scenarios remain Phase5.
 - No visual comparison, live analytical request, real SQL, refresh admission,
   resource provisioning, push or deployment was performed.
+
+## Overview chart zoom — phase 1 assignment, October 7
+
+- User authorized starting the accepted chart-zoom plan. Coordinator delegates
+  T1.1–T1.4 and T1.C from `specs/overview-chart-zoom/tasks.md` to
+  `overview_zoom_spec` on `feat/overview-chart-zoom`; one worker, no concurrent
+  source writers or shared configuration changes.
+- Exclusive scope: new Overview `chart-viewport.ts`/test and
+  `ChartZoomControls.tsx`/test/stories; phase-1 verification, task status and
+  journal/evidence records. Existing T3.O and T4.O1–T4.OC prerequisites apply.
+- NationalTrend/controller integration, Overview assembly and subsequent
+  browser/live acceptance remain later phases. Foundation evidence cannot
+  establish connected chart or live acceptance.
+
+## Overview chart zoom — phase 1 checkpoint, October 7
+
+- T1.1–T1.4 and T1.C complete on `feat/overview-chart-zoom`: pure bounded
+  calendar viewport and isolated controlled UI, with no NationalTrend hookup.
+- Evidence: [phase 1](../../../specs/overview-chart-zoom/verification/phase-1.md).
+  Targeted tests 21/21, boundary tests 33/33, typecheck/lint/source boundaries
+  and fresh Storybook passed. Eight desktop/narrow control specimens passed
+  browser checks after approved launch escalation; agent image review completed.
+- All checkpoint AC evidence remains partial foundation evidence. Emulated
+  touch taps do not establish physical touch gestures; chart/page/native-input,
+  live and human visual acceptance remain later phases. Stop for phase review.
