@@ -48,6 +48,12 @@ export async function guardOperation<T, F extends { readonly kind: string } = Op
       if (result.failure.kind === "unauthenticated" && runtime.isCurrent(context)) {
         runtime.invalidate("unauthenticated");
       }
+      // A feature may abort its own request while clearing denied content. Only a
+      // new session generation, not that cleanup abort, supersedes this denial.
+      if (result.failure.kind === "forbidden" && options.requireAuthenticated !== false
+        && runtime.getSnapshot().generation === context.generation) {
+        runtime.denyAccess();
+      }
     }
   }
   return "published";

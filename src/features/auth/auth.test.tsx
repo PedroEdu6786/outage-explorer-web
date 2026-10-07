@@ -22,6 +22,20 @@ function setup(signedIn = false) {
 afterEach(() => { runtimes.splice(0).forEach((runtime) => { runtime.dispose(); }); vi.useRealTimers(); });
 
 describe("Auth fixture lifecycle", () => {
+  it("withholds revoked content until the user explicitly checks the session", async () => {
+    const { controller, runtime, entry } = setup(true);
+    render(entry);
+    expect(screen.getByText("Protected analysis")).toBeVisible();
+    act(() => { runtime.denyAccess(); });
+    expect(screen.queryByText("Protected analysis")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Access denied" })).toBeVisible();
+    expect(controller.callLog.read()).toHaveLength(0);
+    controller.setPersona("viewer");
+    fireEvent.click(screen.getByRole("button", { name: "Check session" }));
+    await screen.findByText("Protected analysis");
+    expect(controller.callLog.read().map((call) => call.operation)).toEqual(["resolveSession"]);
+    expect(runtime.getSnapshot()).toMatchObject({ status: "authenticated", session: { capabilities: { canExecuteQuery: false } } });
+  });
   it("does not invoke or mount protected content during a held pending resolution", async () => {
     const { controller, runtime, entry, protectedContent } = setup();
     runtime.invalidate("pending");

@@ -33,6 +33,8 @@ export type SessionResolution =
 
 export type SessionState =
   | { readonly status: "pending"; readonly generation: SessionGeneration; readonly reason?: "logout" }
+  /** Local access revocation; the backend session may still exist. */
+  | { readonly status: "access-denied"; readonly generation: SessionGeneration }
   | (SessionResolution & { readonly generation: SessionGeneration });
 
 /** Capture before dispatch; check before publishing any success/error or side effect. */

@@ -76,9 +76,9 @@ describe("guarded operation publication", () => {
     runtime.dispose();
   });
 
-  it("cannot invalidate a new generation established by a throwing failure callback", async () => {
+  it.each(["unauthenticated", "forbidden"] as const)("cannot invalidate a new generation established by a throwing %s callback", async (kind) => {
     const { controller, runtime, callbacks } = setup();
-    const operation = () => Promise.resolve<OperationResult<void>>({ ok: false, failure: { kind: "unauthenticated", message: "Synthetic" } });
+    const operation = () => Promise.resolve<OperationResult<void>>({ ok: false, failure: { kind, message: "Synthetic" } });
     const onFailure = () => {
       controller.setPersona("viewer");
       runtime.setResolution(controller.sessionResolution());
@@ -96,6 +96,23 @@ describe("guarded operation publication", () => {
     runtime.invalidate();
     expect(guardCurrent(runtime, context, publish)).toBe(false);
     expect(publish).not.toHaveBeenCalled();
+  });
+
+  it("revokes access even when feature denial cleanup aborts the request and throws", async () => {
+    const { runtime, callbacks } = setup();
+    const abort = new AbortController();
+    const context = runtime.capture(abort.signal);
+    const cleanup = vi.fn();
+    runtime.registerCleanup(cleanup);
+    const operation = () => Promise.resolve<OperationResult<void>>({ ok: false, failure: { kind: "forbidden", message: "Denied" } });
+    await expect(guardOperation(runtime, context, operation, {
+      ...callbacks,
+      onFailure: () => { abort.abort(); throw new Error("Feature cleanup failed"); },
+    })).rejects.toThrow("Feature cleanup failed");
+    expect(runtime.getSnapshot().status).toBe("access-denied");
+    expect(cleanup).toHaveBeenCalledOnce();
+    expect(runtime.isCurrent(context)).toBe(false);
+    runtime.dispose();
   });
 
   it("publishes current execution uncertainty once without retry", async () => {

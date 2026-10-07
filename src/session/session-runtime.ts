@@ -20,6 +20,8 @@ export interface SessionRuntime {
   setResolution(resolution: SessionResolution): void;
   /** Clear protected state without claiming backend logout; retries share this generation. */
   beginLogout(): void;
+  /** Revoke protected state after a current denial, without claiming backend logout. */
+  denyAccess(): void;
   /** Invalidate locally before dispatching logout or changing identity/access. */
   invalidate(status?: "pending" | "unauthenticated" | "expired"): void;
   /** Releases timer and protected state. The runtime is unusable after disposal. */
@@ -41,7 +43,7 @@ export function createSessionRuntime(clock: SessionClock = browserClock): Sessio
   const listeners = new Set<() => void>();
   const cleanups = new Set<() => void>();
 
-  function transition(resolution: SessionResolution | { readonly status: "pending"; readonly reason?: "logout" }) {
+  function transition(resolution: SessionResolution | { readonly status: "access-denied" } | { readonly status: "pending"; readonly reason?: "logout" }) {
     if (disposed) return;
     cancelExpiry?.();
     cancelExpiry = undefined;
@@ -119,6 +121,7 @@ export function createSessionRuntime(clock: SessionClock = browserClock): Sessio
       }
     },
     invalidate: (status = "unauthenticated") => { transition({ status }); },
+    denyAccess: () => { transition({ status: "access-denied" }); },
     beginLogout() {
       if (state.status !== "pending" || state.reason !== "logout") transition({ status: "pending", reason: "logout" });
     },

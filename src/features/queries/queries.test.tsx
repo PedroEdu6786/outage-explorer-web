@@ -33,8 +33,8 @@ describe("Queries explicit execution lifecycle", () => {
     const delayed = fixture.deferNext("readQueryPage"); fixture.failNext("readQueryPage", { kind: "forbidden", message: "Denied" });
     const pending = controller.readPage(2); vi.setSystemTime(Date.now() + 60_001);
     delayed.release(); await pending;
-    expect(controller.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, context: null, handoff: null, failure: { kind: "forbidden" } });
-    expect(runtime.getSnapshot().status).toBe("authenticated");
+    expect(controller.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, context: null, handoff: null, failure: null });
+    expect(runtime.getSnapshot().status).toBe("access-denied");
   });
 
   it("keeps byte-bound validation under explicit Run and preserves the exact draft", async () => {
@@ -77,7 +77,7 @@ describe("Queries explicit execution lifecycle", () => {
     controller.editDraft(sql); fixture.failNextExecution({ kind: "forbidden", message: "Denied" }); await controller.run();
     delayed.release(); await pending;
     expect(controller.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, schemaPending: false, catalogPending: false, submitted: null });
-    expect(runtime.getSnapshot().status).toBe("authenticated");
+    expect(runtime.getSnapshot().status).toBe("access-denied");
   });
   it("expires idle route-persistent results at the original deadline without SQL replay", async () => {
     vi.useFakeTimers();
@@ -167,10 +167,8 @@ describe("Queries explicit execution lifecycle", () => {
       fixture.failNext(metadataOperation, { kind: "forbidden", message: "Denied" });
       await (metadataOperation === "listDatasets" ? controller.loadCatalog() : controller.selectDataset("synthetic-national"));
       delayed.release(); await pending;
-      expect(controller.getSnapshot()).toMatchObject({ result: null, submitted: null, catalog: [], schema: null, context: null, handoff: null, draft: sql });
-      expect(controller.getSnapshot().failure).not.toHaveProperty("retainedQuery");
-      expect(controller.getSnapshot()).toMatchObject({ result: null, activity: "failure", failure: { kind: "forbidden" } });
-      expect(runtime.getSnapshot().status).toBe("authenticated");
+      expect(controller.getSnapshot()).toMatchObject({ result: null, submitted: null, catalog: [], schema: null, context: null, handoff: null, draft: "", failure: null });
+      expect(runtime.getSnapshot().status).toBe("access-denied");
       expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
     }
   });
@@ -304,13 +302,20 @@ describe("Queries explicit execution lifecycle", () => {
     expect(fixture.callLog.read().some((call) => call.operation === "executeQuery")).toBe(false);
     runtime.invalidate(); controller.confirmHandoff(); controller.receiveIntent(intent); expect(controller.getSnapshot().context).toBeNull();
   });
-  it("clears currently denied metadata/context and ignores obsolete catalog denial in the same session", async () => {
+  it("clears denied metadata/context and requires session resolution before further work", async () => {
     const { fixture, controller, runtime } = setup(); await controller.loadCatalog(); await controller.selectDataset("synthetic-national");
     controller.receiveIntent({ target: "queries", generation: runtime.getSnapshot().generation, datasetId: "synthetic-national", filters: {} });
     fixture.failNext("readSchema", { kind: "forbidden", message: "Access removed" }); await controller.selectDataset("synthetic-national");
     expect(controller.getSnapshot()).toMatchObject({ catalog: [], schema: null, context: null, handoff: null, selectedDataset: null });
+    expect(runtime.getSnapshot().status).toBe("access-denied");
+    const callsAfterDenial = fixture.callLog.read().length;
+    await controller.loadCatalog(); await controller.run();
+    expect(fixture.callLog.read()).toHaveLength(callsAfterDenial);
+    runtime.setResolution(fixture.sessionResolution());
     await controller.loadCatalog(); await controller.selectDataset("synthetic-national"); controller.editDraft(sql); fixture.failNextExecution({ kind: "forbidden", message: "Query denied" }); await controller.run();
     expect(controller.getSnapshot()).toMatchObject({ catalog: [], schema: null, result: null, context: null, handoff: null });
+    expect(runtime.getSnapshot().status).toBe("access-denied");
+    runtime.setResolution(fixture.sessionResolution());
     const pause = fixture.deferNext("listDatasets"); fixture.failNext("listDatasets", { kind: "unauthenticated", message: "Obsolete failure" }); const obsolete = controller.loadCatalog(); await controller.loadCatalog(); pause.release(); await obsolete;
     expect(runtime.getSnapshot().status).toBe("authenticated"); expect(controller.getSnapshot().catalog).toHaveLength(3); expect(controller.getSnapshot().metadataFailure).toBeNull();
   });

@@ -386,3 +386,23 @@ login actions and keeps protected content unmounted. A valid response returns
 to the current page; confirmed signed-out/expired responses retain explicit
 sign-in. Failed checks retain deliberate retry. No session caching, automatic
 renewal or backend cookie/expiry policy changes are introduced.
+
+## Cross-feature access denial — October 7
+
+A current protected-operation `403` now establishes the local `access-denied`
+state and advances the shared session generation. This conservatively clears
+all protected feature state, including the SQL controller retained outside its
+route, catalog metadata, navigation handoffs and auth-owned CSRF. Outstanding
+responses from the previous generation cannot publish. The backend cookie is
+not deleted and logout is not claimed.
+
+The existing auth boundary withholds the protected subtree and offers **Check
+session**. Recovery requires that explicit session request; it never replays SQL
+or refresh admission. A valid response restores only the newly resolved role's
+presentation access. An obsolete denial cannot invalidate a newer identity.
+Refresh publication and ordinary metadata invalidation still preserve valid
+retained SQL executions. Auth-operation failures keep their existing deliberate
+recovery rather than being interpreted as protected-data permission loss.
+
+This is a conservative client response to denial, not evidence of backend
+authorization. See [controlled denial verification](../../../../specs/data-reuse/verification/access-denial.md).

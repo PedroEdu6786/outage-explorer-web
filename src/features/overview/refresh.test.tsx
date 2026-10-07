@@ -55,10 +55,11 @@ it("clears protected run state and ignores late responses when Admin becomes Vie
   expect(screen.queryByRole("region", { name: "Admin data refresh" })).toBeNull(); expect(onPublished).not.toHaveBeenCalled();
 });
 it("revokes controls on forbidden status without automatic retries", async () => {
-  const { operations } = setup(); operations.readRefresh.mockResolvedValue({ ok: false, failure: { kind: "forbidden", message: "Refresh access denied" } });
-  fireEvent.click(screen.getByRole("button", { name: "Check refresh status" })); await screen.findByText("Refresh access denied");
-  expect(screen.getByRole("button", { name: "Refresh data" })).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Check refresh status" })).toBeDisabled(); expect(operations.readRefresh).toHaveBeenCalledTimes(1);
+  const { runtime, operations } = setup(); operations.readRefresh.mockResolvedValue({ ok: false, failure: { kind: "forbidden", message: "Refresh access denied" } });
+  fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+  await waitFor(() => { expect(runtime.getSnapshot().status).toBe("access-denied"); });
+  expect(screen.queryByRole("button", { name: "Refresh data" })).toBeNull();
+  expect(screen.queryByRole("button", { name: "Check refresh status" })).toBeNull(); expect(operations.readRefresh).toHaveBeenCalledTimes(1);
 });
 
 it("keeps one persistent live region through refresh states and settles on publication", async () => {

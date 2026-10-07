@@ -72,8 +72,8 @@ describe("protected catalog memory", () => {
     const other = resources.read({ context: runtime.capture(), identity: { kind: "catalog", requestKey: "other" }, load: () => late.promise });
     await Promise.resolve();
     const denied = await resources.read({ context: runtime.capture(), identity: { kind: "catalog", requestKey: "denied" }, load: () => Promise.resolve({ ok: false, failure: { kind: "forbidden", message: "Denied" } }) });
-    expect(denied).toMatchObject({ ok: false, failure: { kind: "forbidden" } });
-    expect(runtime.getSnapshot().status).toBe("authenticated");
+    expect(denied.ok).toBe(false);
+    expect(runtime.getSnapshot().status).toBe("access-denied");
     expect(resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 }); expect((await other).ok).toBe(false);
     late.release(success("late")); await Promise.resolve(); expect(resources.accounting().entries).toBe(0);
   });
@@ -114,7 +114,7 @@ it("runs mandatory invalidation subscribers and completes disposal when one thro
 });
 
 
-it.each(["denial", "published-refresh", "disposal"] as const)("same-session %s cannot turn a guarded metadata cancellation into backend logout", async (reason) => {
+it.each(["denial", "published-refresh", "disposal"] as const)("%s cannot turn a guarded metadata cancellation into backend logout", async (reason) => {
   const { runtime, resources } = setup(); const late = deferred<OperationResult<string>>(); const context = runtime.capture();
   const callbacks = { onSuccess: vi.fn(), onFailure: vi.fn(), onRejected: vi.fn() };
   const guarded = guardOperation(runtime, context, () => resources.read({ context, identity, load: () => late.promise }), callbacks);
@@ -122,8 +122,9 @@ it.each(["denial", "published-refresh", "disposal"] as const)("same-session %s c
   if (reason === "denial") resources.reportFailure(runtime.capture(), { kind: "forbidden", message: "Denied" });
   else if (reason === "disposal") resources.dispose(); else resources.invalidate({ reason });
   await guarded;
-  expect(runtime.getSnapshot().status).toBe("authenticated");
-  expect(callbacks.onFailure).toHaveBeenCalledWith(expect.objectContaining({ kind: "service-failure" }));
+  expect(runtime.getSnapshot().status).toBe(reason === "denial" ? "access-denied" : "authenticated");
+  if (reason === "denial") expect(callbacks.onFailure).not.toHaveBeenCalled();
+  else expect(callbacks.onFailure).toHaveBeenCalledWith(expect.objectContaining({ kind: "service-failure" }));
   expect(callbacks.onSuccess).not.toHaveBeenCalled();
   late.release(success("late")); await Promise.resolve(); expect(resources.accounting().entries).toBe(0);
 });
@@ -142,7 +143,7 @@ it("a throwing denial subscriber cannot strand catalog callers", async () => {
   const { runtime, resources } = setup();
   const stop = resources.subscribe(() => { throw new Error("Synthetic listener failure"); });
   const result = await resources.read({ context: runtime.capture(), identity, load: () => Promise.resolve({ ok: false, failure: { kind: "forbidden", message: "Denied" } }) });
-  expect(result).toMatchObject({ ok: false, failure: { kind: "service-failure" } });
-  expect(resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 }); expect(runtime.getSnapshot().status).toBe("authenticated");
+  expect(result.ok).toBe(false);
+  expect(resources.accounting()).toEqual({ entries: 0, bytes: 0, pending: 0 }); expect(runtime.getSnapshot().status).toBe("access-denied");
   stop();
 });

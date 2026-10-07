@@ -14,6 +14,53 @@ function queryBody(name: string) {
     { index: 1, name: "untrusted_text", type: "string", encoding: "string", nullable: null, unit: null },
   ], rows: [[name === "query_second" ? "-9007199254740993" : "9007199254740993", '<img src=x onerror="alert(1)">']] };
 }
+for (const pendingQuery of [false, true]) {
+  test(`current denial clears off-route SQL until explicit session recovery (pending: ${String(pendingQuery)})`, async ({ page }) => {
+    const expiry = new Date(Date.now() + 600_000).toISOString();
+    let sessionReads = 0;
+    let queryPosts = 0;
+    let queryStarted = false;
+    let releaseQuery = () => { /* Immediate responses require no release. */ };
+    const delayedQuery = new Promise<void>((resolve) => { releaseQuery = resolve; });
+    await page.route("**/api/**", async (route) => {
+      const request = route.request();
+      const path = new URL(request.url()).pathname;
+      if (path === "/api/auth/session") {
+        sessionReads += 1;
+        return route.fulfill({ json: { user: { id: "controlled-user", email: "controlled@example.invalid", role: "analyst" }, expires_at: expiry, csrf_token: "controlled-csrf" } });
+      }
+      if (path === "/api/datasets") return route.fulfill({ json: body("catalog_analyst") });
+      if (path === "/api/datasets/national/preview" && sessionReads > 1) {
+        return route.fulfill({ json: { ...body("preview_national"), page_size: 100, has_more: false, next_cursor: null, expires_at: expiry } });
+      }
+      if (path === "/api/query" && request.method() === "POST") {
+        queryPosts += 1;
+        queryStarted = true;
+        if (pendingQuery) await delayedQuery;
+        return route.fulfill({ json: { ...body("query_reference_free"), expires_at: expiry } });
+      }
+      return route.fulfill({ status: 403, json: { error: "forbidden" } });
+    });
+    await page.goto("/query");
+    await page.getByRole("textbox", { name: "SQL statement" }).fill("SELECT 1");
+    await page.getByLabel("Rows per page for next execution", { exact: true }).fill("1");
+    await page.getByRole("button", { name: "Run query", exact: true }).click();
+    await expect.poll(() => queryStarted).toBe(true);
+    if (!pendingQuery) await expect(page.getByRole("table", { name: "SQL query results" })).toBeVisible();
+    await page.getByRole("link", { name: "Overview", exact: true }).click();
+    await expect(page.getByRole("heading", { name: "Access denied", exact: true })).toBeVisible();
+    releaseQuery();
+    await expect(page.getByRole("table", { includeHidden: true })).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: "Main navigation", includeHidden: true })).toHaveCount(0);
+    expect(sessionReads).toBe(1);
+    await page.getByRole("button", { name: "Check session", exact: true }).click();
+    await page.getByRole("link", { name: "SQL Workspace", exact: true }).click();
+    await expect(page.getByRole("textbox", { name: "SQL statement" })).toHaveValue("");
+    await expect(page.getByRole("table", { name: "SQL query results" })).toHaveCount(0);
+    expect(queryPosts).toBe(1);
+    expect(sessionReads).toBe(2);
+  });
+}
 for (const role of ["viewer", "analyst", "admin"] as const) {
   test(`${role} production registration, handoffs and retained SQL`, async ({ page }) => {
     await page.clock.install();

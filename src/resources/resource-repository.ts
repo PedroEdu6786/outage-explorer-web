@@ -55,7 +55,13 @@ export function createResourceRepository(options: { readonly runtime: SessionRun
     reportFailure(context, failure) {
       if (disposed || !runtime.isCurrent(context) || runtime.getSnapshot().status !== "authenticated") return;
       if (failure.kind === "unauthenticated") runtime.invalidate();
-      else if (failure.kind === "forbidden") invalidate({ reason: "denial" });
+      else if (failure.kind === "forbidden") {
+        try {
+          invalidate({ reason: "denial" });
+        } finally {
+          if (runtime.getSnapshot().generation === context.generation) runtime.denyAccess();
+        }
+      }
       else if (failure.kind === "data-unavailable") invalidate({ reason: "unavailable", kind: "catalog" });
     },
     async read<T>(input: ResourceRead<T>): Promise<OperationResult<T>> {

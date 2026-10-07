@@ -4,6 +4,61 @@ import { createLiveComposition } from "./live-composition";
 import { createSessionRuntime } from "../session/session-runtime";
 import { createAuthService } from "../features/auth/service";
 import fixtures from "../../docs/specs/web-client/contracts/data-api-v1/fixtures.json";
+import { createQueriesController } from "../features/queries/service";
+import { createNavigationOperations } from "../composition/navigation";
+
+it.each([false, true])("clears retained SQL and blocks late publication after another feature is denied (pending SQL: %s)", async (pendingQuery) => {
+  const runtime = createSessionRuntime();
+  const fetch = vi.fn<typeof globalThis.fetch>();
+  const composition = createLiveComposition({ runtime, fetch, navigate: vi.fn(), authEnabled: true });
+  if (!composition) throw new Error("Configured composition required");
+  const queries = createQueriesController({
+    runtime,
+    operations: { ...composition.dataOperations, ...createNavigationOperations(runtime) },
+    initialPageSize: 1,
+    maximumPageSize: 500,
+  });
+  queries.attach();
+  try {
+    fetch.mockResolvedValueOnce(Response.json({ user: { id: "synthetic-user", email: "synthetic@example.invalid", role: "analyst" }, expires_at: new Date(Date.now() + 3600_000).toISOString(), csrf_token: "synthetic-memory" }));
+    await createAuthService(composition.operations, runtime).perform("resolve", { onSuccess: vi.fn(), onFailure: vi.fn() });
+    const catalog = fixtures.fixtures.find((item) => item.name === "catalog_analyst");
+    const query = fixtures.fixtures.find((item) => item.name === "query_reference_free");
+    if (!catalog || !query) throw new Error("Synthetic fixtures required");
+    fetch.mockResolvedValueOnce(Response.json(catalog.body));
+    await queries.loadCatalog();
+    queries.editDraft("SELECT 1");
+    let releaseQuery = () => { /* An immediate response needs no release. */ };
+    const queryResponse = Response.json({ ...query.body, expires_at: new Date(Date.now() + 600_000).toISOString() });
+    fetch.mockImplementationOnce(() => pendingQuery
+      ? new Promise<Response>((resolve) => { releaseQuery = () => { resolve(queryResponse); }; })
+      : Promise.resolve(queryResponse));
+    const execution = queries.run();
+    if (!pendingQuery) {
+      await execution;
+      expect(queries.getSnapshot().result).not.toBeNull();
+    }
+    const oldContext = runtime.capture();
+    fetch.mockResolvedValueOnce(Response.json({ error: "forbidden" }, { status: 403 }));
+    await composition.dataOperations.startPreview(oldContext, { datasetId: "facilities", filters: {}, pageSize: 10 });
+    expect(runtime.getSnapshot().status).toBe("access-denied");
+    expect(queries.getSnapshot()).toMatchObject({ result: null, catalog: [], schema: null, handoff: null, context: null });
+    expect(composition.resources.accounting()).toMatchObject({ entries: 0, pending: 0 });
+    expect(composition.csrfToken()).toBeNull();
+    releaseQuery();
+    await execution;
+    expect(queries.getSnapshot().result).toBeNull();
+    expect(fetch.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
+    // An obsolete denial cannot revoke a newly resolved identity.
+    runtime.setResolution({ status: "authenticated", session: { identity: { subject: "new-viewer", displayName: "Viewer" }, capabilities: { datasetIds: ["national"], canReadNationalSeries: true, canExploreDatasets: false, canExecuteQuery: false, canRefreshDatasets: false }, expiresAt: new Date(Date.now() + 600_000).toISOString() } });
+    composition.resources.reportFailure(oldContext, { kind: "forbidden", message: "Old denial" });
+    expect(runtime.getSnapshot().status).toBe("authenticated");
+  } finally {
+    queries.dispose();
+    composition.dispose();
+    runtime.dispose();
+  }
+});
 
 it("supplies independent preview and SQL request settings", () => {
   expect(productionPreviewSettings).toEqual({ initialPageSize: 10, maximumPageSize: 500 });

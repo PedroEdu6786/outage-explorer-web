@@ -109,7 +109,8 @@ describe("Overview retainedSeries (AC5)", () => {
       const { hook, deferred } = await startRangeChange(context, undefined, () => { fixture.failNext("readNationalSeries", { kind, message: `Synthetic ${kind}` }); });
       expect(hook.result.current.retainedSeries).not.toBeNull();
       await release(deferred);
-      await waitFor(() => { expect(hook.result.current.failure?.kind).toBe(kind); });
+      if (kind === "forbidden") expect(context.runtime.getSnapshot().status).toBe("access-denied");
+      else await waitFor(() => { expect(hook.result.current.failure?.kind).toBe(kind); });
       expect(hook.result.current.retainedSeries).toBeNull();
       expect(hook.result.current.series).toBeNull();
       hook.unmount(); context.runtime.dispose();
