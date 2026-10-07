@@ -1,124 +1,198 @@
-# outage-explorer-web
+# Outage Explorer web
 
 Authenticated web client for exploring stored U.S. nuclear outage observations
-from EIA at national, facility and generator levels. Users browse permitted
-datasets, preview records, inspect the daily national offline-capacity metric
-and run read-only analytical SQL through the separate Outage Explorer backend.
+from EIA at national, facility and generator levels. Users inspect national
+metrics, browse permitted datasets and run read-only analytical SQL through the
+separate Python/Flask backend.
 
-## Project context
+Built with **Next.js App Router, React, TypeScript and Tailwind CSS**. The supplied
+Figma prototype guides the UI; shared components follow atomic design.
 
-Start with the [UI context index](docs/context/ui-client/README.md). Read the
-five documents in order before planning or implementation.
+## Setup
 
-| Document | Defines |
-| --- | --- |
-| [Product scope](docs/context/ui-client/01-product-scope.md) | Personas, permissions, domain meaning, metric precision and non-goals |
-| [Web experience](docs/context/ui-client/02-web-experience.md) | Journeys, Figma workflow, session behavior, pagination and accessible states |
-| [Component architecture](docs/context/ui-client/03-component-architecture.md) | Technologies, atomic design, feature boundaries and state ownership |
-| [Backend integration](docs/context/ui-client/04-backend-integration.md) | API responsibilities, fixture isolation and unresolved contracts |
-| [Delivery and acceptance](docs/context/ui-client/05-delivery-and-acceptance.md) | Delivery sequence, acceptance criteria, verification and remaining inputs |
+### Prerequisites
 
-Contributor and agent guidance lives in [AGENTS.md](AGENTS.md).
+- Node **24.18.0** (`.nvmrc`) and npm **11.16.0** (`package.json`).
+- For connected use, the separate Outage Explorer Flask backend, its Cognito
+  configuration and seeded Viewer, Analyst or Admin accounts. Authentication
+  alone does not configure analytical storage: the backend must also enable its
+  data services and have published observations.
+- For browser tests, Playwright Chromium. Python 3 is needed only for the
+  optional devlog-hook checks.
 
-Conversation summaries are buffered by `.codex/hooks.json` and appended to
-`docs/devlog/` before Codex commits. Review and enable **Stop** and
-**PreToolUse** through `/hooks`, then start or resume a repository session.
-The agent reviews and stages new notes before retrying the commit. See
-[devlog setup and checks](docs/development/devlog.md).
-
-The [web-client implementation handoff](docs/specs/web-client/README.md) contains
-the inspected Figma prototype, council-reviewed spec/plan and dependency-ordered
-tasks for atomic-first, parallel feature development with individual pages last.
-The [technical execution plan](docs/specs/web-client/execution-plan.md) defines
-when downstream tasks can start and how a coordinator runs concurrent workers
-with separate ownership, architecture checks and Figma review evidence.
-
-## Selected technologies and boundaries
-
-The selected client stack is **React, Next.js, TypeScript and Tailwind CSS**.
-The existing Figma design governs visual implementation. Components follow
-atomic design: atoms, domain-free molecules, contextual organisms, reusable
-templates and thin route pages. Feature hooks/services own workflows; API
-adapters own transport and response validation.
-
-The separate Python/Flask backend owns authorization, data ingestion, metrics
-and SQL execution. Viewers have national-only Overview access; `/datasets` and `/query` are restricted
-to Analysts and Admins. Analysts have access to
-all analytical datasets; Admins additionally have backend refresh capability.
-A dedicated Admin UI is conditional. The client consumes authorized backend
-APIs and does not directly access EIA, S3, RDS or DuckDB.
-
-## Current integration intake — October 5, 2026
-
-The user confirms the documented backend services are implemented and ready for
-frontend integration. The updated source handoff confirms all seven operations
-are implemented and opt-in, closes the former B1–B3 artifact issues and permits
-null query generation identity for reference-free SQL. See the [Integration completion spec](specs/backend-integration/spec.md)
-and [state/security assessment](docs/specs/web-client/integration-assessment.md) for current source hashes, remaining frontend behavior,
-state-management options and SQL-security recommendations.
-
-This update supersedes backend-pending statements below, which retain historical
-intake provenance. Production auth/data adapters are registered; connected acceptance remains open. Backend analytical resources must be
-explicitly configured for the named live target; user-owned isolation validation
-is outside this frontend work. No live or visual acceptance gate is closed here.
-
-## Current state and open decisions
-
-Phases 1–4 have established a pinned toolchain, minimal Next.js App
-Router bootstrap, frontend operation contracts, a generation-guarded session
-runtime, synthetic fixtures and isolated Storybook/behavior/browser tooling.
-Observed design tokens, local licensed fonts and reusable atoms now have isolated
-Storybook previews, interaction tests and desktop/mobile capture evidence. See
-the [Phase 2 verification record](docs/specs/web-client/verification/phase-2.md).
-Reusable fields, status displays, tabs, pagination, positional tables, navigation
-and slot templates are also implemented. All four feature lanes have shared
-readiness records; see [Phase 3 verification](docs/specs/web-client/verification/phase-3.md).
-Auth, Overview, Explorer and Queries now expose injected feature entries,
-synthetic Storybook stories and adversarial lifecycle coverage; see
-[Phase 4 verification](docs/specs/web-client/verification/phase-4.md).
-The composed fixture harness is accepted; see [Phase 5 verification](docs/specs/web-client/verification/phase-5.md). The four fixture page compositions are accepted; see [Phase 6 verification](docs/specs/web-client/verification/phase-6.md). Auth and data now have opt-in production composition; full live acceptance still gates T6.L.
-Source-boundary and emitted-fixture checks are executable. Product routes build at `/sign-in`, `/overview`, `/datasets` and `/query`, with `/` redirecting to Overview. Configured auth and data use a same-origin Flask proxy; missing configuration and backend failures fail closed. Fixture page demos remain in isolated Storybook roots. See the coordinator-owned
-[execution state](docs/specs/web-client/execution-state.md) for accepted tasks
-and the [Phase 1 verification record](docs/specs/web-client/verification/phase-1.md)
-for the integrated checkpoint evidence.
-
-The context pack was imported from the sibling `outage-explorer` repository's
-`docs/context/ui-client/` on October 4, 2026. Its backend implementation status
-is a dated handoff snapshot, not a verified live API contract. Revalidate it
-against the backend version used for integration.
-
-Next.js App Router is now used by the minimal bootstrap. Exact compatible
-versions and their official compatibility evidence are recorded in the
-[toolchain documentation](docs/development/toolchain.md). The October 5
-[auth HTTP handoff](docs/specs/web-client/contracts/auth.md) documents Flask-owned
-Cognito login/callback, HttpOnly cookie sessions, CSRF logout and a same-origin
-local proxy. The current role-bearing response and user-approved presentation
-mapping are integrated; see [auth integration evidence](docs/specs/web-client/verification/auth-integration.md).
-Full authenticated browser lifecycle acceptance remains pending. The subsequent [Data API v1 handoff](docs/specs/web-client/contracts/data-api.md)
-now documents catalog/preview, prepared national metrics, SQL and refresh, with
-local OpenAPI/fixture snapshots and a [comparison report](docs/specs/web-client/contracts/contract-review.md).
-Backend data endpoints remain pending implementation; frontend hosting remains open.
-The supplied published Figma
-prototype has been inspected; release still needs connected data/lifecycle
-verification and visual sign-off; see
-the [remaining inputs](docs/context/ui-client/05-delivery-and-acceptance.md#inputs-still-needed-for-implementation).
-Explicit synthetic fixtures support independent UI work while live integration
-is pending. They are isolated from production and do not establish EIA findings.
-
-## Local development and checks
-
-Select the pinned Node 24.18.0 and npm 11.16.0, then install the lockfile:
+From the repository root:
 
 ```sh
 nvm install
 nvm use
+node --version
+npm --version
+# If npm differs from the pinned version:
+npm install --global npm@11.16.0
 npm ci
 ```
 
-`npm run storybook` serves isolated previews on port 6006. `npm run dev` serves
-the assembled routes with configured live auth and data operations. Both development
-and production framework builds explicitly use webpack because Turbopack's
-PostCSS worker port binding failed in this runtime.
+See [toolchain details](docs/development/toolchain.md) for exact dependency pins
+and compatibility evidence. Development and production builds use webpack.
+
+### Connect the backend
+
+Create a gitignored `.env.local` in the repository root with the following
+values, replacing the example Cognito domain and public app client ID with
+those from your backend environment:
+
+```dotenv
+OUTAGE_API_ORIGIN=http://localhost:8000
+COGNITO_DOMAIN=https://your-domain.auth.your-region.amazoncognito.com
+COGNITO_APP_CLIENT_ID=yourPublicAppClientId
+OUTAGE_AUTH_LOGOUT_URI=http://localhost:3000/sign-in
+```
+
+| Variable | Purpose |
+| --- | --- |
+| `OUTAGE_API_ORIGIN` | Server-side Flask origin; Next proxies `/api/*` to it. Use an HTTPS origin, or loopback HTTP for local development, without a path or credentials. |
+| `COGNITO_DOMAIN` | Cognito managed-login HTTPS origin used to construct the public logout URL. |
+| `COGNITO_APP_CLIENT_ID` | Public Cognito app client ID for provider logout. |
+| `OUTAGE_AUTH_LOGOUT_URI` | Explicit `/sign-in` return URL registered in Cognito's Allowed sign-out URLs. |
+
+Configure **the backend** with `OUTAGE_AUTH_UI_ORIGIN=http://localhost:3000` so
+login returns and logout Origin checks match the UI. Retain its configured
+Cognito callback on Flask (port 8000 in this local setup). See the
+[auth contract](docs/specs/web-client/contracts/auth.md) for the full transport
+and callback requirements; backend startup and AWS provisioning belong to the
+backend repository.
+
+Keep backend secrets, including `COGNITO_APP_CLIENT_SECRET`, out of this project
+and all `NEXT_PUBLIC_*` variables. Flask owns OAuth code exchange, provider
+tokens, HttpOnly session cookies and authorization. The client keeps the logout
+CSRF token in memory. These settings are read server-side; only the constructed
+public Cognito logout URL is passed to the browser.
+
+Start Flask on port 8000 using its own setup instructions, then run:
+
+```sh
+npm run dev
+```
+
+Open **http://localhost:3000**. Use `localhost` consistently for both services;
+cookies are host-scoped, so mixing it with `127.0.0.1` breaks this local setup.
+Restart the development server or rebuild production after configuration changes.
+Missing backend configuration and API failures show explicit unavailable/error
+states; production never substitutes synthetic data.
+
+For a local production build:
+
+```sh
+npm run build
+npm run start
+```
+
+Frontend hosting, domain and release configuration remain open decisions.
+
+### Preview components without a backend
+
+```sh
+npm run storybook
+```
+
+Open **http://localhost:6006** for isolated components, feature states and page
+demos. Stories use explicitly synthetic fixtures, including role and failure
+scenarios. Fixtures live under `tests/fixtures/` and are excluded from production;
+these demos do not establish live integration or real EIA findings.
+
+## Modules and routes
+
+`/` redirects to `/overview`. Protected pages wait for session resolution before
+rendering permitted content.
+
+| Module | Route / access | What it provides |
+| --- | --- | --- |
+| [Auth](src/features/auth) | `/sign-in`; all personas | Cognito sign-in entry, session resolution, expiry, access recovery and current-session logout followed by provider logout. |
+| [Overview](src/features/overview) | `/overview`; Viewer, Analyst, Admin | National offline-capacity cards, calculated and EIA-reported percentages, trend chart, daily observations and date-range controls. Admins also get **Refresh data** and **Check refresh status**. |
+| [Dataset Explorer](src/features/explorer) | `/datasets`; Analyst, Admin | Authorized catalog, schema inspection, date-only filters and snapshot-bound cursor previews. |
+| [SQL Workspace](src/features/queries) | `/query`; Analyst, Admin | Schema browser, editable SQL, explicit execution, column metadata, numbered retained-result pages and expiry/truncation/error recovery. |
+
+Viewer navigation exposes Overview only; direct `/datasets` and `/query` visits
+redirect to Overview before restricted content mounts. These presentation rules
+come from the backend-assigned role; Flask authorizes every API request.
+
+Overview date edits stay local until **Apply dates** submits a valid changed
+range. Its daily table starts at 10 rows and offers 10, 20, 50, 100 or 500 rows;
+paging leaves the full selected chart range and latest-day cards intact.
+Explorer starts at 10 rows, supports sizes 1–500 and starts a new cursor sequence
+when filters or size change. SQL starts at 100 rows per page (maximum 500),
+selected independently and fixed for each execution. Cross-page handoffs prepare
+filters or unsent SQL in memory; SQL still requires an explicit Run.
+
+### Code organization
+
+| Location | Responsibility |
+| --- | --- |
+| `src/app/` | Thin Next route pages, layouts and root providers. |
+| `src/components/` | Domain-free atoms/molecules, shared table/navigation organisms and reusable slot-based templates. |
+| `src/features/` | Auth, Overview, Explorer and Queries UI, hooks and workflow state. |
+| `src/contracts/` | Typed feature-facing operations, models and failure states. |
+| `src/adapters/live/` | Auth/data/refresh HTTP adapters, response validation and lossless transport mapping. |
+| `src/integration/` | Server configuration, session-aware HTTP transport and live adapter assembly. |
+| `src/composition/` | Production operation registration, providers and navigation handoffs. |
+| `src/session/` | Session lifecycle, access invalidation and guards against stale responses. |
+| `src/resources/` | One shared authorized catalog cache with a 256 KiB serialized UTF-8 admission cap; oversized responses remain usable without retention. |
+| `src/styles/` | Design tokens and reduced-motion-aware animation styles. |
+| `tests/`, `.storybook/`, `scripts/` | Synthetic fixtures, behavior/browser tests, component previews and boundary/devlog checks. |
+
+Catalog reuse lasts within the open app until reload or invalidation. Logout,
+access changes and successful Admin publication clear protected metadata;
+observation rows and SQL pages are outside this cache. See the
+[catalog-cache record](specs/data-reuse/verification/catalog-cache.md).
+
+## Frontend challenge requirements
+
+The challenge's **Part 4 — Web application** requires login, permitted dataset
+discovery, a backend-paginated table and SQL input/results. The table below maps
+that core to this client's accepted behavior. The local
+[product scope](docs/context/ui-client/01-product-scope.md) and
+[acceptance criteria](docs/context/ui-client/05-delivery-and-acceptance.md#acceptance-criteria)
+record the UI requirements. The original challenge PDF is outside this repository;
+the backend's [challenge criteria index](../outage-explorer/docs/challenge/README.md)
+contains its reviewed paraphrase and broader deliverables (requires the sibling
+backend checkout).
+
+| Requirement | Frontend behavior to demonstrate |
+| --- | --- |
+| Login and authenticated access | Sign in through the agreed backend, restore the current session, require explicit sign-in on expiry and invalidate the current session on logout. |
+| Permitted datasets | Show only authorized catalog/schema information. Viewer web access is national Overview only; Analyst/Admin can browse facility and generator data. |
+| Backend-paginated records | Render schema-driven tables, apply accepted date-only filters and follow opaque snapshot-bound cursors. Expiry offers an explicit restart. |
+| SQL input and results | Support open-ended read-only analysis, show positional columns/rows (including duplicate labels/rows), and paginate one execution by its query ID and fixed page size. Never rewrite SQL or rerun it implicitly to page, retry or recover. |
+| Ready-made national metric (US-08) | Display `100 × outage / capacity` alongside EIA's reported percentage from the same observation, using two-decimal half-up percentages. Preserve calendar dates, opaque IDs, units and missing-versus-zero values. |
+| Safe, usable workflows | Explain pending, empty, unavailable, denied, busy, timeout, expired and truncated states. Clear protected data on logout/access loss and block late responses from restoring it. |
+| Reproducible delivery | Document runnable setup and checks, preserve incremental commits and provide evidence that can be explained and extended during the live session. |
+
+React/Next.js/TypeScript/Tailwind, atomic design, the Figma-based Overview/chart,
+Viewer's Overview-only navigation and the Admin refresh control are subsequent
+accepted project decisions. They refine the challenge's minimal web experience.
+Keyboard access, focus, labels, announcements, narrow-screen table/editor use,
+accessible chart data and reduced-motion behavior are part of UI acceptance.
+Percentage rounding differs intentionally from MW and preview decimal display,
+which truncates extra digits to at most two decimal places while preserving
+exact source values.
+
+The backend owns ingestion, persistent storage, authorization, SQL safety and
+execution, metric calculation and refresh publication. The overall challenge
+also requires a documented data model/ER diagram, at least 30 days of
+reconciliation, three reproducible real anomalies, decisions/findings and
+Engineering Notes covering AI contributions, a concrete AI mistake and independent
+verification. Those are submission-wide deliverables; this README and synthetic
+UI demos do not establish their completion. No separate findings page is required,
+and the UI must not invent causes, outage durations or anomalies.
+
+A separate Admin page, registration/password recovery, user management, saved
+queries, exports and scheduling are outside the current UI scope. The
+**new data available** card remains deferred. The client accesses authorized
+Flask APIs rather than EIA, S3, RDS or DuckDB directly.
+
+## Verification and delivery status
+
+Run the standard source and production checks:
 
 ```sh
 npm run typecheck
@@ -128,139 +202,61 @@ npm run test:boundaries
 npm run check:boundaries
 npm run build
 npm run check:production-fixtures
-npm run build-storybook
+npm run check:release-boundaries
+```
+
+Artifact scans require a fresh production build. For fixture browser checks:
+
+```sh
 npx playwright install chromium
+npm run build-storybook
 npm run test:e2e
 ```
 
-The browser smoke test serves the built Storybook on port 6007. This workspace's
-downloaded browser uses a temporary cache; run
-`PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npm run test:e2e`
-to use it. Alternatively install Chromium into Playwright's default cache as
-shown above. `npm run check:release-boundaries` now checks structurally registered live operations and fixture exclusion; its pass does not accept T5.L/T6.L or a release.
+Playwright serves built Storybook on port 6007. If using this workspace's temporary
+browser cache, set `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright`
+for installation and execution. Serialize builds and browser projects that share
+output. The [verification guide](docs/development/verification.md) documents
+separate development, controlled-production and real-Flask auth configurations,
+their prerequisites and evidence limits.
 
-See [verification](docs/development/verification.md) for prerequisites, actual
-evidence, build freshness and separate fixture/live/visual reporting, and
-[ownership](docs/development/ownership.md) for shared-file handoffs.
+The four feature modules, composed fixture pages, production auth/data adapters,
+Admin refresh, catalog reuse and motion improvements are implemented. Controlled
+behavior/browser and build evidence is recorded in
+[backend integration](specs/backend-integration/verification/phase-4.md),
+[fixture page verification](docs/specs/web-client/verification/phase-6.md),
+[catalog reuse](specs/data-reuse/verification/catalog-cache.md) and
+[motion verification](specs/ui-motion/verification/phase-4.md).
 
-Delivery is evaluated against the
-[acceptance criteria](docs/context/ui-client/05-delivery-and-acceptance.md#acceptance-criteria).
-Report fixture behavior, live integration and Figma comparison separately,
-with the checks actually run and any remaining gaps.
+**Release acceptance remains open:** named-target live data/session/permission
+and pagination scenarios, full authenticated Cognito lifecycle, Figma visual
+sign-off and human [motion review](specs/ui-motion/verification/visual-signoff.md)
+remain separate gates. Passing structural registration/fixture-exclusion checks
+or controlled synthetic browser tests does not close those gates. Report fixture,
+live-integration and visual evidence separately.
 
-## Frontend contract adaptation — October 5, 2026
+## Project documentation
 
-The user accepted date-only filters and independently optional start/end bounds;
-valid ranges outside coverage show empty results. The user now confirms backend
-auth works and is ready for frontend integration; confirm current capability
-fields during intake and implement the auth adapter next. Local data decoders,
-injected operations, complete national preview assembly, exact fractions, richer
-tables and explicit SQL recovery are prepared; production remains unavailable.
-See the [expected-versus-available proposal and implementation record](docs/specs/web-client/contracts/frontend-adaptation.md).
-Controlled tests do not establish live acceptance. Backend auth is ready per the
-user; the earlier expectation of no API responses now applies to data services.
-Earlier fixture milestones remain historical evidence.
+Start with the [UI context index](docs/context/ui-client/README.md), then read its
+five documents: [product scope](docs/context/ui-client/01-product-scope.md),
+[web experience](docs/context/ui-client/02-web-experience.md),
+[component architecture](docs/context/ui-client/03-component-architecture.md),
+[backend integration](docs/context/ui-client/04-backend-integration.md) and
+[delivery/acceptance](docs/context/ui-client/05-delivery-and-acceptance.md).
+Imported October 4 handoff statements retain historical provenance; newer
+accepted contracts and verification records supersede earlier pending-status
+claims.
 
-## Selective metadata reuse — October 5, 2026
+The [implementation handoff](docs/specs/web-client/README.md) links the spec,
+plan and tasks; [auth](docs/specs/web-client/contracts/auth.md) and
+[Data API v1](docs/specs/web-client/contracts/data-api.md) define transport.
+The [design inventory](docs/specs/web-client/design-inventory.md) and
+[deviation record](docs/specs/web-client/design-deviations.md) trace prototype
+inspection and required extensions. Consult the
+[execution plan](docs/specs/web-client/execution-plan.md) and
+[ownership guide](docs/development/ownership.md) for implementation handoffs.
 
-The [data-reuse scope review](specs/data-reuse/scope-review.md) narrows current
-work to shared dataset models, schemas and catalog metadata. The controlled
-[phase-1 foundation](specs/data-reuse/verification/phase-1.md) shares one decoded
-catalog loader across consumers; observation rows and SQL-page reads retain
-existing retrieval behavior. The user selected a one-entry / 256 KiB serialized JSON admission budget.
-Production completed-response retention is enabled after the October 7 user
-request. Each actual decoded catalog is checked against the cap at runtime;
-oversized responses are used but not retained. The cap is not a heap-size guarantee.
-Successful Admin publication now invalidates catalog metadata before Overview
-reloads metadata and observations, preserving selected dates; see the
-[publication follow-up](specs/data-reuse/verification/publication.md).
-Reuse is scoped to the open app until page reload, with existing session/access
-cleanup and explicit invalidation. Broader row retention remains deferred. Overview date edits remain local until
-**Apply dates** submits a valid changed range; unchanged or invalid submissions
-make no request. See the [navigation/date correction](specs/data-reuse/verification/navigation-and-dates.md).
-
-The shared memory implementation is now a catalog-specific `CatalogCache`:
-one typed bundle, one pending read and the existing 256 KiB admission cap.
-See [the simplification and its checks](specs/data-reuse/verification/catalog-cache.md).
-
-## Connected local auth — October 5, 2026
-
-Set the server-only `OUTAGE_API_ORIGIN=http://localhost:8000` in `.env.local`
-(configured in this workspace), then run `npm run dev` and open
-`http://localhost:3000`. Restart/rebuild Next after configuration changes.
-Flask remains on port 8000 with its existing Cognito callback there; its
-`OUTAGE_AUTH_UI_ORIGIN=http://localhost:3000` makes final login redirects and
-logout Origin checks match the UI. Cookies are shared by the localhost host,
-not by port; use localhost consistently rather than mixing it with 127.0.0.1.
-
-For complete browser logout, copy only `COGNITO_DOMAIN` and
-`COGNITO_APP_CLIENT_ID` from the backend configuration into `.env.local`, and set
-`OUTAGE_AUTH_LOGOUT_URI=http://localhost:3000/sign-in` explicitly. That return
-URL is already registered in Cognito Allowed sign-out URLs per the user.
-Never copy `COGNITO_APP_CLIENT_SECRET`. Configured auth requires these logout
-settings; restart/rebuild Next after changes. Only the constructed public URL
-is passed to the browser. After API logout returns `204`, protected state is
-cleared and local logout confirmed, then `window.location.assign()` opens Cognito
-`/logout`. Cognito returns to `/sign-in`. API errors or uncertain outcomes keep
-the existing deliberate retry and never navigate to Cognito.
-
-The user confirmed the role-only response and supplied Viewer/Analyst/Admin
-presentation restrictions. Backend-assigned role now maps to UI capabilities;
-Flask still enforces every request. No capability expansion is required for this
-auth integration. Data adapters are registered and do not use fixtures.
-
-After a configured fresh build, run the separate real-Flask smoke tests:
-
-```sh
-PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npx playwright test --config playwright.auth.config.ts --workers=1
-```
-
-These cover signed-out resolution, login redirect/binding cookies and idempotent
-logout Origin handling. They do not prove authenticated Cognito completion,
-reload/reopen, backend role changes or independent-session logout; see the
-[evidence and remaining checks](docs/specs/web-client/verification/auth-integration.md).
-
-## Admin refresh on Overview — October 5, 2026
-
-Admin users now see **Refresh data** and **Check refresh status** on Overview.
-Configured auth connects these controls to `/api/refresh`, using the current
-session's CSRF token and an admission idempotency key. Retry uncertain admission
-with the offered retry button; status checks do not start another run. Viewer
-and Analyst users have no refresh controls. See the [refresh contract](docs/specs/web-client/contracts/refresh.md).
-Analytical data registration is complete; live acceptance remains separate.
-
-## Production data registration — October 5, 2026
-
-Backend-integration Phase 4 registers catalog, embedded schema, cursor previews,
-complete national metrics and retained SQL operations using the existing
-auth-owned session and memory-only CSRF transport. Preview and next-execution
-SQL settings are independent: preview starts at 10, SQL at 100, maximum 500.
-Overview's Daily observations table starts at 10 with an adjustable size and
-Previous/Next controls over its complete loaded series; the chart and latest-day
-cards retain the full selected range. Explorer uses backend cursor pagination.
-Overview → Explorer →
-SQL handoffs stay in memory and prepare unsent SQL; edited drafts still require
-consent. Viewer routes remain Overview only.
-
-Configured actual Next browser checks intercept every API with explicitly
-synthetic responses; missing-configuration checks use an unconfigured fresh
-build without interception. These are controlled evidence, not named-target
-live acceptance or Figma sign-off. See [Phase 4 evidence](specs/backend-integration/verification/phase-4.md)
-and [verification commands](docs/development/verification.md). Phase 5 and original
-T5.L/T6.L remain open until named enabled backend resources and authorized
-persona/lifecycle scenarios are verified.
-
-## UI motion improvements — October 6, 2026
-
-Subtle animations and micro-interactions are **implemented with evidence across
-all four phases**: shared tokens/reduced-motion policy, control feedback,
-status/loading and skeletons, drawer/template/chart entrances, guarded Overview
-refetch dimming, compare/inspection and coverage pulses, Explorer switching and
-filters, and SQL busy progress, Copy feedback, results and schema expansion.
-Exact values, gaps, authorization and explicit execution/pagination remain
-unchanged. E1 shimmer stays off; schema removal is immediate. The catalog and
-exclusions are in the [motion spec](specs/ui-motion/spec.md), with its
-[plan](specs/ui-motion/plan.md), [tasks](specs/ui-motion/tasks.md) and
-[final verification](specs/ui-motion/verification/phase-4.md). Human
-[motion visual sign-off](specs/ui-motion/verification/visual-signoff.md) remains
-pending and separate from Figma fidelity and live integration.
+Contributor/agent instructions live in [AGENTS.md](AGENTS.md). Conversation
+summaries and explicit change/check notes are preserved in `docs/devlog/` before
+local commits. See [devlog setup](docs/development/devlog.md) for optional Codex
+hook enablement and `npm run test:devlog`.
