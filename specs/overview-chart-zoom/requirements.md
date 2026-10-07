@@ -28,8 +28,12 @@ An explicit Zoom mode toggle makes scrolling behavior deliberate.
   distinguish. Observations retain their daily granularity and original values.
 - With Zoom mode disabled, ordinary scrolling scrolls the page rather than
   changing the visible chart window.
-- The user can move the zoomed window left or right to inspect neighboring dates.
+- Zoom mode starts disabled; switching it off retains the current chart window.
+- The minimum zoom window is 15 days.
+- With Zoom mode enabled, horizontal scrolling moves the zoomed window left or
+  right to inspect neighboring dates.
 - Reset zoom restores the full applied date range.
+- Applying changed page-level date bounds resets zoom to the full new range.
 - Zoom affects only the graph. The daily table, metric cards and page-level date
   filters retain their existing scope.
 
@@ -41,14 +45,15 @@ An explicit Zoom mode toggle makes scrolling behavior deliberate.
 
 ## Open questions
 
-- What minimum time window should zoom allow? Seven days was suggested but has
-  not been agreed.
-- Which gesture or controls should move the visible window left and right?
-- Should Zoom mode start disabled, and should switching it off retain the
-  current zoom? These defaults remain to be specified.
 - What keyboard and touch controls should accompany scrolling? Alternative
   controls were proposed; the repository requires keyboard access, but their
-  exact behavior remains to be specified.
+  exact behavior remains to be specified. The user requested a recommendation.
+
+## Assumption for planning
+
+- Proposed interpretation, not yet explicitly accepted: count the 15-day minimum
+  as inclusive calendar days. If the applied range is shorter, display its full
+  span and disable further zoom-in without expanding outside the applied dates.
 
 ## Discussion provenance
 
@@ -56,3 +61,8 @@ On October 7, 2026, the user confirmed the difficulty inspecting long ranges,
 selected graph-only zoom, accepted the pointer-centered time-window behavior
 and explicitly requested the Zoom mode toggle. This brief captures that
 discussion; implementation and verification have not started.
+
+In the subsequent clarification, the user selected a 15-day minimum, horizontal
+scrolling for left/right navigation, Zoom mode initially disabled with the
+current zoom retained when switched off, and zoom reset when applied dates
+change. Keyboard and touch controls await agreement after a recommendation.
