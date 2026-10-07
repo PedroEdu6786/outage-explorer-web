@@ -5,6 +5,7 @@ import { createFixtureOperations, type FixtureOptions } from "../../../tests/fix
 import { syntheticSettings } from "../../../tests/fixtures/scenarios";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { ExplorerFeature } from "./ExplorerFeature";
+import { DatasetPreview } from "./DatasetPreview";
 import { isCalendarDate } from "./preview-state";
 import { createExplorerController, type ExplorerOperations } from "./service";
 
@@ -23,6 +24,30 @@ function setup(options: FixtureOptions = {}, operationsOverride?: (operations: E
 const ready = async (controller: ReturnType<typeof createExplorerController>) => { await waitFor(() => { expect(controller.getSnapshot().previewStatus).toBe("ready"); }); };
 
 describe("Explorer authorized cursor lifecycle", () => {
+  it("truncates preview decimals while retaining source precision, identifiers and missing values", async () => {
+    const { controller } = setup(); await ready(controller);
+    const state = controller.getSnapshot();
+    const page = state.pages[0];
+    if (!page) throw new Error("Preview page required");
+    const table = {
+      columns: [
+        { id: "mw", label: "Capacity", kind: "decimal" as const, unit: "MW", nullable: true },
+        { id: "id", label: "Facility", kind: "identifier" as const, unit: null, nullable: false },
+      ],
+      rows: [
+        { position: 0, cells: [{ kind: "decimal" as const, exact: "9007199254740993.99999", display: "9007199254740993.99999" }, { kind: "identifier" as const, value: "0012" }] },
+        { position: 1, cells: [{ kind: "decimal" as const, exact: "0", display: "0" }, { kind: "identifier" as const, value: "A1" }] },
+        { position: 2, cells: [{ kind: "null" as const }, { kind: "identifier" as const, value: "A2" }] },
+      ],
+    };
+    render(<DatasetPreview state={{ ...state, pages: [{ ...page, table }], pageIndex: 0 }} onNext={vi.fn()} onPrevious={vi.fn()} onRestart={vi.fn()} />);
+    expect(screen.getByText("9007199254740993.99")).toBeVisible();
+    expect(screen.queryByText("9007199254740993.99999")).toBeNull();
+    expect(screen.getByText("0012")).toBeVisible();
+    expect(screen.getByText("0")).toBeVisible();
+    expect(screen.getByLabelText("Missing value")).toBeVisible();
+    expect(table.rows[0]?.cells[0]).toEqual({ kind: "decimal", exact: "9007199254740993.99999", display: "9007199254740993.99999" });
+  });
   it.each(["catalog", "schema"] as const)("revokes the sequence after %s denial before delayed protected successes arrive", async (source) => {
     for (const failure of [{ kind: "forbidden", message: "Denied" }, { kind: "data-unavailable", code: "dataset_unavailable", message: "Unavailable" }] as const) {
       const { controller, fixture, runtime } = setup(); await ready(controller);

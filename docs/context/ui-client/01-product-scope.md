@@ -104,6 +104,8 @@ Reported fleet capacity cards and Daily observations table display at most two
 decimal places, truncating extra digits without changing exact source values.
 Percentage displays retain the two-decimal half-up behavior above. The requested
 20-row daily table pagination is deferred to a separate update.
+The same two-decimal truncation applies to decimal cells in Dataset Explorer
+previews, preserving exact values, opaque identifiers and missing values.
 
 Use observation dates as calendar dates, without timezone shifts. Missing or
 excluded observations are unavailable, not zero. A valid zero outage displays

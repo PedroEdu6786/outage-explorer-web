@@ -1,9 +1,10 @@
 import type { NationalObservation } from "../../contracts/observations";
 import type { DecimalValue, PercentageValue, TableCell, TableData } from "../../contracts/table";
+import { truncateDecimalDisplay } from "../../components/atoms/decimal-display";
 
 /** Truncate MW display text without coercing or changing the exact source value. */
 export function capacityLabel(value: DecimalValue | null): string | null {
-  return value?.display.replace(/(\.\d{2})\d+$/, "$1") ?? null;
+  return value === null ? null : truncateDecimalDisplay(value.display);
 }
 
 /** Exact values remain untouched; Number conversion is confined to SVG coordinates. */
