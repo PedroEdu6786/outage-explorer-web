@@ -8,7 +8,7 @@ export function Checkbox({ className = "", ...props }: CheckboxProps) {
     <input
       {...props}
       type="checkbox"
-      className={`size-4 shrink-0 accent-accent disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`motion-check size-4 shrink-0 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     />
   );
 }

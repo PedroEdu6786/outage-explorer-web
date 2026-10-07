@@ -20,7 +20,7 @@ export function Badge({ tone = "neutral", className = "", ...props }: BadgeProps
   return (
     <span
       {...props}
-      className={`inline-flex w-fit items-center gap-(--badge-gap) rounded-badge px-(--badge-padding-inline) py-(--badge-padding-block) text-[length:var(--text-badge)] font-[number:var(--text-badge--font-weight)] tracking-[.035em] uppercase ${tones[tone]} ${className}`}
+      className={`motion-colors inline-flex w-fit items-center gap-(--badge-gap) rounded-badge px-(--badge-padding-inline) py-(--badge-padding-block) text-[length:var(--text-badge)] font-[number:var(--text-badge--font-weight)] tracking-[.035em] uppercase ${tones[tone]} ${className}`}
     />
   );
 }

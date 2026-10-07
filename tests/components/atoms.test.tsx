@@ -53,6 +53,24 @@ describe("native action contracts", () => {
     expect(click).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps the loading name, disabled state, aria-busy and blocked clicks through label motion", async () => {
+    const user = userEvent.setup();
+    const click = vi.fn();
+    const { container, rerender } = render(<Button onClick={click}>Save</Button>);
+    expect(screen.getByRole("button", { name: "Save" })).not.toHaveAttribute("aria-busy");
+    rerender(<Button loading loadingLabel="Saving…" onClick={click}>Save</Button>);
+    const loading = screen.getByRole("button", { name: "Saving…" });
+    expect(loading).toBeDisabled();
+    expect(loading).toHaveAttribute("aria-busy", "true");
+    expect(loading).toHaveTextContent("Saving…");
+    expect(loading).not.toHaveTextContent("Save Saving");
+    await user.click(loading);
+    expect(click).not.toHaveBeenCalled();
+    expect(container.querySelectorAll("[role=status],[aria-live]")).toHaveLength(0);
+    rerender(<Button onClick={click}><Icon name="close" />Save</Button>);
+    expect(screen.getByRole("button", { name: "Save" }).children).toHaveLength(1);
+  });
+
   it("names icon buttons independently of decorative glyphs and keeps links native", async () => {
     const user = userEvent.setup();
     const close = vi.fn();
@@ -91,6 +109,20 @@ describe("native labeled controls", () => {
     expect(code).toHaveValue("SELECT\n  '001A';");
   });
 
+  it("keeps the checkbox a native input operable by Space with an unchanged name and state", async () => {
+    const user = userEvent.setup();
+    const change = vi.fn();
+    const { container } = render(<><label htmlFor="native-check">Native compare</label><Checkbox id="native-check" onChange={change} /></>);
+    const checkbox = screen.getByRole("checkbox", { name: "Native compare" });
+    expect(checkbox.tagName).toBe("INPUT");
+    expect(checkbox).toHaveAttribute("type", "checkbox");
+    expect(container.querySelectorAll("input,svg,canvas")).toHaveLength(1);
+    await user.tab();
+    await user.keyboard(" ");
+    expect(checkbox).toBeChecked();
+    expect(change).toHaveBeenCalledTimes(1);
+  });
+
   it("allows checkbox keyboard and label toggles; disabled controls retain values", async () => {
     const user = userEvent.setup();
     render(<><label htmlFor="compare">Compare reported percentage</label><Checkbox id="compare" /><label htmlFor="disabled">Disabled value</label><Input id="disabled" disabled defaultValue="retained" /></>);
@@ -113,6 +145,21 @@ describe("status and asset semantics", () => {
     expect(screen.getAllByRole("status")).toHaveLength(1);
     expect(screen.getByRole("status")).toHaveTextContent("Loading preview");
     expect(screen.getByText("Read only")).not.toHaveAttribute("role");
+  });
+
+  it("announces a labelled spinner once and leaves badge and icon button output unchanged", () => {
+    const { container } = render(<><Spinner label="Loading" /><Badge tone="error">Unavailable</Badge><IconButton label="Close preview"><Icon name="close" /></IconButton></>);
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(container.querySelector("[aria-live=polite]")).toBe(screen.getByRole("status"));
+    expect(container.querySelector("[aria-hidden=true]")).toBeInTheDocument();
+    const badge = screen.getByText("Unavailable");
+    expect(badge.tagName).toBe("SPAN");
+    expect(badge).not.toHaveAttribute("role");
+    expect(badge.textContent).toBe("Unavailable");
+    const button = screen.getByRole("button", { name: "Close preview" });
+    expect(button).toHaveAttribute("type", "button");
+    expect(button).not.toHaveAttribute("aria-busy");
+    expect(button.children).toHaveLength(1);
   });
 
   it("keeps surface headings/regions and meaningful versus decorative assets", () => {

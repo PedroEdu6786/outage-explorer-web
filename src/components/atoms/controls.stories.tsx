@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Checkbox } from "./Checkbox";
 import { Input } from "./Input";
@@ -119,3 +120,26 @@ export const Disabled: Story = {
     </div>
   ),
 };
+
+function ControlMotionStates() {
+  const [invalid, setInvalid] = useState(false);
+  return (
+    <div className="grid max-w-sm gap-3 p-3">
+      <label htmlFor="motion-unchecked" className="flex min-h-8 w-fit cursor-pointer items-center gap-2 text-[11px] text-text-muted">
+        <Checkbox id="motion-unchecked" />
+        Unchecked, toggle with Space
+      </label>
+      <label htmlFor="motion-checked" className="flex min-h-8 w-fit cursor-pointer items-center gap-2 text-[11px] text-text-muted">
+        <Checkbox id="motion-checked" defaultChecked />
+        Checked, toggle with Space
+      </label>
+      <label htmlFor="motion-field" className="text-[11px] text-text">Start date</label>
+      <Input id="motion-field" type="date" aria-invalid={invalid ? "true" : undefined} aria-describedby={invalid ? "motion-field-error" : undefined} />
+      {invalid && <p id="motion-field-error" className="animate-fade-in text-[11px] text-error">Choose a start date.</p>}
+      <button type="button" className="w-fit rounded-control border border-border-strong px-2 py-1 text-[11px]" onClick={() => { setInvalid((value) => !value); }}>{invalid ? "Mark valid" : "Mark invalid"}</button>
+    </div>
+  );
+}
+
+/** Synthetic checked/unchecked checkbox and valid-to-invalid input for motion review. */
+export const MotionReview: Story = { render: () => <ControlMotionStates /> };

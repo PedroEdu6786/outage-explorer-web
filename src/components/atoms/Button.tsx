@@ -31,12 +31,12 @@ export function Button({
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={[
-        "inline-flex min-h-[var(--control-height)] items-center justify-center gap-[var(--action-gap)] rounded-control border px-[var(--action-padding-inline)] py-[var(--action-padding-block)] text-action whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-[.48]",
+        "motion-control inline-flex min-h-[var(--control-height)] items-center justify-center gap-[var(--action-gap)] rounded-control border px-[var(--action-padding-inline)] py-[var(--action-padding-block)] text-action whitespace-nowrap enabled:active:translate-y-(--motion-press-shift) disabled:cursor-not-allowed disabled:opacity-[.48]",
         variants[variant],
         className,
       ].filter(Boolean).join(" ")}
     >
-      {loading ? loadingLabel : children}
+      {loading ? <span className="animate-fade-in">{loadingLabel}</span> : children}
     </button>
   );
 }

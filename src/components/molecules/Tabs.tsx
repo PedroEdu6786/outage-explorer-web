@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type KeyboardEvent, type ReactNode } from "react";
+import { useSlidingIndicator } from "../atoms/useSlidingIndicator";
 
 export interface TabItem {
   /** Unique within the document; forms the tab and panel IDs. */
@@ -24,6 +25,8 @@ export function Tabs({ label, items, selectedId, onSelectionChange, className = 
   const enabled = items.filter((item) => !item.disabled);
   const selected = enabled.find((item) => item.id === selectedId);
   const focusableId = selected?.id ?? enabled[0]?.id;
+  const tablist = useRef<HTMLDivElement>(null);
+  useSlidingIndicator({ containerRef: tablist, activeKey: selected?.id ?? null });
 
   function navigate(event: KeyboardEvent<HTMLButtonElement>, id: string) {
     const current = enabled.findIndex((item) => item.id === id);
@@ -41,7 +44,7 @@ export function Tabs({ label, items, selectedId, onSelectionChange, className = 
 
   return (
     <div className={className}>
-      <div role="tablist" aria-label={label} className="flex border-b border-border px-[18px]">
+      <div ref={tablist} role="tablist" aria-label={label} className="relative flex border-b border-border px-[18px]">
         {items.map((item) => (
           <button
             key={item.id}
@@ -55,14 +58,16 @@ export function Tabs({ label, items, selectedId, onSelectionChange, className = 
             aria-controls={`${item.id}-panel`}
             aria-selected={selectedId === item.id && !item.disabled}
             tabIndex={focusableId === item.id ? 0 : -1}
+            data-indicator-active={selectedId === item.id && !item.disabled ? "" : undefined}
             disabled={item.disabled}
             onClick={() => { onSelectionChange(item.id); }}
             onKeyDown={(event) => { navigate(event, item.id); }}
-            className={`border-0 border-b-2 bg-transparent px-[13px] py-[10px] text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-50 ${selectedId === item.id && !item.disabled ? "border-b-accent text-accent-dark" : "border-b-transparent text-text-muted"}`}
+            className={`motion-colors border-0 border-b-2 bg-transparent px-[13px] py-[10px] text-[11px] font-semibold disabled:cursor-not-allowed disabled:opacity-50 [[data-indicator=ready]_&]:border-b-transparent ${selectedId === item.id && !item.disabled ? "border-b-accent text-accent-dark" : "border-b-transparent text-text-muted"}`}
           >
             {item.label}
           </button>
         ))}
+        <span aria-hidden="true" data-sliding-indicator className="sliding-underline bg-accent" />
       </div>
       {items.map((item) => (
         <div
@@ -72,6 +77,7 @@ export function Tabs({ label, items, selectedId, onSelectionChange, className = 
           aria-labelledby={`${item.id}-tab`}
           hidden={selected?.id !== item.id}
           tabIndex={0}
+          className="animate-fade-rise"
         >
           {item.content}
         </div>

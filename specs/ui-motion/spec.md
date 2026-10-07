@@ -1,5 +1,5 @@
 # Spec: Animations and micro-interactions
-> Status: accepted scope, not implemented · Slug: ui-motion · Date: October 6, 2026
+> Status: in progress, phase 1 verified · Slug: ui-motion · Date: October 6, 2026
 
 ## Decision record
 

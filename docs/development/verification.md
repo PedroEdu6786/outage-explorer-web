@@ -230,3 +230,31 @@ intended configured environment afterward before serving the app. Serialize thes
 builds and production servers; fresh output is required for fixture/release scans.
 The release-boundaries marker establishes registration and source/artifact
 isolation only. T5.L/T6.L still require named-target connected acceptance.
+
+## Motion checks (ui-motion)
+
+Motion is an extension (see the [motion spec](../../specs/ui-motion/spec.md));
+phase records live in `specs/ui-motion/verification/`. These are fixture/synthetic
+checks; they are neither live-integration nor Figma-fidelity evidence.
+
+- **Storybook `motion` global.** Default `off`: the preview injects the test-only
+  stylesheet from `tests/support/motion-off.ts` (zero animation/transition
+  duration and delay, iteration count 1), so captures and behavior assertions see
+  end states. Use the toolbar "Motion" toggle, or append `&globals=motion:on` to a
+  story iframe URL, to review motion. The stylesheet never enters `src/` or app output.
+- **Reduced-motion and token check.** After `npm run build-storybook`, run
+  `PLAYWRIGHT_BROWSERS_PATH=/private/tmp/outage-web-playwright npm run test:e2e -- tests/motion --workers=1`.
+  The specs open stories with motion on and switch `emulateMedia` between `reduce`
+  and `no-preference`, asserting computed values with retrying matchers (never
+  timing). `tests/motion/**` is excluded from Vitest; the source-scan guard is
+  `tests/components/motion-guard.test.ts`.
+- **Real-route configs** (development, controlled, production, auth) set
+  `use.reducedMotion: "reduce"`; they assert behavior only and capture nothing.
+- **Capture comparison (AC7).** Regenerate the committed evidence PNGs with motion
+  off (the default `npm run test:e2e`), hash every file under
+  `docs/specs/web-client/evidence/` and compare with the phase-1 baseline run
+  (`specs/ui-motion/verification/baseline.md`), then review each differing file
+  visually. Capture specs are not byte-deterministic for some Overview/Explorer
+  files even on an unmodified tree; the baseline lists them. Keep regenerated
+  PNGs only when the differences are intentional and recorded; otherwise restore
+  them with `git checkout`.

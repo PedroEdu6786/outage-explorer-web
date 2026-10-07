@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "../styles/tokens.css";
+@import "../styles/motion.css";
+
+/* Prose in specs/docs mentions class names; keep it out of the emitted stylesheet. */
+@source not "../../specs";
+@source not "../../docs";
 
 @layer base {
   html {

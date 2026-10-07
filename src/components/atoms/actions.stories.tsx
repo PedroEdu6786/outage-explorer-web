@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "./Button";
 import { IconButton } from "./IconButton";
@@ -39,3 +40,27 @@ export const Vocabulary: Story = {
     </section>
   ),
 };
+
+function MotionStates() {
+  const [loading, setLoading] = useState(false);
+  return (
+    <section aria-label="Action motion states" className="grid gap-4 rounded-panel border border-border bg-surface p-4">
+      <div className="flex flex-wrap items-center gap-4">
+        <Button>Hover or press me</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="ghost">Ghost</Button>
+        <Button disabled variant="secondary">Disabled</Button>
+        <IconButton label="Close preview"><Icon name="close" /></IconButton>
+        <Link href="#action-destination">Explore dataset</Link>
+      </div>
+      <div className="flex flex-wrap items-center gap-4">
+        <Button loading={loading} loadingLabel="Saving…">Save changes</Button>
+        <Button variant="secondary" onClick={() => { setLoading((value) => !value); }}>{loading ? "Finish loading" : "Start loading"}</Button>
+      </div>
+      <span id="action-destination">Navigation destination</span>
+    </section>
+  );
+}
+
+/** Synthetic hover, press, loading and disabled states for motion review (toggle the toolbar Motion global on). */
+export const MotionReview: Story = { render: () => <MotionStates /> };

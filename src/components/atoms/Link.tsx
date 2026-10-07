@@ -8,7 +8,7 @@ export function Link({ className, ...props }: LinkProps) {
     <a
       {...props}
       className={[
-        "text-accent-dark underline underline-offset-2 hover:text-accent",
+        "motion-colors text-accent-dark underline underline-offset-2 hover:text-accent",
         className,
       ].filter(Boolean).join(" ")}
     />

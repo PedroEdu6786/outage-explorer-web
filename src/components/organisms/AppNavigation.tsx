@@ -4,6 +4,7 @@ import { useEffect, useRef, useSyncExternalStore, type KeyboardEvent, type RefOb
 import { BrandMark } from "../atoms/BrandMark";
 import { Icon, type IconName } from "../atoms/Icon";
 import { IconButton } from "../atoms/IconButton";
+import { useSlidingIndicator } from "../atoms/useSlidingIndicator";
 import { NavigationItem } from "../molecules/NavigationItem";
 import { UserSummary, type UserSummaryProps } from "../molecules/UserSummary";
 
@@ -49,8 +50,16 @@ export function AppNavigation({ data, open, onOpenChange, onSignOut, returnFocus
   const dialog = useRef<HTMLDialogElement>(null);
   const desktop = useRef<HTMLElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const desktopNavigation = useRef<HTMLElement>(null);
   const revision = data.status === "ready" ? data.revision : null;
   const previousRevision = useRef(revision);
+  const activeDestination = data.status === "ready" ? data.destinations.find((destination) => destination.active)?.id ?? "" : null;
+  // Measurement only; the indicator never affects drawer, focus or return-focus logic.
+  useSlidingIndicator({
+    containerRef: desktopNavigation,
+    activeKey: revision === null ? null : `${String(revision)}:${activeDestination ?? ""}`,
+    enabled: data.status === "ready",
+  });
 
   useEffect(() => {
     if (previousRevision.current !== revision) {
@@ -112,7 +121,8 @@ export function AppNavigation({ data, open, onOpenChange, onSignOut, returnFocus
         </div>
         {data.status === "ready" ? (
           <>
-            <nav aria-label="Main navigation" className="grid gap-[3px] px-[10px] py-[16px]">
+            <nav ref={mobile ? undefined : desktopNavigation} aria-label="Main navigation" className="relative isolate grid gap-[3px] px-[10px] py-[16px]">
+              {!mobile && <span aria-hidden="true" data-sliding-indicator className="sliding-indicator -z-10 rounded-brand bg-[#23a1a62e] shadow-[inset_2px_0_#55bfc2]" />}
               {data.destinations.map((destination) => (
                 <NavigationItem key={destination.id} {...destination} icon={<Icon name={destination.icon} />} onClick={() => { onOpenChange(false); }} className="focus-visible:outline-[#55bfc2]" />
               ))}

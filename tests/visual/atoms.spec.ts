@@ -1,8 +1,8 @@
 import { mkdir } from "node:fs/promises";
 import { expect, test, type Page } from "@playwright/test";
 
-async function story(page: Page, id: string) {
-  await page.goto(`/iframe.html?id=${id}&viewMode=story`);
+async function story(page: Page, id: string, globals = "") {
+  await page.goto(`/iframe.html?id=${id}&viewMode=story${globals ? `&globals=${globals}` : ""}`);
   await expect(page.getByRole("note")).toHaveText("Synthetic fixture preview — not live EIA data.");
   await expect(page.locator("#storybook-root")).not.toBeEmpty();
   await page.evaluate(async () => { await document.fonts.ready; });
@@ -67,7 +67,8 @@ test("A2 native keyboard search, select, checkbox and unchanged code editing", a
 
 test("A3 status semantics and reduced-motion ring retain exact token styles", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await story(page, "atoms-status-and-surfaces--loading");
+  // Motion defaults to off in Storybook; these assertions need the real animation tokens.
+  await story(page, "atoms-status-and-surfaces--loading", "motion:on");
   const status = page.getByRole("status");
   await expect(status).toHaveCount(1);
   await expect(status).toHaveText("Loading preview");

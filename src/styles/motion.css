@@ -1,0 +1,181 @@
+/* Motion primitives. Durations, easing and movement distances are tokens in
+   tokens.css; the single prefers-reduced-motion rule lives there too, so
+   components never carry motion-reduce variants. Only these named animations
+   and utilities may express motion outside src/styles. */
+
+@theme {
+  --animate-fade-in: fade-in var(--duration-base) var(--ease-out) backwards;
+  --animate-fade-rise: fade-rise var(--duration-enter) var(--ease-out) backwards;
+  --animate-scale-in: scale-in var(--duration-enter) var(--ease-out) backwards;
+  --animate-settle: settle var(--duration-enter) var(--ease-out);
+  --animate-nudge: nudge var(--duration-base) var(--ease-out);
+  --animate-expand: expand var(--duration-enter) var(--ease-out);
+  --animate-chart-wipe: chart-wipe 700ms var(--ease-out) backwards;
+  --animate-progress: progress 1.4s var(--ease-out) infinite;
+  --animate-dot-pulse: dot-pulse 1.2s var(--ease-out);
+  --animate-spinner: spinner 0.8s linear infinite;
+  /* Defined but intentionally unused (E1): no call site enables shimmer. */
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+  }
+
+  @keyframes fade-rise {
+    from { opacity: 0; translate: 0 var(--motion-rise); }
+  }
+
+  @keyframes scale-in {
+    from { opacity: 0; scale: var(--motion-scale-from); }
+  }
+
+  @keyframes settle {
+    from { border-color: var(--color-success); }
+  }
+
+  @keyframes nudge {
+    30% { translate: var(--motion-nudge) 0; }
+  }
+
+  @keyframes expand {
+    from { grid-template-rows: 0fr; opacity: 0; }
+  }
+
+  @keyframes chart-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+  }
+
+  @keyframes progress {
+    from { translate: -100% 0; }
+    to { translate: 250% 0; }
+  }
+
+  @keyframes dot-pulse {
+    50% { scale: 1.6; opacity: 0.6; }
+  }
+
+  @keyframes spinner {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
+}
+
+/* Color/opacity-only feedback (links, badges, row hovers). */
+@utility motion-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, box-shadow, opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+}
+
+/* Control feedback, including press translate/scale. */
+@utility motion-control {
+  transition-property: color, background-color, border-color, text-decoration-color, box-shadow, opacity, translate, scale;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+}
+
+/* Fields: border color and a constant-size focus ring that eases in. */
+@utility motion-field {
+  outline-style: none;
+  outline-width: var(--focus-width);
+  outline-offset: var(--focus-offset);
+  outline-color: transparent;
+  transition-property: border-color, background-color, color, opacity, outline-color, outline-style;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+  transition-behavior: allow-discrete;
+
+  &:focus-visible {
+    outline-style: solid;
+    outline-color: var(--color-accent);
+  }
+}
+
+/* Entrance with an index-driven delay; callers cap --stagger-index. */
+@utility motion-stagger {
+  animation: var(--animate-fade-rise);
+  animation-delay: calc(var(--stagger-index, 0) * var(--stagger-step));
+}
+
+/* Sliding indicator: JS writes only the custom properties; CSS moves it. The
+   transition is enabled by the container after the first untransitioned placement. */
+@utility sliding-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  translate: var(--indicator-x, 0px) var(--indicator-y, 0px);
+  width: var(--indicator-width, 0px);
+  height: var(--indicator-height, 0px);
+
+  [data-indicator-animate="true"] > & {
+    transition-property: translate, width, height;
+    transition-duration: var(--duration-move);
+    transition-timing-function: var(--ease-out);
+  }
+}
+
+/* Underline variant: bottom-aligned 2px bar that follows the active item's x/width. */
+@utility sliding-underline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  pointer-events: none;
+  translate: var(--indicator-x, 0px) 0;
+  width: var(--indicator-width, 0px);
+
+  [data-indicator-animate="true"] > & {
+    transition-property: translate, width;
+    transition-duration: var(--duration-move);
+    transition-timing-function: var(--ease-out);
+  }
+}
+
+/* Native checkbox with a clip-path draw-in check mark on ::after. */
+@utility motion-check {
+  appearance: none;
+  position: relative;
+  /* Non-text contrast: close to the native unchecked border, not the field border. */
+  border: 1px solid var(--color-text-muted);
+  border-radius: 3px;
+  background-color: var(--color-surface);
+  transition-property: background-color, border-color, opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-surface);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7.2l2.8 2.8L11 4.4'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 7.2l2.8 2.8L11 4.4'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path var(--duration-move) var(--ease-out);
+  }
+
+  &:checked {
+    border-color: var(--color-accent);
+    background-color: var(--color-accent);
+  }
+
+  &:checked::after {
+    clip-path: inset(0);
+  }
+
+  @media (forced-colors: active) {
+    &:checked {
+      border-color: Highlight;
+      background-color: Highlight;
+    }
+
+    &::after {
+      background-color: HighlightText;
+    }
+  }
+}

@@ -20,6 +20,23 @@ describe("caller-owned field compositions", () => {
     expect(screen.getByRole("textbox", { name: "First field" })).toHaveAccessibleDescription("First help.");
   });
 
+  it("keeps aria-invalid, aria-describedby and error text unchanged for inputs, search and form fields", () => {
+    const { rerender } = render(<><FormField label="Plain field" error="Plain error.">{(props) => <Input {...props} />}</FormField><SearchField label="Find" value="" onValueChange={() => undefined} error="Search error." /></>);
+    const plain = screen.getByRole("textbox", { name: "Plain field" });
+    expect(plain).toHaveAttribute("aria-invalid", "true");
+    expect(plain).toHaveAccessibleDescription("Plain error.");
+    expect(plain.getAttribute("aria-describedby")).toBe(`${plain.id}-error`);
+    expect(screen.getByText("Plain error.").id).toBe(`${plain.id}-error`);
+    expect(screen.getByText("Plain error.").tagName).toBe("P");
+    const search = screen.getByRole("searchbox", { name: "Find" });
+    expect(search).toHaveAttribute("aria-invalid", "true");
+    expect(search).toHaveAccessibleDescription("Search error.");
+    rerender(<><FormField label="Plain field">{(props) => <Input {...props} />}</FormField><SearchField label="Find" value="" onValueChange={() => undefined} /></>);
+    expect(screen.getByRole("textbox", { name: "Plain field" })).not.toHaveAttribute("aria-invalid");
+    expect(screen.getByRole("searchbox", { name: "Find" })).not.toHaveAttribute("aria-invalid");
+    expect(screen.queryByText("Plain error.")).not.toBeInTheDocument();
+  });
+
   it("passes calendar strings and empty dates unchanged without enforcing date order", () => {
     const start = vi.fn();
     const end = vi.fn();

@@ -40,7 +40,7 @@ export function FormField({
       <label htmlFor={controlId} className={labelVisuallyHidden ? "sr-only" : "text-[10px] font-semibold text-text-muted"}>{label}</label>
       {children(controlProps)}
       {hasDescription && <p id={`${controlId}-description`} className="text-[11px] text-text-muted">{description}</p>}
-      {hasError && <p id={`${controlId}-error`} className="text-[11px] text-error">{error}</p>}
+      {hasError && <p id={`${controlId}-error`} className="animate-fade-in text-[11px] text-error">{error}</p>}
     </div>
   );
 }

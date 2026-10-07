@@ -54,6 +54,16 @@ afterEach(() => {
 });
 
 describe("supplied shell navigation", () => {
+  it("renders the desktop sliding indicator inertly in jsdom and keeps aria-current on the active destination", () => {
+    narrow = false;
+    const { container } = render(<Harness />);
+    const desktopNav = container.querySelector("aside nav");
+    expect(desktopNav).not.toHaveAttribute("data-indicator");
+    expect(desktopNav?.querySelectorAll("[data-sliding-indicator][aria-hidden=true]")).toHaveLength(1);
+    expect(container.querySelectorAll("dialog [data-sliding-indicator]")).toHaveLength(0);
+    for (const link of container.querySelectorAll("a[aria-current=page]")) expect(link).toHaveTextContent("National overview");
+  });
+
   it("opens a modal focused on close, handles Escape and restores the trigger", async () => {
     const user = userEvent.setup();
     render(<Harness />);

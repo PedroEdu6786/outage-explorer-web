@@ -13,7 +13,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const ready: NavigationData = {
+const ready: Extract<NavigationData, { status: "ready" }> = {
   status: "ready", revision: "synthetic-session-1",
   identity: { name: "Synthetic User", initials: "S", roleLabel: "Analyst" },
   destinations: [
@@ -41,3 +41,24 @@ function ShellPreview({ pending = false, title = "Dataset Explorer" }: { pending
 export const Ready: Story = { render: () => <ShellPreview /> };
 export const Pending: Story = { render: () => <ShellPreview pending /> };
 export const LongTitle: Story = { render: () => <ShellPreview title="SyntheticUnbrokenHeaderTitleWithAllContentPreservedForAssistiveTechnology" /> };
+
+function IndicatorPreview() {
+  const [open, setOpen] = useState(false);
+  const [activeId, setActiveId] = useState("datasets");
+  const trigger = useRef<HTMLButtonElement>(null);
+  const data: NavigationData = { ...ready, destinations: ready.destinations.map((destination) => ({ ...destination, active: destination.id === activeId })) };
+  return <>
+    <AppNavigation data={data} open={open} onOpenChange={setOpen} onSignOut={() => undefined} returnFocusRef={trigger} />
+    <div className="min-[1001px]:ml-(--sidebar-width)">
+      <AppHeader title="Indicator review" onOpenNavigation={() => { setOpen(true); }} navigationOpen={open} navigationButtonRef={trigger} />
+      <main className="flex gap-2 p-6">
+        {ready.destinations.map((destination) => (
+          <button key={destination.id} type="button" onClick={() => { setActiveId(destination.id); }}>Show {destination.label}</button>
+        ))}
+      </main>
+    </div>
+  </>;
+}
+
+/** Desktop shell whose active destination changes, to review the sliding indicator (Motion global on). */
+export const DesktopIndicator: Story = { render: () => <IndicatorPreview /> };

@@ -22,7 +22,7 @@ export function IconButton({
       aria-busy={loading || undefined}
       disabled={disabled || loading}
       className={[
-        "inline-grid size-[var(--control-height)] shrink-0 place-items-center rounded-control border-0 bg-transparent p-0 text-inherit enabled:hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-[.48]",
+        "motion-control inline-grid size-[var(--control-height)] shrink-0 place-items-center rounded-control border-0 bg-transparent p-0 text-inherit enabled:hover:bg-surface-muted enabled:active:scale-(--motion-press-scale) disabled:cursor-not-allowed disabled:opacity-[.48]",
         className,
       ].filter(Boolean).join(" ")}
     >

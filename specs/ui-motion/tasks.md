@@ -13,7 +13,7 @@
 ## Phases
 | Phase | File | Scope | Status |
 | --- | --- | --- | --- |
-| 1 | [tasks/phase-1.md](tasks/phase-1.md) | Baseline; A1–A3; B1–B5, B7; C1; Spinner token migration | not started |
+| 1 | [tasks/phase-1.md](tasks/phase-1.md) | Baseline; A1–A3; B1–B5, B7; C1; Spinner token migration | verified (T1.37 devlog/commit pending) |
 | 2 | [tasks/phase-2.md](tasks/phase-2.md) | Skeleton/TableSkeleton; B6, B8–B12; C5 loading; D2 first-load cards; D3 skeletons | not started |
 | 3 | [tasks/phase-3.md](tasks/phase-3.md) | C2–C4, C5 stagger, C6, C7, D1; D2 chart wipe, metric entrance, guarded range-change dim | not started |
 | 4 | [tasks/phase-4.md](tasks/phase-4.md) | Remaining D2; D3; D4; E1 left off; final evidence | not started |

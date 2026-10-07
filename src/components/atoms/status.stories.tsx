@@ -1,5 +1,6 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Badge } from "./Badge";
+import { Badge, type BadgeTone } from "./Badge";
 import { Spinner } from "./Spinner";
 import { Surface } from "./Surface";
 
@@ -60,3 +61,19 @@ export const Panel: Story = {
     </Surface>
   ),
 };
+
+const tones: readonly BadgeTone[] = ["neutral", "info", "success", "warning", "error"];
+
+function ToneSwitch() {
+  const [index, setIndex] = useState(0);
+  const tone = tones[index] ?? "neutral";
+  return (
+    <div className="flex items-center gap-3">
+      <Badge tone={tone}>Tone: {tone}</Badge>
+      <button type="button" className="rounded-control border border-border-strong px-2 py-1 text-[11px]" onClick={() => { setIndex((value) => (value + 1) % tones.length); }}>Next tone</button>
+    </div>
+  );
+}
+
+/** One badge changing tone, to review the color crossfade (toolbar Motion global on). */
+export const ToneSwitchReview: Story = { render: () => <ToneSwitch /> };
