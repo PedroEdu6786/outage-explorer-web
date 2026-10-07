@@ -22,7 +22,7 @@ export function PreviewFilters({ dataset, selection, onApply }: { readonly datas
     setError(problem);
     if (!problem) onApply(filters, Number(size));
   }
-  return <form onSubmit={(event) => { event.preventDefault(); apply(); }} className="flex flex-wrap items-end gap-[10px] border-y border-border bg-surface-muted px-[18px] py-[14px] [@media(width<=480px)]:flex-col [@media(width<=480px)]:items-stretch">
+  return <form onSubmit={(event) => { event.preventDefault(); apply(); }} className="motion-colors focus-within:border-accent flex flex-wrap items-end gap-[10px] border-y border-border bg-surface-muted px-[18px] py-[14px] [@media(width<=480px)]:flex-col [@media(width<=480px)]:items-stretch">
     {dataset.filters.dates && <DateRangeField start={start} end={end} onStartChange={setStart} onEndChange={setEnd} />}
     <FormField label="Rows per page">{(association) => <Input {...association} type="number" min={1} max={500} value={size} onChange={(event) => { setSize(event.currentTarget.value); }} className="max-w-[90px]" />}</FormField>
     <Button type="submit">Apply filters</Button><Button variant="ghost" onClick={() => { setStart(""); setEnd(""); setSize(String(selection.pageSize)); setError(null); onApply({}, selection.pageSize); }}>Reset</Button>

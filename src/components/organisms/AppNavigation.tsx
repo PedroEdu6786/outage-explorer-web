@@ -133,7 +133,7 @@ export function AppNavigation({ data, open, onOpenChange, onSignOut, returnFocus
                   <span aria-hidden="true" className="mt-[3px] size-[7px] shrink-0 animate-dot-pulse rounded-full bg-[#51b88c]" />
                   <div className="grid gap-[3px] text-[11px]">
                     <strong className="text-[10px] font-medium tracking-[.04em] text-[#91a5ad] uppercase">Data available through</strong>
-                    <span className="font-semibold text-white">{data.coverage.availableThrough}</span>
+                    <span key={data.coverage.availableThrough} className="inline-block animate-dot-pulse font-semibold text-white">{data.coverage.availableThrough}</span>
                     {data.coverage.updated && <small className="text-[10px] text-[#8fa1aa]">{data.coverage.updated}</small>}
                   </div>
                 </div>

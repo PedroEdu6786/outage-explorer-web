@@ -60,3 +60,19 @@ it("revokes controls on forbidden status without automatic retries", async () =>
   expect(screen.getByRole("button", { name: "Refresh data" })).toBeDisabled();
   expect(screen.getByRole("button", { name: "Check refresh status" })).toBeDisabled(); expect(operations.readRefresh).toHaveBeenCalledTimes(1);
 });
+
+it("keeps one persistent live region through refresh states and settles on publication", async () => {
+  const { operations } = setup();
+  operations.admitRefresh.mockResolvedValue({ ok: true, value: run("accepted") });
+  fireEvent.click(screen.getByRole("button", { name: "Refresh data" }));
+  await screen.findByText(/Refresh accepted/);
+  const region = screen.getByRole("status");
+  expect(region).toHaveAttribute("aria-atomic", "true");
+  for (const state of ["running", "succeeded"] as const) {
+    operations.readRefresh.mockResolvedValue({ ok: true, value: run(state) });
+    fireEvent.click(screen.getByRole("button", { name: "Check refresh status" }));
+    await waitFor(() => { expect(region).toHaveTextContent(state === "running" ? "Refresh is running" : "new data was published"); });
+    expect(screen.getAllByRole("status")).toEqual([region]);
+  }
+  expect(region.parentElement).toHaveClass("motion-enter-settle");
+});

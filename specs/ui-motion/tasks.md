@@ -1,5 +1,5 @@
 # Tasks: Animations and micro-interactions
-> Status: phases 1–3 verified (phase 3 devlog/commit pending) · Slug: ui-motion · Plan: ./plan.md · Spec: ./spec.md · Layout: hybrid (manifest + `tasks/phase-N.md`)
+> Status: phases 1–4 complete with recorded verification and devlog · Slug: ui-motion · Plan: ./plan.md · Spec: ./spec.md · Layout: hybrid (manifest + `tasks/phase-N.md`)
 
 ## Overview
 136 tasks across 4 phases; 62 tasks parallelizable [P] (phase 1: 38/18, phase 2: 34/14, phase 3: 34/16, phase 4: 30/14).
@@ -15,8 +15,8 @@
 | --- | --- | --- | --- |
 | 1 | [tasks/phase-1.md](tasks/phase-1.md) | Baseline; A1–A3; B1–B5, B7; C1; Spinner token migration | verified and committed (36936b1) |
 | 2 | [tasks/phase-2.md](tasks/phase-2.md) | Skeleton/TableSkeleton; B6, B8–B12; C5 loading; D2 first-load cards; D3 skeletons | verified and committed (36612ab) |
-| 3 | [tasks/phase-3.md](tasks/phase-3.md) | C2–C4, C5 stagger, C6, C7, D1; D2 chart wipe, metric entrance, guarded range-change dim | verified (T3.33 devlog/commit pending) |
-| 4 | [tasks/phase-4.md](tasks/phase-4.md) | Remaining D2; D3; D4; E1 left off; final evidence | not started |
+| 3 | [tasks/phase-3.md](tasks/phase-3.md) | C2–C4, C5 stagger, C6, C7, D1; D2 chart wipe, metric entrance, guarded range-change dim | verified and committed (2b79cdc) |
+| 4 | [tasks/phase-4.md](tasks/phase-4.md) | Remaining D2; D3; D4; E1 left off; final evidence | complete; verification and devlog in phase completion commit |
 
 ## Cross-phase dependencies
 - Phase 1 → all: T1.1 baseline is the AC7 reference for every checkpoint; T1.2–T1.4 tokens/primitives, T1.5/T1.6 Storybook motion global, T1.8 `tests/motion` discovery and T1.31 helpers are reused by phases 2–4.

@@ -111,7 +111,7 @@ for (const preference of preferences) {
     test("coverage status dot pulses a single iteration; reduced motion removes the pulse", async ({ page }) => {
       await page.setViewportSize({ width: 1280, height: 900 });
       await openMotionStory(page, "organisms-shell--coverage-dot", preference);
-      const dot = page.locator("aside span.animate-dot-pulse");
+      const dot = page.locator("aside span.rounded-full.animate-dot-pulse");
       await expect(dot).toHaveCount(1);
       const motion = await readMotion(dot);
       expect(motion.animationName).toBe(reduce ? "none" : "dot-pulse");

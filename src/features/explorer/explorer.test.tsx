@@ -5,6 +5,7 @@ import { createFixtureOperations, type FixtureOptions } from "../../../tests/fix
 import { syntheticSettings } from "../../../tests/fixtures/scenarios";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { ExplorerFeature } from "./ExplorerFeature";
+import { DatasetSchema } from "./DatasetSchema";
 import { DatasetPreview } from "./DatasetPreview";
 import { isCalendarDate } from "./preview-state";
 import { createExplorerController, type ExplorerOperations } from "./service";
@@ -454,4 +455,44 @@ describe("Explorer loading treatments (FR4, AC3, AC5)", () => {
     expect(dimmed()).toBeNull();
     expect(screen.getByRole("button", { name: "Restart browsing" })).toBeEnabled();
   });
+});
+
+ it("switches presentational content without remounting catalog or filter controls", async () => {
+  const user = userEvent.setup(); const fixture = createFixtureOperations({ persona: "analyst" });
+  const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+  const view = render(<ExplorerFeature operations={fixture.operations} runtime={runtime} />);
+  await screen.findByRole("table", { name: "Synthetic national observations preview" });
+  const catalogButton = screen.getByRole("button", { name: /Synthetic facility observations/ });
+  await user.click(catalogButton);
+  await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+  expect(catalogButton).toHaveFocus();
+  expect(screen.getByRole("button", { name: /Synthetic facility observations/ })).toBe(catalogButton);
+  const apply = screen.getByRole("button", { name: "Apply filters" });
+  const start = screen.getByLabelText("Start date");
+  await user.click(start); fireEvent.change(start, { target: { value: "2026-09-02" } });
+  expect(start).toHaveFocus();
+  await user.click(apply);
+  await waitFor(() => { expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toMatchObject({ filters: { dates: { start: "2026-09-02" } } }); });
+  // Applying changes intentionally remounts existing keyed filters; local edits keep focus.
+  expect(screen.getByRole("button", { name: "Apply filters" })).toBeEnabled();
+  const header = view.container.querySelector("header .animate-fade-in");
+  expect(header?.querySelector("button,input,select,textarea,a[href],[tabindex]")).toBeNull();
+  await user.click(screen.getByRole("tab", { name: "Schema" }));
+  const schemaTable = await screen.findByRole("table", { name: "Authorized dataset schema" });
+  expect(schemaTable.classList.contains("animate-fade-in")).toBe(true);
+  expect(schemaTable.querySelector("button,input,select,textarea,a[href],[tabindex]")).toBeNull();
+});
+
+it("preserves schema scroll focus while replacing only presentational table content", async () => {
+  const { controller } = setup({ persona: "analyst" }); await ready(controller);
+  const schema = controller.getSnapshot().schema;
+  if (!schema) throw new Error("Schema required");
+  const view = render(<DatasetSchema schema={schema} />);
+  const region = screen.getByRole("region", { name: "Authorized dataset schema: scrollable table" });
+  const table = screen.getByRole("table"); region.focus();
+  view.rerender(<DatasetSchema schema={{ ...schema, datasetId: "synthetic-facility" }} />);
+  expect(screen.getByRole("region", { name: "Authorized dataset schema: scrollable table" })).toBe(region);
+  expect(region).toHaveFocus();
+  expect(screen.getByRole("table")).not.toBe(table);
+  expect(screen.getByRole("table").querySelector("button,input,select,textarea,a[href],[tabindex]")).toBeNull();
 });

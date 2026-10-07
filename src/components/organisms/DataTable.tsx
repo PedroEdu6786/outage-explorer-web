@@ -22,6 +22,9 @@ export interface DataTableProps {
    * inside Tabs panels whose display toggles would otherwise replay the stagger.
    */
   entrance?: "stagger" | "none";
+  /** Replace/fade presentational table content while preserving its focusable scroll region. */
+  contentKey?: string;
+  contentClassName?: string;
   className?: string;
 }
 
@@ -81,6 +84,8 @@ export function DataTable({
   emptyActions,
   loading = false,
   entrance = "stagger",
+  contentKey,
+  contentClassName = "",
   className = "",
 }: DataTableProps) {
   return (
@@ -91,7 +96,7 @@ export function DataTable({
       className={`motion-colors ${loading ? "opacity-60" : ""} ${className}`.trim()}
     >
       <div role="region" aria-label={`${caption}: scrollable table`} tabIndex={0} className="max-w-full overflow-x-auto">
-        <table className="w-full border-separate border-spacing-0 text-[11px]">
+        <table key={contentKey} className={`w-full border-separate border-spacing-0 text-[11px] ${contentClassName}`.trim()}>
           <caption className="sr-only">{caption}</caption>
           <thead>
             <tr>

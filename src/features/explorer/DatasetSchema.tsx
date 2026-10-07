@@ -16,5 +16,5 @@ export function DatasetSchema({ schema }: { readonly schema: Schema }) {
       column.nullable === null ? { kind: "text", value: "Unknown" } : { kind: "boolean", value: column.nullable },
     ] })),
   };
-  return <DataTable data={table} caption="Authorized dataset schema" entrance="none" emptyTitle="No schema columns available" />;
+  return <DataTable contentKey={schema.datasetId} contentClassName="animate-fade-in" data={table} caption="Authorized dataset schema" entrance="none" emptyTitle="No schema columns available" />;
 }

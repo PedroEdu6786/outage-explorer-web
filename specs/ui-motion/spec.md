@@ -1,14 +1,14 @@
 # Spec: Animations and micro-interactions
-> Status: in progress, phases 1–3 verified · Slug: ui-motion · Date: October 6, 2026
+> Status: implemented-with-evidence; human motion visual sign-off pending · Slug: ui-motion · Date: October 6, 2026
 
 ## Decision record
 
 The user asked for subtle animations and micro-interactions across all views and
 components of the web client, proposed first. After review, the user accepted
 the whole proposal except the items listed under [Excluded](#excluded) and asked
-to leave it documented for now. **This document authorizes no implementation.**
-Implementation starts only when the user requests it; revalidate the codebase
-and this scope first.
+to leave it documented for now. The user subsequently authorized each implementation phase; all four phases
+now have recorded evidence. The original proposal by itself authorized no
+implementation.
 
 Motion is not part of the inspected Figma prototype. It is an extension, recorded
 like the existing "D5 extension" spinner note. Static visuals, geometry, tokens
@@ -151,19 +151,19 @@ not assumptions:
 
 ## Acceptance criteria
 
-- [ ] **AC1:** Tokens and the reduced-motion rule exist; every catalog item uses
+- [x] **AC1:** Tokens and the reduced-motion rule exist; every catalog item uses
   them rather than ad-hoc durations. (FR1)
-- [ ] **AC2:** With reduced motion emulated, no catalog item moves or scales and
+- [x] **AC2:** With reduced motion emulated, no catalog item moves or scales and
   the chart is shown without a wipe; state changes remain perceivable. (FR5)
-- [ ] **AC3:** Metric values, chart points and table cells are identical with
+- [x] **AC3:** Metric values, chart points and table cells are identical with
   and without motion; missing observations still render as gaps. (FR6)
-- [ ] **AC4:** Focus order, focus return after the drawer closes, `aria-live`
+- [x] **AC4:** Focus order, focus return after the drawer closes, `aria-live`
   announcements and keyboard operation are unchanged; existing tests pass. (FR3)
-- [ ] **AC5:** Logout, expiry and access change still clear protected content
+- [x] **AC5:** Logout, expiry and access change still clear protected content
   immediately, without a lingering dim or fade of stale data. (behavior-neutral)
-- [ ] **AC6:** No new runtime dependency; `typecheck`, `lint`, `npm test`,
+- [x] **AC6:** No new runtime dependency; `typecheck`, `lint`, `npm test`,
   boundary checks and `build` pass; fixture-isolation scan unchanged.
-- [ ] **AC7:** Existing desktop/mobile capture evidence is regenerated with
+- [x] **AC7:** Existing desktop/mobile capture evidence is regenerated with
   animations disabled and compared; any intentional differences are recorded.
 
 ## Suggested sequencing (for the later plan)
@@ -176,9 +176,10 @@ not assumptions:
 Each step is a separate commit with the checks in AC6 and a reduced-motion
 browser check. The design plan is [plan.md](plan.md) and the task breakdown is
 [tasks.md](tasks.md) (hybrid layout, per-phase files under `tasks/`), both
-drafted October 6, 2026 and not yet implemented.
+drafted October 6, 2026 and implemented in four phases. Final acceptance mapping
+and actual gates are in [verification/phase-4.md](verification/phase-4.md).
 
 ## Open items
 
-- Implementation authorization (the confirmations above do not grant it) and priority relative to live-acceptance work.
-- Visual sign-off for motion is separate from Figma fidelity evidence.
+- Named-target live acceptance remains separate from this authorized motion work.
+- Human [motion visual sign-off](verification/visual-signoff.md) remains pending, separate from Figma fidelity evidence.

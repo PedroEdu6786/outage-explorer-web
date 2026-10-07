@@ -44,3 +44,21 @@ test("busy and lost results offer explicit recovery without rerun", async ({ pag
   await expect(editor).toHaveValue("SELECT 1");
   expect((await calls(page)).filter((call) => call.operation === "executeQuery")).toHaveLength(2);
 });
+
+
+test("motion-on SQL paging and expanded schema clear at once when session is withheld", async ({ page }) => {
+  await openPage(page, "query--ready", "motion:on");
+  await page.getByRole("textbox", { name: "SQL statement" }).fill("SELECT * FROM synthetic_national");
+  await page.getByRole("button", { name: "Run query", exact: true }).click();
+  await expect(page.getByText("Query succeeded", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "synthetic_national", exact: true }).click();
+  await expect(page.getByText("Schema labels are a reference; no SQL is inserted or run.")).toBeVisible();
+  const cleared = await page.evaluate(() => {
+    const click = (label: string) => { const button = Array.from(document.querySelectorAll("button")).find((element) => element.textContent.trim() === label); if (!button) throw new Error(label); button.click(); };
+    click("Next"); click("Withhold unresolved session");
+    return new Promise<boolean>((resolve) => { requestAnimationFrame(() => { resolve(document.querySelector("#storybook-root table") === null && document.querySelector(".animate-expand") === null && document.querySelector("[inert]") === null); }); });
+  });
+  expect(cleared).toBe(true);
+  await expect(page.locator("#storybook-root").getByRole("table", { includeHidden: true })).toHaveCount(0);
+  await expect(page.getByText("Schema labels are a reference; no SQL is inserted or run.")).toHaveCount(0);
+});

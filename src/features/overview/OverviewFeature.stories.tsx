@@ -1,3 +1,4 @@
+import { fireEvent, within } from "storybook/test";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FixtureProvider, useFixtureController } from "../../../tests/fixtures/FixtureProvider";
 import type { FixtureDataState } from "../../../tests/fixtures/scenarios";
@@ -40,3 +41,6 @@ export const Unavailable: OverviewStory = { args: { state: "unavailable" } };
 export const Denied: OverviewStory = { args: { denied: true } };
 /** Hold the next response, then change the end date: the previous range stays dimmed (inert, hidden from assistive technology) until you release it. */
 export const RangeChangeRefetch: OverviewStory = { args: { rangeReview: true } };
+
+export const Compare: OverviewStory = { play: async ({ canvasElement }) => { const canvas = within(canvasElement); await fireEvent.click(await canvas.findByRole("checkbox", { name: "Compare EIA reported %" })); } };
+export const InspectedObservation: OverviewStory = { play: async ({ canvasElement }) => { const canvas = within(canvasElement); const select = await canvas.findByRole("combobox", { name: "Inspect observation" }); await fireEvent.change(select, { target: { value: "2026-09-01" } }); } };

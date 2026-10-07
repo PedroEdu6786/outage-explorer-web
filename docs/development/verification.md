@@ -257,7 +257,7 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   visually. Capture specs are not byte-deterministic for some Overview/Explorer
   files even on an unmodified tree; the baseline lists them. Keep regenerated
   PNGs only when the differences are intentional and recorded; otherwise restore
-  them with `git checkout`.
+  them with `git restore` after review.
 
 ### Skeleton and loading conventions
 
@@ -273,7 +273,7 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   the caller retained: `aria-busy`, `inert` and `aria-hidden`, cells untouched. The
   caller owns what is retained; Explorer and SQL paging reuse controller state that
   logout, expiry and access change already clear, so no stale rows survive. Overview
-  shows first-load skeleton cards only (no retained series yet).
+  shows first-load skeleton cards and guarded retained series on range changes (see below).
 - **Geometry.** Skeletons use the real padding and line-height strut so the swap does
   not shift layout (`tests/motion/status-loading.spec.ts` compares card and row
   heights). Skeleton-bearing pending states are expected, recorded capture differences.
@@ -323,3 +323,38 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   component regressions additionally cover both bounds, compare, inspection, open
   bounds and empty windows against broader supplied data. These remain synthetic
   behavior checks, with no live API or visual-comparison acceptance implied.
+
+### Feature micro-interactions and final motion evidence (phase 4)
+
+- `tests/motion/features.spec.ts` checks compare-series opacity, inspected cards,
+  keyed coverage dates, catalog accent, dataset-switch fades, filter feedback,
+  SQL busy progress, Copy icon swap, results entrance and schema expansion with
+  motion on under both preferences. Its clock-bound DOM comparison checks
+  Overview/Explorer/Queries text, cells and chart points with motion on/off.
+- The SQL bar is decorative, indeterminate and state-bound to `busy` (execution
+  or retained-page loading); it unmounts immediately when idle and stays static
+  under reduce. Copy uses one restartable 1.5-second feedback timer, cleaned up
+  on unmount, and keeps its button name and separate copy-status live region.
+- Dataset switches key only presentational header/table content. Schema table
+  replacement preserves its focusable scroll region through `DataTable.contentKey`;
+  pagination and SQL actions are outside the new keyed content. Filters retain
+  their existing state/handlers and existing selection-driven reset behavior.
+- Schema expand animates; collapse/removal is immediate to avoid retaining
+  protected metadata for an exit. The production controller reloads a clicked
+  selected dataset; this phase adds no toggle semantics. A controlled component
+  story (`Features/Queries/SchemaCollapse`) verifies expanded-to-collapsed props.
+- Coverage pulse is verified in shell stories; production composition still does
+  not supply coverage. E1 shimmer remains unused at all call sites.
+- Run all [phase gate commands](../../specs/ui-motion/tasks.md#phase-gate-commands),
+  including the configured real-route controlled config, with builds and capture
+  runs serialized. The complete committed phase-2/3/4/6 PNG set is regenerated
+  with `motion:off` plus `animations: "disabled"`, compared by SHA-256 to T1.1,
+  and differing images visually inspected. Record intentional catalog differences,
+  earlier committed product changes, fixture corrections and capture noise
+  separately. Do not replace intended SQL/Explorer captures with forbidden screens.
+- Final machine evidence is [phase-4.md](../../specs/ui-motion/verification/phase-4.md).
+  **Human motion visual sign-off** is a separate evidence class in
+  [visual-signoff.md](../../specs/ui-motion/verification/visual-signoff.md), pending
+  until a named reviewer records the date and motion-on states reviewed. Machine
+  captures, reduced-motion assertions and an agent's image review do not close it.
+  Neither evidence class establishes live integration or Figma fidelity.

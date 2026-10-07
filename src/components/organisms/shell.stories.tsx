@@ -72,3 +72,9 @@ export const DrawerOpen: Story = { render: () => <ShellPreview initiallyOpen /> 
 
 /** Desktop sidebar: the coverage status dot pulses once on mount; the header icon swaps with `navigationOpen`. */
 export const CoverageDot: Story = { render: () => <ShellPreview /> };
+
+function CoverageChangePreview() {
+  const [date, setDate] = useState("September 30, 2026");
+  return <><AppNavigation data={{ ...ready, coverage: { availableThrough: date } }} open={false} onOpenChange={() => undefined} onSignOut={() => undefined} /><main className="p-6 min-[1001px]:ml-(--sidebar-width)"><button type="button" onClick={() => { setDate((value) => value === "September 30, 2026" ? "October 1, 2026" : "September 30, 2026"); }}>Change coverage date</button></main></>;
+}
+export const CoverageDateChange: Story = { render: () => <CoverageChangePreview /> };

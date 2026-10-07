@@ -39,7 +39,7 @@ export function NationalTrend({ series, range = series.range }: { readonly serie
           const value = min + (max - min) * index / 3;
           return <g key={index}><line x1="60" x2="870" y1={y(value)} y2={y(value)} stroke="#dce3e7" /><text x="48" y={y(value) + 4} textAnchor="end" fontSize="11" fill="#5f707a">{value.toFixed(1)}%</text></g>;
         })}
-        {([calculated, ...(compare ? [reported] : [])]).map((segments, seriesIndex) => <g key={seriesIndex} fill="none" stroke={seriesIndex === 0 ? "#087d82" : "#246b9e"} strokeWidth="2" data-series={seriesIndex === 0 ? "calculated" : "reported"}>
+        {([calculated, ...(compare ? [reported] : [])]).map((segments, seriesIndex) => <g key={seriesIndex} className={seriesIndex === 1 ? "animate-fade-in" : undefined} fill="none" stroke={seriesIndex === 0 ? "#087d82" : "#246b9e"} strokeWidth="2" data-series={seriesIndex === 0 ? "calculated" : "reported"}>
           {segments.map((segment, index) => <g key={index}><polyline data-segment="observed" points={segment.map((point) => `${String(x(point.date))},${String(y(point.value))}`).join(" ")} />{segment.map((point) => <circle key={point.date} cx={x(point.date)} cy={y(point.value)} r="4" fill="white" onMouseEnter={() => { setSelected(point.date); }}><title>{point.date}: {seriesIndex === 0 ? "Calculated" : "EIA reported"} {point.label}</title></circle>)}</g>)}
         </g>)}
         <text x="60" y="285" fontSize="11" fill="#5f707a">{startDate}</text><text x="870" y="285" textAnchor="end" fontSize="11" fill="#5f707a">{endDate}</text>
@@ -49,7 +49,7 @@ export function NationalTrend({ series, range = series.range }: { readonly serie
       <label className="mt-3 flex flex-wrap items-center gap-2 text-[12px]">Inspect observation
         <select className="rounded border border-border bg-surface p-2" value={selected ?? ""} onChange={(event) => { setSelected(event.currentTarget.value); }}><option value="">Select date</option>{rows.map((row) => <option key={row.date} value={row.date}>{row.date}</option>)}</select>
       </label>
-      {active && <div role="status" className="mt-2 rounded bg-sidebar p-3 text-[12px] text-white"><strong>{active.date}</strong><p>Calculated offline: {percentageLabel(active.status === "available" ? active.calculatedPercentage : null)}</p>{compare && <p>EIA reported: {percentageLabel(active.status === "available" ? active.reportedPercentage : null)}</p>}<p>Offline capacity: {active.status === "available" && active.outageMw ? `${active.outageMw.display} MW` : "Unavailable"}</p><p>Fleet capacity: {active.status === "available" && active.capacityMw ? `${active.capacityMw.display} MW` : "Unavailable"}</p></div>}
+      {active && <div role="status" className="animate-fade-rise mt-2 rounded bg-sidebar p-3 text-[12px] text-white"><strong>{active.date}</strong><p>Calculated offline: {percentageLabel(active.status === "available" ? active.calculatedPercentage : null)}</p>{compare && <p>EIA reported: {percentageLabel(active.status === "available" ? active.reportedPercentage : null)}</p>}<p>Offline capacity: {active.status === "available" && active.outageMw ? `${active.outageMw.display} MW` : "Unavailable"}</p><p>Fleet capacity: {active.status === "available" && active.capacityMw ? `${active.capacityMw.display} MW` : "Unavailable"}</p></div>}
       </>}
     </div>
   </Surface>;

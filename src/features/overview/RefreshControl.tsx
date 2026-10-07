@@ -1,4 +1,5 @@
 "use client";
+import { Icon } from "../../components/atoms/Icon";
 import { Button } from "../../components/atoms/Button";
 import { StatusMessage } from "../../components/molecules/StatusMessage";
 import type { RefreshOperations, RefreshStatus } from "../../contracts/refresh";
@@ -22,7 +23,7 @@ export function RefreshControl({ operations, onPublished }: { readonly operation
       <Button variant="secondary" disabled={model.pending || model.denied || !!(model.run && refreshActive(model.run.status))} onClick={() => { void model.start(); }}>{model.retryAdmission ? "Retry refresh admission" : "Refresh data"}</Button>
       <Button variant="ghost" loading={model.pending} loadingLabel="Contacting refresh…" disabled={model.denied} onClick={() => { void model.check(); }}>Check refresh status</Button>
     </div>
-    {model.run && <StatusMessage title={descriptions[model.run.status]} description={`Refresh interval: ${model.run.interval.start} – ${model.run.interval.end}${model.run.stage ? ` · Stage: ${model.run.stage}` : ""}`} tone={model.run.status === "failed" || model.run.status === "interrupted" ? "warning" : "neutral"} />}
+    {model.run && <StatusMessage title={descriptions[model.run.status]} description={`Refresh interval: ${model.run.interval.start} – ${model.run.interval.end}${model.run.stage ? ` · Stage: ${model.run.stage}` : ""}`} pending={refreshActive(model.run.status)} icon={<Icon name={model.run.status === "succeeded" ? "check" : "warning"} size={16} />} tone={model.run.status === "succeeded" ? "success" : model.run.status === "failed" || model.run.status === "interrupted" ? "warning" : "neutral"} />}
     {model.message && <StatusMessage title={model.message} tone="warning" />}
   </section>;
 }

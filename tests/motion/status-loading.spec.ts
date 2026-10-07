@@ -19,8 +19,10 @@ async function liveRegionCount(page: Page) {
  * Animations under `root` other than the one-shot row entrance (`fade-rise` on mount, phase 3):
  * dimming and loading themselves never animate.
  */
+// Named opacity-only table fades and bounded row entrances may still be settling
+// when paging starts; count every other animation so data movement cannot slip through.
 async function animationsUnder(root: Locator) {
-  return root.evaluate((element) => element.getAnimations({ subtree: true }).filter((animation) => (animation as CSSAnimation).animationName !== "fade-rise").length);
+  return root.evaluate((element) => element.getAnimations({ subtree: true }).filter((animation) => !["fade-rise", "fade-in"].includes((animation as CSSAnimation).animationName)).length);
 }
 
 for (const preference of preferences) {

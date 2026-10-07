@@ -34,3 +34,5 @@ export const Loading: Story = { render: () => wrap({}, "loading") };
 /** Next page held open: the retained page is dimmed, inert and hidden from assistive technology. */
 export const Paging: Story = { render: () => wrap({}, "paging"), play: async ({ canvasElement }) => { const canvas = within(canvasElement); await waitFor(() => { if (canvas.queryByRole("button", { name: "Next" })?.hasAttribute("disabled") ?? true) throw new Error("Waiting for the first preview page"); }); await fireEvent.click(canvas.getByRole("button", { name: "Next" })); await canvas.findByText("Loading preview"); } };
 export const Expired: Story = { render: () => wrap({}, "expired") };
+
+export const DatasetSwitch: Story = { render: () => wrap({ persona: "analyst" }), play: async ({ canvasElement }) => { const canvas = within(canvasElement); await canvas.findByRole("table", { name: "Synthetic national observations preview" }); await fireEvent.click(canvas.getByRole("button", { name: /Synthetic facility observations/ })); await canvas.findByRole("table", { name: "Synthetic facility observations preview" }); } };

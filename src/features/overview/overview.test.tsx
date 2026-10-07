@@ -132,12 +132,17 @@ describe("Overview exact observation behavior", () => {
     expect(before).toHaveLength(plotSegments(syntheticObservations, "calculatedPercentage").length);
     expect(before.length).toBeGreaterThan(1);
     await user.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    expect(container.querySelector("g[data-series=reported]")).toHaveClass("animate-fade-in");
     // Same svg element (no remount, so no replayed wipe); the calculated segments are byte-identical and the reported ones are added.
     expect(container.querySelector("svg[data-chart=national-trend]")).toBe(chart);
     expect(Array.from(container.querySelectorAll("g[data-series=calculated] polyline")).map((line) => line.getAttribute("points"))).toEqual(before);
     expect(container.querySelectorAll("g[data-series=reported] polyline[data-segment=observed]")).toHaveLength(plotSegments(syntheticObservations, "reportedPercentage").length);
     await user.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
     expect(container.querySelector("svg[data-chart=national-trend]")).toBe(chart);
+    expect(observed()).toEqual(before);
+    fireEvent.change(screen.getByRole("combobox", { name: "Inspect observation" }), { target: { value: "2026-09-01" } });
+    expect(screen.getByRole("status")).toHaveClass("animate-fade-rise");
+    expect(screen.getByRole("status")).toHaveTextContent("2026-09-01Calculated offline:");
     expect(observed()).toEqual(before);
   });
   it("remounts the chart (a new wipe) when the range changes, with the same points per range", async () => {

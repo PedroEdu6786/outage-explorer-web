@@ -256,3 +256,17 @@
   from { box-shadow: 0 0 0 transparent; }
   to { box-shadow: var(--shadow-panel); }
 }
+
+/* Layout-changing dataset accent and schema-chevron rotation jump under reduce. */
+@utility motion-dataset-row {
+  transition-property: background-color, border-color, border-left-width;
+  transition-duration: var(--duration-move);
+  transition-timing-function: var(--ease-out);
+}
+
+@utility motion-chevron {
+  display: inline-flex;
+  transition-property: rotate;
+  transition-duration: var(--duration-move);
+  transition-timing-function: var(--ease-out);
+}

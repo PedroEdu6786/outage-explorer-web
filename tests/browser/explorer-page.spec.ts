@@ -33,3 +33,20 @@ test("Viewer direct Explorer entry returns to Overview without preview or SQL ac
   await expect(page.getByRole("button", { name: "Explore dataset", exact: true })).toHaveCount(0);
   expect((await calls(page)).filter((call) => ["startPreview", "readSchema", "executeQuery"].includes(call.operation))).toHaveLength(0);
 });
+
+
+test("motion-on pending Explorer paging clears rows and schema synchronously when session is withheld", async ({ page }) => {
+  await openPage(page, "explorer--ready", "motion:on");
+  await expect(page.getByRole("table", { name: "Synthetic national observations preview" })).toBeVisible();
+  await page.getByRole("tab", { name: "Schema", exact: true }).click();
+  await expect(page.getByRole("table", { name: "Authorized dataset schema" })).toBeVisible();
+  await page.getByRole("tab", { name: "Preview", exact: true }).click();
+  const cleared = await page.evaluate(() => {
+    const click = (label: string) => { const button = Array.from(document.querySelectorAll("button")).find((element) => element.textContent.trim() === label); if (!button) throw new Error(label); button.click(); };
+    click("Next"); click("Withhold unresolved session");
+    return new Promise<boolean>((resolve) => { requestAnimationFrame(() => { resolve(document.querySelector("#storybook-root table") === null && document.querySelector("[inert]") === null); }); });
+  });
+  expect(cleared).toBe(true);
+  await expect(page.locator("#storybook-root").getByRole("table", { includeHidden: true })).toHaveCount(0);
+  await expect(page.getByText("Synthetic facility observations", { exact: true })).toHaveCount(0);
+});

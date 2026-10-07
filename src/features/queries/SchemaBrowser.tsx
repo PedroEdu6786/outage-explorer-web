@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Surface } from "../../components/atoms/Surface";
+import { Icon } from "../../components/atoms/Icon";
 import { Button } from "../../components/atoms/Button";
 import { SearchField } from "../../components/molecules/SearchField";
 import { StatusMessage } from "../../components/molecules/StatusMessage";
@@ -14,12 +15,12 @@ export function SchemaBrowser({ state, onSelect, onReload }: { readonly state: Q
     {state.catalogPending && <StatusMessage title="Loading authorized datasets" pending />}
     {state.metadataFailure && <StatusMessage title="Schema unavailable" description={state.metadataFailure.message} tone="error" actions={<Button variant="secondary" onClick={onReload}>Reload catalog</Button>} />}
     {!state.catalogPending && matches.length === 0 && <p className="p-3 text-[12px]">No authorized datasets match.</p>}
-    {matches.map((dataset) => <div key={dataset.id}><button type="button" aria-expanded={state.selectedDataset === dataset.id} onClick={() => { onSelect(dataset.id); }} className="flex min-h-[36px] w-full items-center gap-2 border-b border-border px-3 text-left font-mono text-[11px] hover:bg-surface-muted"><span aria-hidden="true">{state.selectedDataset === dataset.id ? "⌄" : "›"}</span>{dataset.sqlName}</button>
-      {state.selectedDataset === dataset.id && <div className="bg-surface-muted p-3">
+    {matches.map((dataset) => <div key={dataset.id}><button type="button" aria-expanded={state.selectedDataset === dataset.id} onClick={() => { onSelect(dataset.id); }} className="flex min-h-[36px] w-full items-center gap-2 border-b border-border px-3 text-left font-mono text-[11px] hover:bg-surface-muted"><span aria-hidden="true" className={`motion-chevron ${state.selectedDataset === dataset.id ? "rotate-90" : "rotate-0"}`}><Icon name="chevron" size={12} /></span>{dataset.sqlName}</button>
+      {state.selectedDataset === dataset.id && <div className="grid animate-expand grid-rows-[1fr]"><div className="min-h-0 overflow-hidden"><div className="bg-surface-muted p-3">
         {state.schemaPending && <StatusMessage title="Loading schema" pending />}
         {state.schema?.columns.map((column) => <div key={column.id} className="flex flex-wrap justify-between gap-2 py-2 text-[11px]"><span>{column.label}</span><span className="font-mono text-text-muted">{column.sqlType}{column.nullable === null ? " · nullability unknown" : column.nullable ? " · nullable" : ""}</span></div>)}
         <p className="mt-2 text-[11px] text-text-muted">Schema labels are a reference; no SQL is inserted or run.</p>
-      </div>}
+      </div></div></div>}
     </div>)}
   </Surface>;
 }

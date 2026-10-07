@@ -245,14 +245,15 @@ persona/lifecycle scenarios are verified.
 
 ## UI motion improvements — October 6, 2026
 
-Subtle animations and micro-interactions across views and components are
-accepted in scope and **in progress (phases 1–3 of 4 verified: tokens, reduced-motion
-rule, motion-off test harness, control feedback, Tabs and desktop navigation
-indicators, status/empty/loading transitions, skeleton placeholders,
-retained-page dimming, drawer and header motion, template/table entrances, the
-chart wipe and the guarded Overview range-change dim)**; the catalog, exclusions (no count-up
-metrics, no chart interpolation, no hover-lift), assumptions and acceptance
-criteria are in the [motion spec](specs/ui-motion/spec.md), with a design
-[plan](specs/ui-motion/plan.md) and a phased [task list](specs/ui-motion/tasks.md)
-(136 tasks, 4 phases). Phase 4 awaits an explicit request; phase records are in
-`specs/ui-motion/verification/`.
+Subtle animations and micro-interactions are **implemented with evidence across
+all four phases**: shared tokens/reduced-motion policy, control feedback,
+status/loading and skeletons, drawer/template/chart entrances, guarded Overview
+refetch dimming, compare/inspection and coverage pulses, Explorer switching and
+filters, and SQL busy progress, Copy feedback, results and schema expansion.
+Exact values, gaps, authorization and explicit execution/pagination remain
+unchanged. E1 shimmer stays off; schema removal is immediate. The catalog and
+exclusions are in the [motion spec](specs/ui-motion/spec.md), with its
+[plan](specs/ui-motion/plan.md), [tasks](specs/ui-motion/tasks.md) and
+[final verification](specs/ui-motion/verification/phase-4.md). Human
+[motion visual sign-off](specs/ui-motion/verification/visual-signoff.md) remains
+pending and separate from Figma fidelity and live integration.

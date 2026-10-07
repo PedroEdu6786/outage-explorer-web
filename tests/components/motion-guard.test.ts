@@ -58,6 +58,11 @@ describe("motion token and reduced-motion guard (AC1, AC2, AC6)", () => {
     expect(offenders(outsideStyles, /@keyframes/)).toEqual([]);
   });
 
+  it("keeps E1 shimmer disabled at every call site", () => {
+    const callSites = outsideStyles.filter((path) => !path.endsWith("/Skeleton.tsx") && !path.endsWith("/TableSkeleton.tsx"));
+    expect(offenders(callSites, /\bshimmer(?:\s|=|\})|animate-shimmer|motion-shimmer/)).toEqual([]);
+  });
+
   it("has no per-component motion-reduce variants", () => {
     expect(offenders(all, /motion-reduce:/)).toEqual([]);
   });

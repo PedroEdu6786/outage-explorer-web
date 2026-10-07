@@ -4,7 +4,7 @@ import { openPage } from "../browser/support/page-boundary";
 const specimens = [
   ["sign-in", "sign-in--signed-out", "Sign in to your workspace"],
   ["overview", "overview--ready", "U.S. Nuclear Outage Overview"],
-  ["explorer", "explorer--viewer", "Dataset Explorer"],
+  ["explorer", "explorer--ready", "Dataset Explorer"],
   ["query", "query--ready", "SQL Workspace"],
 ] as const;
 test("four final page compositions preserve reference widths and inclusive breakpoint controls", async ({ page }) => {

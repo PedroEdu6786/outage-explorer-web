@@ -4,6 +4,9 @@ import { createFixtureOperations } from "../../../tests/fixtures/operations";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { createQueriesController } from "./service";
 import { QueriesFeature } from "./QueriesFeature";
+import { SqlEditorPanel } from "./SqlEditorPanel";
+import { SchemaBrowser } from "./SchemaBrowser";
+import { QueryStatus } from "./QueryStatus";
 import { QueryResults } from "./QueryResults";
 import { initialQueryState } from "./query-state";
 import { createDataAdapter } from "../../adapters/live/data-adapter";
@@ -376,5 +379,66 @@ describe("Queries explicit execution lifecycle", () => {
       await waitFor(() => { expect(dimmed()).toBeNull(); });
       expect(document.querySelector("table")).toBeNull();
     });
+  });
+});
+
+
+describe("Query motion keeps interactions immediate", () => {
+  it("swaps Copy for 1.5 seconds, restarts its single timer and cleans up on unmount", async () => {
+    vi.useFakeTimers();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } });
+    const props = { draft: "SELECT 1", onChange: vi.fn(), onRun: vi.fn(), busy: false, disabled: false };
+    const view = render(<SqlEditorPanel {...props} />);
+    const button = screen.getByRole("button", { name: "Copy" });
+    const copyIcon = button.querySelector("svg")?.innerHTML;
+    await act(async () => { fireEvent.click(button); await Promise.resolve(); });
+    expect(screen.getByRole("status")).toHaveTextContent("SQL copied");
+    expect(button.querySelector("svg")?.innerHTML).not.toBe(copyIcon);
+    const check = button.querySelector("svg")?.innerHTML;
+    act(() => { vi.advanceTimersByTime(1000); });
+    await act(async () => { fireEvent.click(button); await Promise.resolve(); });
+    act(() => { vi.advanceTimersByTime(1499); });
+    expect(button.querySelector("svg")?.innerHTML).toBe(check);
+    act(() => { vi.advanceTimersByTime(1); });
+    expect(button.querySelector("svg")?.innerHTML).toBe(copyIcon);
+    await act(async () => { fireEvent.click(button); await Promise.resolve(); });
+    view.unmount(); expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("retains the clipboard failure message and removes the busy bar immediately", async () => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: vi.fn().mockRejectedValue(new Error("Unavailable")) } });
+    const props = { draft: "SELECT 1", onChange: vi.fn(), onRun: vi.fn(), busy: true, disabled: false };
+    const view = render(<SqlEditorPanel {...props} />);
+    expect(view.container.querySelector(".animate-progress")?.parentElement).toHaveAttribute("aria-hidden", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Copy" }));
+    await screen.findByText("Copy unavailable. Select the SQL text to copy.");
+    view.rerender(<SqlEditorPanel {...props} busy={false} />);
+    expect(view.container.querySelector(".animate-progress")).toBeNull();
+  });
+
+  it("rotates a decorative chevron and removes collapsed schema in the same render", async () => {
+    const { controller } = setup(); await controller.loadCatalog(); await controller.selectDataset("synthetic-national");
+    const props = { onSelect: vi.fn(), onReload: vi.fn() };
+    const view = render(<SchemaBrowser {...props} state={controller.getSnapshot()} />);
+    const button = screen.getByRole("button", { name: "synthetic_national" });
+    expect(button).toHaveAttribute("aria-expanded", "true");
+    expect(button.querySelector(".motion-chevron")).toHaveClass("rotate-90");
+    expect(button.querySelector(".motion-chevron")).toHaveAttribute("aria-hidden", "true");
+    expect(view.container.querySelector(".animate-expand")).not.toBeNull();
+    view.rerender(<SchemaBrowser {...props} state={{ ...controller.getSnapshot(), selectedDataset: null, schema: null }} />);
+    expect(button).toHaveAttribute("aria-expanded", "false");
+    expect(view.container.querySelector(".animate-expand")).toBeNull();
+    expect(screen.queryByText("Schema labels are a reference; no SQL is inserted or run.")).toBeNull();
+  });
+
+  it("keeps QueryStatus live-region identity from running to success", async () => {
+    const { controller } = setup(); controller.editDraft(sql);
+    const view = render(<QueryStatus state={{ ...controller.getSnapshot(), activity: "running" }} />);
+    const region = screen.getByRole("status");
+    expect(region).toHaveTextContent("Executing query");
+    await controller.run(); view.rerender(<QueryStatus state={controller.getSnapshot()} />);
+    expect(screen.getByRole("status")).toBe(region);
+    expect(region).toHaveTextContent("Query succeeded");
   });
 });

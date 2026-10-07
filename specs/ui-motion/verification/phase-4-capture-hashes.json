@@ -1,0 +1,600 @@
+{
+  "scope": "75 phase-2/3/4/6 regenerated PNGs plus 10 unchanged Figma prototype reference PNGs; compare against T1.1 copies",
+  "files": [
+    {
+      "file": "datasets-mobile.png",
+      "baseline": "2af6e18e81eeecc1fe4ae0fa3cf67480f1a567a95dea9f003e92e4838b2d5c28",
+      "regenerated": "2af6e18e81eeecc1fe4ae0fa3cf67480f1a567a95dea9f003e92e4838b2d5c28",
+      "head": "2af6e18e81eeecc1fe4ae0fa3cf67480f1a567a95dea9f003e92e4838b2d5c28",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "datasets-preview-desktop.png",
+      "baseline": "d069657ec9ead285ba1b615962a93f8eb943b9a4fc103ee9d8c1b63c39e75db8",
+      "regenerated": "d069657ec9ead285ba1b615962a93f8eb943b9a4fc103ee9d8c1b63c39e75db8",
+      "head": "d069657ec9ead285ba1b615962a93f8eb943b9a4fc103ee9d8c1b63c39e75db8",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "datasets-schema-desktop.png",
+      "baseline": "8f72d78b5ab3536387423ba05843f4222992cd4b4ada112b9dfff28b537fc8eb",
+      "regenerated": "8f72d78b5ab3536387423ba05843f4222992cd4b4ada112b9dfff28b537fc8eb",
+      "head": "8f72d78b5ab3536387423ba05843f4222992cd4b4ada112b9dfff28b537fc8eb",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "navigation-mobile.png",
+      "baseline": "4159e55b00a12822a9dd067207d9e3f61a2e9eeeffe924a0ab7ced843b7320b9",
+      "regenerated": "4159e55b00a12822a9dd067207d9e3f61a2e9eeeffe924a0ab7ced843b7320b9",
+      "head": "4159e55b00a12822a9dd067207d9e3f61a2e9eeeffe924a0ab7ced843b7320b9",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "overview-desktop.png",
+      "baseline": "842bc6a943239c80df7ff556f66107958741bd258d80a7699d332bbae51eca2d",
+      "regenerated": "842bc6a943239c80df7ff556f66107958741bd258d80a7699d332bbae51eca2d",
+      "head": "842bc6a943239c80df7ff556f66107958741bd258d80a7699d332bbae51eca2d",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "overview-mobile.png",
+      "baseline": "f732b9052c9925fbf28c71073fdad9389f308364544c0871cc18977420942ef0",
+      "regenerated": "f732b9052c9925fbf28c71073fdad9389f308364544c0871cc18977420942ef0",
+      "head": "f732b9052c9925fbf28c71073fdad9389f308364544c0871cc18977420942ef0",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/actions-1440.png",
+      "baseline": "7a537c7475ff792f2b041c030b36cde263a0c24a2bf02750d028af50e648fae9",
+      "regenerated": "7a537c7475ff792f2b041c030b36cde263a0c24a2bf02750d028af50e648fae9",
+      "head": "7a537c7475ff792f2b041c030b36cde263a0c24a2bf02750d028af50e648fae9",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/actions-390.png",
+      "baseline": "beb45b0524384d9103245ce3db09484a3c1e3a03dbcbcc9725cac3fad9c42143",
+      "regenerated": "beb45b0524384d9103245ce3db09484a3c1e3a03dbcbcc9725cac3fad9c42143",
+      "head": "beb45b0524384d9103245ce3db09484a3c1e3a03dbcbcc9725cac3fad9c42143",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/badges-1440.png",
+      "baseline": "68f5e7cf8e5312b2d81d0ea90f500719182d2b63cc0cb3445e817cf7e50dc2d3",
+      "regenerated": "68f5e7cf8e5312b2d81d0ea90f500719182d2b63cc0cb3445e817cf7e50dc2d3",
+      "head": "68f5e7cf8e5312b2d81d0ea90f500719182d2b63cc0cb3445e817cf7e50dc2d3",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/badges-390.png",
+      "baseline": "f25e4ce1fffbfc1f6703af97c9819eef64179fdbc92da04653eb67d8826055af",
+      "regenerated": "f25e4ce1fffbfc1f6703af97c9819eef64179fdbc92da04653eb67d8826055af",
+      "head": "f25e4ce1fffbfc1f6703af97c9819eef64179fdbc92da04653eb67d8826055af",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/brand-1440.png",
+      "baseline": "d29d00fdfba5fb6df20039b34fd0cc894754a3ff72f83ee25b31f77db59d1047",
+      "regenerated": "d29d00fdfba5fb6df20039b34fd0cc894754a3ff72f83ee25b31f77db59d1047",
+      "head": "d29d00fdfba5fb6df20039b34fd0cc894754a3ff72f83ee25b31f77db59d1047",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/brand-390.png",
+      "baseline": "51272415101526292c26e0c55177d409747c741958c1dcdf50dbd8f3516bbd1c",
+      "regenerated": "51272415101526292c26e0c55177d409747c741958c1dcdf50dbd8f3516bbd1c",
+      "head": "51272415101526292c26e0c55177d409747c741958c1dcdf50dbd8f3516bbd1c",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/code-1440.png",
+      "baseline": "91981f9c71bcf226023c86457cece1e15bb11a14058b0e99d1b4408454d3d153",
+      "regenerated": "91981f9c71bcf226023c86457cece1e15bb11a14058b0e99d1b4408454d3d153",
+      "head": "91981f9c71bcf226023c86457cece1e15bb11a14058b0e99d1b4408454d3d153",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/code-390.png",
+      "baseline": "f76262a2651ea2c3df5563989e3d58d9030d09b99b239b8924c408f66988a586",
+      "regenerated": "f76262a2651ea2c3df5563989e3d58d9030d09b99b239b8924c408f66988a586",
+      "head": "f76262a2651ea2c3df5563989e3d58d9030d09b99b239b8924c408f66988a586",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/controls-1440.png",
+      "baseline": "80cf5bbbbcfc8779a741b6ae8510d2ebea84c8ab88eff8f169aff5f0f7238d13",
+      "regenerated": "80cf5bbbbcfc8779a741b6ae8510d2ebea84c8ab88eff8f169aff5f0f7238d13",
+      "head": "80cf5bbbbcfc8779a741b6ae8510d2ebea84c8ab88eff8f169aff5f0f7238d13",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/controls-390.png",
+      "baseline": "c1a0cea85532bcd86c29e7b5ed533c3c15ffee9afc4d9e31e6f9b0b54ee40f22",
+      "regenerated": "c1a0cea85532bcd86c29e7b5ed533c3c15ffee9afc4d9e31e6f9b0b54ee40f22",
+      "head": "c1a0cea85532bcd86c29e7b5ed533c3c15ffee9afc4d9e31e6f9b0b54ee40f22",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/icons-1440.png",
+      "baseline": "97377a361dc37007ec25f0e30977a3ed00b5d3da952074dcb8e0ae7c34c85636",
+      "regenerated": "97377a361dc37007ec25f0e30977a3ed00b5d3da952074dcb8e0ae7c34c85636",
+      "head": "97377a361dc37007ec25f0e30977a3ed00b5d3da952074dcb8e0ae7c34c85636",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/icons-390.png",
+      "baseline": "b5dd8937d945605ec5c6b0df9ec62382795b866823cafdb4c0ba31f7f2ce9b0f",
+      "regenerated": "b5dd8937d945605ec5c6b0df9ec62382795b866823cafdb4c0ba31f7f2ce9b0f",
+      "head": "b5dd8937d945605ec5c6b0df9ec62382795b866823cafdb4c0ba31f7f2ce9b0f",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/surface-1440.png",
+      "baseline": "04f08fb889fec30e3d77e93873f6fed7b47f16f0f4119f37c417ac955221dab9",
+      "regenerated": "04f08fb889fec30e3d77e93873f6fed7b47f16f0f4119f37c417ac955221dab9",
+      "head": "04f08fb889fec30e3d77e93873f6fed7b47f16f0f4119f37c417ac955221dab9",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-2/surface-390.png",
+      "baseline": "1e08c0f41573750e3905e647f0fdd6c1729bfe07081f63317cc195a1f96ebf1a",
+      "regenerated": "1e08c0f41573750e3905e647f0fdd6c1729bfe07081f63317cc195a1f96ebf1a",
+      "head": "1e08c0f41573750e3905e647f0fdd6c1729bfe07081f63317cc195a1f96ebf1a",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/auth-entry-1440.png",
+      "baseline": "811265b23a2aea2df0e836f8983c43c559455dbd1865105a37a79c18bc44ee71",
+      "regenerated": "811265b23a2aea2df0e836f8983c43c559455dbd1865105a37a79c18bc44ee71",
+      "head": "811265b23a2aea2df0e836f8983c43c559455dbd1865105a37a79c18bc44ee71",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/auth-entry-390.png",
+      "baseline": "270017139c38978d8f376b02953d16f751fe7d6b6ac8e82c65034f7c01f06a46",
+      "regenerated": "270017139c38978d8f376b02953d16f751fe7d6b6ac8e82c65034f7c01f06a46",
+      "head": "270017139c38978d8f376b02953d16f751fe7d6b6ac8e82c65034f7c01f06a46",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/auth-error-1440.png",
+      "baseline": "e51893914814dafc429542e9ccfa4cd65fe00261681b0b7ba0c2785e5b06d90b",
+      "regenerated": "e51893914814dafc429542e9ccfa4cd65fe00261681b0b7ba0c2785e5b06d90b",
+      "head": "e51893914814dafc429542e9ccfa4cd65fe00261681b0b7ba0c2785e5b06d90b",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/auth-error-390.png",
+      "baseline": "86347cb60fa32ba1e7b497a0c7b8ef13235e00a66cdbaed77dde03a16e849c4a",
+      "regenerated": "86347cb60fa32ba1e7b497a0c7b8ef13235e00a66cdbaed77dde03a16e849c4a",
+      "head": "86347cb60fa32ba1e7b497a0c7b8ef13235e00a66cdbaed77dde03a16e849c4a",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/compact-range-1440.png",
+      "baseline": "f0654fda399b5ba5e33a36686f47c1f1df5e06a168a9f58b0529c02aae61b68f",
+      "regenerated": "f0654fda399b5ba5e33a36686f47c1f1df5e06a168a9f58b0529c02aae61b68f",
+      "head": "f0654fda399b5ba5e33a36686f47c1f1df5e06a168a9f58b0529c02aae61b68f",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/compact-range-390.png",
+      "baseline": "8b95613bf3685b995c225c53140dcd0233f0aea1e8adfb9f606adbe8c8dc48f5",
+      "regenerated": "8b95613bf3685b995c225c53140dcd0233f0aea1e8adfb9f606adbe8c8dc48f5",
+      "head": "8b95613bf3685b995c225c53140dcd0233f0aea1e8adfb9f606adbe8c8dc48f5",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/explorer-template-1440.png",
+      "baseline": "60fceeb0c78686eb7091037c035cbe6839fa4629e4e67bae471d1acb26668021",
+      "regenerated": "c60e2fe3bd830e865fdf01899e1691db46eafe6c58880ee4fc62dfbc7765c9b8",
+      "head": "c60e2fe3bd830e865fdf01899e1691db46eafe6c58880ee4fc62dfbc7765c9b8",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/explorer-template-390.png",
+      "baseline": "af14a09b3f032a28e2a01ef79ea80a5d4bd325d1f9a1a3e2cf44121931a7f0aa",
+      "regenerated": "af14a09b3f032a28e2a01ef79ea80a5d4bd325d1f9a1a3e2cf44121931a7f0aa",
+      "head": "af14a09b3f032a28e2a01ef79ea80a5d4bd325d1f9a1a3e2cf44121931a7f0aa",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/fields-1440.png",
+      "baseline": "2184e80946b2768496cbc3dc60bcfea04466130ee3b2c5f56da7a39884908a2d",
+      "regenerated": "2184e80946b2768496cbc3dc60bcfea04466130ee3b2c5f56da7a39884908a2d",
+      "head": "2184e80946b2768496cbc3dc60bcfea04466130ee3b2c5f56da7a39884908a2d",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/fields-390.png",
+      "baseline": "5bfe555b7f14bcec01d3311bde86c3fc369fd48bf8a59c21f19b1a235256ebc2",
+      "regenerated": "5bfe555b7f14bcec01d3311bde86c3fc369fd48bf8a59c21f19b1a235256ebc2",
+      "head": "5bfe555b7f14bcec01d3311bde86c3fc369fd48bf8a59c21f19b1a235256ebc2",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/numbered-actions-1440.png",
+      "baseline": "90344d3fecd06ecde0081ef4bf13b0f05de472b72e3c26f5b46e3a0c1f4a4bb4",
+      "regenerated": "90344d3fecd06ecde0081ef4bf13b0f05de472b72e3c26f5b46e3a0c1f4a4bb4",
+      "head": "90344d3fecd06ecde0081ef4bf13b0f05de472b72e3c26f5b46e3a0c1f4a4bb4",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/numbered-actions-390.png",
+      "baseline": "ba059998fb4c9beda1788c0e81af181744852f0c79eb3296c6021fc7e71bc568",
+      "regenerated": "ba059998fb4c9beda1788c0e81af181744852f0c79eb3296c6021fc7e71bc568",
+      "head": "ba059998fb4c9beda1788c0e81af181744852f0c79eb3296c6021fc7e71bc568",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/overview-template-1440.png",
+      "baseline": "14f7ee410716b17d11f9ee31f0dacf7d2b7a79dc6a2fc51cd37eb8fa9eac4123",
+      "regenerated": "7082fc086ece1941e0cf171be17b433b7859cef2cbb92f06e118b41e07ce10da",
+      "head": "7082fc086ece1941e0cf171be17b433b7859cef2cbb92f06e118b41e07ce10da",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/overview-template-390.png",
+      "baseline": "5798d9e8214053176c8dc626adcd4c06ce4838c853dfd3b444d21e23494598ee",
+      "regenerated": "5798d9e8214053176c8dc626adcd4c06ce4838c853dfd3b444d21e23494598ee",
+      "head": "5798d9e8214053176c8dc626adcd4c06ce4838c853dfd3b444d21e23494598ee",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/pagination-1440.png",
+      "baseline": "8608581d7a65023f408ce214164bbbf8191f57adf187b761a498a41d82ad79b7",
+      "regenerated": "8608581d7a65023f408ce214164bbbf8191f57adf187b761a498a41d82ad79b7",
+      "head": "8608581d7a65023f408ce214164bbbf8191f57adf187b761a498a41d82ad79b7",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/pagination-390.png",
+      "baseline": "5f16e212d93eb4a37bdfd1987c35b51654bfce46219d2ecd46d9d8ec00d26545",
+      "regenerated": "5f16e212d93eb4a37bdfd1987c35b51654bfce46219d2ecd46d9d8ec00d26545",
+      "head": "5f16e212d93eb4a37bdfd1987c35b51654bfce46219d2ecd46d9d8ec00d26545",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/search-1440.png",
+      "baseline": "2dd6458e6857a0c517d476c30b7d1ba7aee79fcc541b45f05af20598957cfdd2",
+      "regenerated": "2dd6458e6857a0c517d476c30b7d1ba7aee79fcc541b45f05af20598957cfdd2",
+      "head": "2dd6458e6857a0c517d476c30b7d1ba7aee79fcc541b45f05af20598957cfdd2",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/search-390.png",
+      "baseline": "d2a6a22fb832973b6b65020bda1ad439d5d8826717b6814707fed1ee3f0615ef",
+      "regenerated": "d2a6a22fb832973b6b65020bda1ad439d5d8826717b6814707fed1ee3f0615ef",
+      "head": "d2a6a22fb832973b6b65020bda1ad439d5d8826717b6814707fed1ee3f0615ef",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/shell-1440.png",
+      "baseline": "f5acb6a0c561aa1e08c6a841a48e0b9db6b79735f0420a0e76e9341be04baea9",
+      "regenerated": "f9ae33a9e3209e196cd1038bce31fe7a71a2d6cd60dca38d32aec383ac75b32b",
+      "head": "f9ae33a9e3209e196cd1038bce31fe7a71a2d6cd60dca38d32aec383ac75b32b",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/shell-390.png",
+      "baseline": "803b5a163265cd11422f87d261f3a389629997104f5702afe0714e604542a2bc",
+      "regenerated": "803b5a163265cd11422f87d261f3a389629997104f5702afe0714e604542a2bc",
+      "head": "803b5a163265cd11422f87d261f3a389629997104f5702afe0714e604542a2bc",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/status-1440.png",
+      "baseline": "92c05ea639228ad4af05192bc7f681807101116a0221cb87bf99c5f664ba618f",
+      "regenerated": "92c05ea639228ad4af05192bc7f681807101116a0221cb87bf99c5f664ba618f",
+      "head": "92c05ea639228ad4af05192bc7f681807101116a0221cb87bf99c5f664ba618f",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/status-390.png",
+      "baseline": "f3d47dd30040033ff6ef13d7866b4ac8fd0f18720811ed15622f3c2a4a211443",
+      "regenerated": "f3d47dd30040033ff6ef13d7866b4ac8fd0f18720811ed15622f3c2a4a211443",
+      "head": "f3d47dd30040033ff6ef13d7866b4ac8fd0f18720811ed15622f3c2a4a211443",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/table-1440.png",
+      "baseline": "e08ed443e1700030a9739c7d0cb8003458090d78c603aecefb8451bd1d72cfbc",
+      "regenerated": "e08ed443e1700030a9739c7d0cb8003458090d78c603aecefb8451bd1d72cfbc",
+      "head": "e08ed443e1700030a9739c7d0cb8003458090d78c603aecefb8451bd1d72cfbc",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/table-390.png",
+      "baseline": "82fe329ab33717692493629e9dcb2a2b0e07c8548678e2d1ef1133ff5f3cb9c2",
+      "regenerated": "82fe329ab33717692493629e9dcb2a2b0e07c8548678e2d1ef1133ff5f3cb9c2",
+      "head": "82fe329ab33717692493629e9dcb2a2b0e07c8548678e2d1ef1133ff5f3cb9c2",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/table-duplicates-1440.png",
+      "baseline": "9ef660c6f617f64db416c87f98fd99c5969dda7aac351c07016a8114a62fd157",
+      "regenerated": "9ef660c6f617f64db416c87f98fd99c5969dda7aac351c07016a8114a62fd157",
+      "head": "9ef660c6f617f64db416c87f98fd99c5969dda7aac351c07016a8114a62fd157",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/table-duplicates-390.png",
+      "baseline": "94e6fadc7201e0fbea826103af63ee17fabcd0cf0a2361f3764cf78e26dfe8a5",
+      "regenerated": "94e6fadc7201e0fbea826103af63ee17fabcd0cf0a2361f3764cf78e26dfe8a5",
+      "head": "94e6fadc7201e0fbea826103af63ee17fabcd0cf0a2361f3764cf78e26dfe8a5",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/tabs-1440.png",
+      "baseline": "3a3d0b142487eb241862cd1cba9b849ab6f849deb11728d95ec3a78c18c89a21",
+      "regenerated": "3a3d0b142487eb241862cd1cba9b849ab6f849deb11728d95ec3a78c18c89a21",
+      "head": "3a3d0b142487eb241862cd1cba9b849ab6f849deb11728d95ec3a78c18c89a21",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/tabs-390.png",
+      "baseline": "105642865cb0247bac9813da93e05a5cb917ece3d90a20a021ac43a8ced98638",
+      "regenerated": "105642865cb0247bac9813da93e05a5cb917ece3d90a20a021ac43a8ced98638",
+      "head": "105642865cb0247bac9813da93e05a5cb917ece3d90a20a021ac43a8ced98638",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/values-1440.png",
+      "baseline": "7f98480d7f75cb725ac910a6708a2374f3a1d005f076b5ba17d32dc428f4d130",
+      "regenerated": "7f98480d7f75cb725ac910a6708a2374f3a1d005f076b5ba17d32dc428f4d130",
+      "head": "7f98480d7f75cb725ac910a6708a2374f3a1d005f076b5ba17d32dc428f4d130",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/values-390.png",
+      "baseline": "623e68058225dea7193bd56ed260d0c7e5630783517c3441bc5e5b090a49552f",
+      "regenerated": "623e68058225dea7193bd56ed260d0c7e5630783517c3441bc5e5b090a49552f",
+      "head": "623e68058225dea7193bd56ed260d0c7e5630783517c3441bc5e5b090a49552f",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/workspace-template-1440.png",
+      "baseline": "279476938ed56093684ecae630d4a221c321de13ae3080c412d924b70cfa27ab",
+      "regenerated": "2b2455d9c0ea57d7a3aad785245c8541cd3977a0b9043dd3ef897228e8795e40",
+      "head": "2b2455d9c0ea57d7a3aad785245c8541cd3977a0b9043dd3ef897228e8795e40",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-3/workspace-template-390.png",
+      "baseline": "daaae3532551b10149013a1877031c87f62667c6da2e95e829d8dd867b02506d",
+      "regenerated": "daaae3532551b10149013a1877031c87f62667c6da2e95e829d8dd867b02506d",
+      "head": "daaae3532551b10149013a1877031c87f62667c6da2e95e829d8dd867b02506d",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-4/auth-1440.png",
+      "baseline": "649f5cdd181692cf098097fdbc9f626b8f551ec88ec6ff227bc9351c3816f77b",
+      "regenerated": "649f5cdd181692cf098097fdbc9f626b8f551ec88ec6ff227bc9351c3816f77b",
+      "head": "649f5cdd181692cf098097fdbc9f626b8f551ec88ec6ff227bc9351c3816f77b",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-4/auth-390.png",
+      "baseline": "86e787f820896bfcbd567969ead5d3a09468be78f3fb011574c25cd275034314",
+      "regenerated": "86e787f820896bfcbd567969ead5d3a09468be78f3fb011574c25cd275034314",
+      "head": "86e787f820896bfcbd567969ead5d3a09468be78f3fb011574c25cd275034314",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-4/auth-expired-1440.png",
+      "baseline": "d2affd676046b43a4b1c4a69ef8dd82d93e87fd846dec5b7cc9a82304e736878",
+      "regenerated": "d2affd676046b43a4b1c4a69ef8dd82d93e87fd846dec5b7cc9a82304e736878",
+      "head": "d2affd676046b43a4b1c4a69ef8dd82d93e87fd846dec5b7cc9a82304e736878",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-4/explorer-1440.png",
+      "baseline": "66cd7c18811c1cc2f853ba6c19f7f3a078080ef4b50da10fe6ba1f90d9f2052a",
+      "regenerated": "66cd7c18811c1cc2f853ba6c19f7f3a078080ef4b50da10fe6ba1f90d9f2052a",
+      "head": "4ec0001857373d9f6a12ecdd9773bcafd4b9ac8f8ee5bc6ebb42ea97686c6a59",
+      "disposition": "restore baseline capture noise"
+    },
+    {
+      "file": "phase-4/explorer-390.png",
+      "baseline": "3f307a92feb09260f62cb49c14b707ce1843a0aab3e3de7849bb608ef41327ca",
+      "regenerated": "4082b10129fe94a9d3ff498cf4f4a05b93f5011ced308caedde3e76da0dbf527",
+      "head": "3f307a92feb09260f62cb49c14b707ce1843a0aab3e3de7849bb608ef41327ca",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/explorer-expired-1440.png",
+      "baseline": "7438ff6dc1ab960b79d138ca3a406efb6a4df6f8f2cf0eceda3ea37987d2dfd0",
+      "regenerated": "7438ff6dc1ab960b79d138ca3a406efb6a4df6f8f2cf0eceda3ea37987d2dfd0",
+      "head": "cb04887092624cf0216c38d82d39bdc226dc544bdfe4bbcd5395ff933a5411fe",
+      "disposition": "restore baseline capture noise"
+    },
+    {
+      "file": "phase-4/explorer-schema-1440.png",
+      "baseline": "f3a0c7ff836b3b01a0110e23e7474edf6c3b2e87dc55afc6accd514482ec3698",
+      "regenerated": "7bc298b47ad955547d9b5da0bb23898a401c323e1adb580512dc39b9e4340dd5",
+      "head": "7bc298b47ad955547d9b5da0bb23898a401c323e1adb580512dc39b9e4340dd5",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-4/overview-1440.png",
+      "baseline": "721765164af1f3907eb1fc31cba5cb3d2a69569d19ce7293244174dbef22b89d",
+      "regenerated": "341880e75c76a4d66a681a20c60091e8e1f0895c38b7e3606dee4bf2bdc57e7d",
+      "head": "a7150417e6e29a1521cee766583708c756eda055ce4f8ce20aa5e13b9c3bab70",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/overview-390.png",
+      "baseline": "7febd0d0308cbaceb71b34c36fa4821b61e657e0976319de0b308748c305389d",
+      "regenerated": "39549818cd4af66a9be19c7da09245b0c21f0583728cf8ae2c83db607439af8f",
+      "head": "7febd0d0308cbaceb71b34c36fa4821b61e657e0976319de0b308748c305389d",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/overview-denied-1440.png",
+      "baseline": "23b2627fd729d55a673a7cec81f31e44a5f27ac4d14dd66d79bb0809d468abdb",
+      "regenerated": "15cf41b0bbedbb311035a8bc8bf53dd747284d1da35179fb27f4596aa62a09c7",
+      "head": "23b2627fd729d55a673a7cec81f31e44a5f27ac4d14dd66d79bb0809d468abdb",
+      "disposition": "restore baseline capture noise"
+    },
+    {
+      "file": "phase-4/overview-exact-390.png",
+      "baseline": "9cccf92cac93ba313336eb4d15d9b313b967d39ffa2168a0cdfc80a52032a22f",
+      "regenerated": "15ce8453e6ec772fb85b112cb98b1c54918a13d16e2324c8c4554a646814b5d4",
+      "head": "07c1d1db7f7f2e2b0b11887d70f137d372191aa5c0d6ece8fa7e4a25ab372b55",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/overview-unavailable-1440.png",
+      "baseline": "c05009205a408c668c697980642993996f1f5ca68f760e5416adaa3d4b6cd179",
+      "regenerated": "a93dc521b53ab9aaabf12fd51beb33b13df0a4417753a8323c9bdb4b6117b797",
+      "head": "57a4bd8d99193401c6d4a03ba4b3281645a3c978a654ebfcc969356167c3e477",
+      "disposition": "restore baseline capture noise"
+    },
+    {
+      "file": "phase-4/queries-1440.png",
+      "baseline": "84af85f36b99cdabf8e24eace7ab709c18a9e877abb12c5b3e5df75643caebcb",
+      "regenerated": "9a1b8adc651dde8bdc72aa4ef3c4bd64a15e4267eefcaaf80c0784d8b31515f2",
+      "head": "84af85f36b99cdabf8e24eace7ab709c18a9e877abb12c5b3e5df75643caebcb",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/queries-390.png",
+      "baseline": "a3e801b770c612385c6e9f4328aa3ffee22b55a4283cd31c1d3febab91247394",
+      "regenerated": "657254a78456cc6a64e419a1f50472889f13ec7efadb403259ebb7e606243a9e",
+      "head": "a3e801b770c612385c6e9f4328aa3ffee22b55a4283cd31c1d3febab91247394",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/queries-truncated-1440.png",
+      "baseline": "7fcbacdcc5ce1d3d69ad3f6286f7aa6211df11c54d4a048dacb8331efa01228f",
+      "regenerated": "2c6b7f2804ede0cd3005ad604c94d23dac0bd33022f9dfec856ae26c9379ab1c",
+      "head": "7fcbacdcc5ce1d3d69ad3f6286f7aa6211df11c54d4a048dacb8331efa01228f",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-4/queries-unknown-1440.png",
+      "baseline": "571e15c3edd870636617b4c99b88955ed2f518bb75f7e43ff371f95b5e8f4231",
+      "regenerated": "ab09dbd24497d749af2e701122a307556cd685e95384717320295652f2663d84",
+      "head": "571e15c3edd870636617b4c99b88955ed2f518bb75f7e43ff371f95b5e8f4231",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/explorer-1440.png",
+      "baseline": "096cd8201918622f75ddfdafe97015fff39e016b6e8e2d5581dd1fb62a881795",
+      "regenerated": "7fb42f553069512ff8115d9633a3fd2d3b047a34dbea2a5f481b920847ce4b09",
+      "head": "096cd8201918622f75ddfdafe97015fff39e016b6e8e2d5581dd1fb62a881795",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/explorer-390.png",
+      "baseline": "d0cc2873275cdd26509a644686d7f7a40502bcc66cef0b84c295ac0fc7d5b6df",
+      "regenerated": "6e6dcc27a30d3f35a940e0d063930b5716f1310fea803baf3069531495f90c5f",
+      "head": "d0cc2873275cdd26509a644686d7f7a40502bcc66cef0b84c295ac0fc7d5b6df",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/explorer-schema-1440.png",
+      "baseline": "cc10d09125c76ad569579e0da7b0b6be68234431c6aa9b4b164f154eb2b16b26",
+      "regenerated": "925145625accb5deda12d9089f40fa6393e5d10197263a2e11c0fc0ed2575291",
+      "head": "cc10d09125c76ad569579e0da7b0b6be68234431c6aa9b4b164f154eb2b16b26",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/explorer-schema-390.png",
+      "baseline": "8f8b43e39dd1552773f08c69790fb5967f2b698321fe5f5bd744f68b44c4bb79",
+      "regenerated": "570ba1873c8914a3d66fa40b3a906c83c9b6336fad8fb3d7447205e37ef9137a",
+      "head": "8f8b43e39dd1552773f08c69790fb5967f2b698321fe5f5bd744f68b44c4bb79",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/navigation-390.png",
+      "baseline": "cb84ea6c6571b909234ed02aa6ffe6e2eb9657d7417e750c426fa923ace59a3c",
+      "regenerated": "f0eafe5d55d6087c16dddc73baf49a4e92cd4626e5fbd1106f581626e5ff4109",
+      "head": "cb84ea6c6571b909234ed02aa6ffe6e2eb9657d7417e750c426fa923ace59a3c",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/overview-1440.png",
+      "baseline": "3bf2aafce38faf983a2d43118723309522d8044b5fe4a5b72f366a8d9aac6c41",
+      "regenerated": "36d7216929c2087fa0412d4f7300194a06cbc0bb5c5b79ff1889ee1c556d1381",
+      "head": "cfac00e6d413f4e50193f9f8ab91116cff33f6c4b8bf96aa3e6d62e27858d140",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/overview-390.png",
+      "baseline": "207ced8fa297ccd3172e615d4b2687cd4012eb5e2267c4574c80e9857c53b263",
+      "regenerated": "52b870a2ab4569c8b5583e7282f0fed51b34108b69c8098b7c3503d56713063d",
+      "head": "207ced8fa297ccd3172e615d4b2687cd4012eb5e2267c4574c80e9857c53b263",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/query-1440.png",
+      "baseline": "348b24970b9ce1c3c6fd30b93f1b27fa54e9c3a63bdaa3b9d2fdb760e73351ff",
+      "regenerated": "1f4105dffa877bb5f9ff2dfb9e0821da3f259695198b7eddfed1fef44fd6e43f",
+      "head": "348b24970b9ce1c3c6fd30b93f1b27fa54e9c3a63bdaa3b9d2fdb760e73351ff",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/query-390.png",
+      "baseline": "3e84fa2458bb3cf92cd8ce702145f73df94b38fdd906f89a644126153ede1b11",
+      "regenerated": "2b8f3cfbd6dbf62211a60783057823f5615c98c558611d6aa4dc5973365db662",
+      "head": "3e84fa2458bb3cf92cd8ce702145f73df94b38fdd906f89a644126153ede1b11",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/query-results-1440.png",
+      "baseline": "b680a2343f1c4856a641c7a50a9620a27f3d952fe7ca8689cc988ab11f7d70a2",
+      "regenerated": "8ee5cfe4cf1dc74426460fee4490eb08431d74d64c0d470565dbd589a046e867",
+      "head": "b680a2343f1c4856a641c7a50a9620a27f3d952fe7ca8689cc988ab11f7d70a2",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/query-results-390.png",
+      "baseline": "43396dfaeb5f8ca6dd1fc5209083ccfaf62f15b78cffd68a9ed9def0cb6bc477",
+      "regenerated": "1ac03936eb436e3b9eec62a3d59873728eae4cc7b03d861cd2082bc1fe23266f",
+      "head": "43396dfaeb5f8ca6dd1fc5209083ccfaf62f15b78cffd68a9ed9def0cb6bc477",
+      "disposition": "retain regenerated intentional change"
+    },
+    {
+      "file": "phase-6/sign-in-1440.png",
+      "baseline": "c2b60083e6e188871084daf881b6f1656877ad145de3350794eaab886677ed97",
+      "regenerated": "c2b60083e6e188871084daf881b6f1656877ad145de3350794eaab886677ed97",
+      "head": "c2b60083e6e188871084daf881b6f1656877ad145de3350794eaab886677ed97",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "phase-6/sign-in-390.png",
+      "baseline": "56f5fd9b35422b6a346fb59a175dfa192e9cfc2c334fb88586bb367c3b559496",
+      "regenerated": "56f5fd9b35422b6a346fb59a175dfa192e9cfc2c334fb88586bb367c3b559496",
+      "head": "56f5fd9b35422b6a346fb59a175dfa192e9cfc2c334fb88586bb367c3b559496",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "sign-in-desktop.png",
+      "baseline": "d6f2e7a6437361c6529240cea5706678ee2d8572cede8303da3cf900204b3203",
+      "regenerated": "d6f2e7a6437361c6529240cea5706678ee2d8572cede8303da3cf900204b3203",
+      "head": "d6f2e7a6437361c6529240cea5706678ee2d8572cede8303da3cf900204b3203",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "sql-mobile.png",
+      "baseline": "53ff3c6d54fdcad72a7c5b5b20be263f8b6bc2e134695f98550fdfb500081bc2",
+      "regenerated": "53ff3c6d54fdcad72a7c5b5b20be263f8b6bc2e134695f98550fdfb500081bc2",
+      "head": "53ff3c6d54fdcad72a7c5b5b20be263f8b6bc2e134695f98550fdfb500081bc2",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "sql-ready-desktop.png",
+      "baseline": "8eaa63fe815a52de518c94d32d3d570f9bf40b7f89a9b34e5dded97571ddd7f9",
+      "regenerated": "8eaa63fe815a52de518c94d32d3d570f9bf40b7f89a9b34e5dded97571ddd7f9",
+      "head": "8eaa63fe815a52de518c94d32d3d570f9bf40b7f89a9b34e5dded97571ddd7f9",
+      "disposition": "unchanged from HEAD"
+    },
+    {
+      "file": "sql-results-desktop.png",
+      "baseline": "4a14a1482ec2cb3be2a33a8df6da70de4ef70743c46d973af77108d75fd245b3",
+      "regenerated": "4a14a1482ec2cb3be2a33a8df6da70de4ef70743c46d973af77108d75fd245b3",
+      "head": "4a14a1482ec2cb3be2a33a8df6da70de4ef70743c46d973af77108d75fd245b3",
+      "disposition": "unchanged from HEAD"
+    }
+  ]
+}
