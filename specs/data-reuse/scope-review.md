@@ -61,3 +61,18 @@ that row reads and explicit SQL execution retain their existing behavior.
 The original phase 2/3 row-retention tasks and broad navigation acceptance are
 deferred by this clarification; revise them before any later implementation.
 This foundation does not close production enabling, live or visual release gates.
+
+
+## Retention budget decision — October 6, 2026
+
+The user accepted a starting production admission budget of one completed
+catalog bundle, with a 256 KiB maximum UTF-8 serialized JSON size. Reuse remains
+within the open app until page reload and the existing invalidation boundaries;
+there is no numeric TTL, polling, or persistence. Oversized successful responses
+remain usable for the current request but are not admitted for later reuse.
+
+This cap measures serialized representation, not actual JavaScript heap use. The
+largest supplied synthetic catalog fixture is about 3.3 KiB; it does not establish
+the size of a live authorized catalog. Production completed-response retention
+remains disabled until the actual catalog size is checked and production enabling
+is explicitly authorized. This decision does not authorize row or SQL-page caches.

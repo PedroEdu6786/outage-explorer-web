@@ -1,5 +1,5 @@
 # Plan: Reuse already fetched data
-> Status: controlled implementation complete; production retention deferred · Slug: data-reuse · Spec: ./spec.md
+> Status: controlled implementation complete; production budget selected, enabling gated · Slug: data-reuse · Spec: ./spec.md
 
 ## Scope and decisions
 
@@ -31,9 +31,10 @@ Completed controlled implementation evidence is recorded in
 [publication follow-up](verification/publication.md). The scope decision and
 resource boundaries are recorded in [scope review](scope-review.md). This plan
 does not mark deferred specification acceptance criteria complete. In
-particular, production completed-response retention remains disabled pending
-the user's deferred budget decision and explicit production enabling; live and
-visual release evidence also remains open.
+particular, the user selected a one-entry, 256 KiB serialized-JSON admission
+cap. Production completed-response retention remains disabled pending a live
+authorized catalog size check and explicit production enabling; live and visual
+release evidence also remains open. See the [budget decision](scope-review.md#retention-budget-decision--october-6-2026).
 
 ## Approach
 
@@ -82,10 +83,12 @@ only the existing execution identity and page inputs and never submits SQL.
 2. **Publication invalidation — complete.** Guarded successful publication
    clears catalog metadata before Overview reload; controlled ordering and
    status behavior are verified. (FR2, FR3)
-3. **Production enabling — gated.** Requires explicit agreement on a production
-   memory budget and retention/admission policy, followed by verification of
-   that policy. No implementation or default is implied by the synthetic test
-   policy. (TR3)
+3. **Production enabling — gated.** The user selected one entry and a 256 KiB
+   maximum UTF-8 serialized JSON size. First measure the actual authorized live
+   catalog and confirm it fits the cap; oversized successful responses remain
+   usable but are not retained. Production remains disabled until the user
+   explicitly authorizes enabling. This byte count is not a heap-size guarantee.
+   (TR3)
 4. **Broader row or SQL-page retention — deferred, not an active phase.** Any
    Overview/Explorer row reuse, retained preview sequence, or additional SQL
    page cache requires a fresh scope decision and revised requirements/ACs.
@@ -172,9 +175,9 @@ change discovery.
   publication callback now clears catalog metadata before Overview reloads;
   other statuses leave current data alone. (FR2, FR3)
 - **Production retention has no approved budget.** Production completed-value
-  retention stays disabled until the user decides the memory budget and
-  explicitly enables it. Synthetic fixture limits do not establish production
-  policy. (TR3)
+  retention stays disabled until the actual authorized catalog size is verified against the selected
+  256 KiB serialized-size cap and the user explicitly authorizes enabling. The
+  cap is an admission bound, not a heap-size guarantee. (TR3)
 - **Broader acceptance remains unproven.** Controlled tests do not prove live
   backend enforcement, backend-only permission-change discovery, broad row
   retention, or Figma fidelity. Keep those release claims open. (AC1–AC10)
@@ -198,9 +201,10 @@ for status-by-status invalidation, ordering, date preservation, and controlled
 browser evidence. The records distinguish controlled synthetic validation from
 live integration and visual comparison.
 
-Any future production-enabling change must first settle and record the retained
-entry/byte budget and eviction/admission behavior, then verify production policy
-without changing preview/SQL absolute deadlines or explicit execution rules.
+Before production enabling, verify the actual authorized catalog serialized size
+against the selected one-entry/256 KiB admission budget and record the result.
+If it exceeds the cap, the successful response remains usable but is not retained.
+Do not change preview/SQL deadlines or explicit execution rules.
 Any expansion into row or SQL-page retention requires a fresh scope decision and
 must not be inferred from the original broad spec.
 
@@ -216,10 +220,10 @@ must not be inferred from the original broad spec.
 
 ## Open decisions
 
-- Agree explicitly on the production retained-entry/byte budget and
-  admission/eviction policy before enabling completed-response retention.
-  Current production policy is disabled; controlled synthetic policy is
-  test-only. (TR3)
+- Verify the actual authorized catalog size against the selected one-entry,
+  256 KiB serialized JSON admission cap, then obtain explicit authorization to
+  enable completed-response retention. Production policy remains disabled until
+  those steps are complete. The serialized size is not a heap-size guarantee. (TR3)
 - Decide through a fresh scope review whether to pursue Overview/Explorer row
   reuse or additional SQL-page retention. Those items are deferred and are not
   active implementation phases; update their requirements and acceptance

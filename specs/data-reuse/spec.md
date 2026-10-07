@@ -14,6 +14,17 @@ known publication invalidation and original preview/SQL deadlines still apply.
 Revise the deferred requirements and their acceptance criteria before implementing
 row retention.
 
+## Retention budget decision — October 6, 2026
+
+The user selected a one-entry, 256 KiB UTF-8 serialized JSON admission cap for
+the catalog bundle. No TTL is added; existing invalidation and page-reload
+lifetime apply. Oversized successful catalog responses remain available to the
+current request but are not retained. This serialized-size estimate is not a
+hard JavaScript heap limit. Production completed-response retention remains
+disabled until the live authorized catalog size is checked and production
+enabling is explicitly authorized. Row and SQL-page retention remain outside
+the accepted scope.
+
 ## Problem
 Outage Explorer users repeatedly wait for information the app has already
 retrieved when revisiting pages or using the same information elsewhere. This

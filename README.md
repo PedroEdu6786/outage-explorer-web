@@ -167,8 +167,9 @@ The [data-reuse scope review](specs/data-reuse/scope-review.md) narrows current
 work to shared dataset models, schemas and catalog metadata. The controlled
 [phase-1 foundation](specs/data-reuse/verification/phase-1.md) shares one decoded
 catalog loader across consumers; observation rows and SQL-page reads retain
-existing retrieval behavior. Production completed-response retention is disabled
-pending the user's deferred budget decision and production enabling.
+existing retrieval behavior. The user selected a one-entry / 256 KiB serialized JSON admission budget.
+Production completed-response retention remains disabled pending a live catalog
+size check and explicit production enabling; the cap is not a heap-size guarantee.
 Successful Admin publication now invalidates catalog metadata before Overview
 reloads metadata and observations, preserving selected dates; see the
 [publication follow-up](specs/data-reuse/verification/publication.md).

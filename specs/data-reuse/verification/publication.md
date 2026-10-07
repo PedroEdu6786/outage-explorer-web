@@ -58,3 +58,11 @@ invalidation itself is verified by the composed behavior tests above. No live
 scenario or visual comparison was run. Production completed-response retention
 remains disabled pending the user's deferred budget decision and production
 enabling. The original live/visual release gates remain open.
+
+
+## Policy update — October 6, 2026
+
+The user selected a one-entry, 256 KiB UTF-8 serialized JSON catalog admission
+cap. This resolves the earlier deferred-budget decision; production retention
+remains disabled pending actual authorized catalog-size verification and explicit
+enabling. The cap estimates serialized bytes, not JavaScript heap use.

@@ -95,3 +95,10 @@ require scope review before implementation.
 Review the diff; confirm the narrowed metadata policy and publication wiring
 before enabling production reuse. Do not start the deferred row-retention phases
 automatically.
+
+### Policy update — October 6, 2026
+
+The user has since selected a one-entry, 256 KiB UTF-8 serialized JSON admission
+cap. The original budget-deferred note above records the October 5 checkpoint.
+Production retention remains disabled pending actual authorized catalog-size
+verification and explicit production enabling.

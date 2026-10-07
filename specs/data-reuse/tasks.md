@@ -4,7 +4,7 @@
 ## Scope revision — October 5, 2026
 - The user narrowed the immediate work to model/schema metadata reuse; row tables may reload on page visits. See [the selective resource review](scope-review.md).
 - Only phase 1's catalog foundation is currently executable. Phase 2/3 row-retention work and broad phase 4 acceptance below are deferred proposal history; revise their scope before implementation.
-- The user chose reuse until page reload and explicitly deferred memory budgets and production reuse. Controlled policy verifies the seam; production retention stays disabled. Existing access cleanup and explicit invalidation remain mandatory.
+- The user chose reuse until page reload and has now selected a production admission budget of one catalog entry / 256 KiB UTF-8 serialized JSON. Verify actual authorized catalog size and obtain explicit enabling authorization before production retention; it stays disabled meanwhile. Controlled policy verifies the seam. Existing access cleanup and explicit invalidation remain mandatory.
 
 - Follow-up to phase 1: known successful Admin publication now invalidates catalog metadata before Overview reloads. See [controlled publication evidence](verification/publication.md). This closes the documented callback gap without starting deferred row-retention phases or enabling production retention.
 
@@ -13,7 +13,7 @@
 - Run one phase per implementation invocation. Checkboxes require integrated passing evidence; coordinator owns acceptance and shared contracts/configuration.
 - Existing feature/composition work is the predecessor baseline: `docs/specs/web-client/verification/phase-4.md`, `docs/specs/web-client/verification/phase-6.md` and `specs/backend-integration/verification/phase-4.md`. Revalidate affected consumers when contracts change.
 - Paths marked **new** are planned additions; all other paths already exist. Feature work consumes public contracts, keeps pages thin and preserves current atomic presentation.
-- Phase 1 can proceed with explicitly injected synthetic test policy and production reuse disabled. No approved production freshness, access-revalidation cadence, entry/byte budget or eviction policy exists. Record agreement before enabling production retention; a test policy is not a production default. (TR3)
+- Phase 1 can proceed with explicitly injected synthetic test policy and production reuse disabled. No numeric freshness timer or access-revalidation cadence is approved. The user selected one retained catalog entry and a 256 KiB serialized JSON cap. Verify live size and obtain explicit enabling authorization before wiring this policy into production; a test policy is not itself a production setting. (TR3)
 - Memory in the open app is the initial scope. Reload/reopen persistence remains unresolved; do not add durable protected storage. Production enabling and full acceptance remain gated independently of controlled phase completion. (FR4, TR1, TR3)
 
 ## Phase 1: Shared ownership and read contracts (plan phase 1)
