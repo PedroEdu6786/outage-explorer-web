@@ -2,7 +2,8 @@
 
 Explore U.S. nuclear outage data: view national trends, browse datasets and run
 read-only SQL. This is the **Next.js + React + TypeScript + Tailwind CSS** frontend;
-the separate Flask backend handles authentication, permissions and data.
+the separate [Flask backend repository](https://github.com/PedroEdu6786/outage-explorer)
+handles authentication, permissions and data.
 
 ## Users
 
