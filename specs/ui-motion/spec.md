@@ -134,10 +134,11 @@ Not to be implemented, and left documented as deliberate non-goals:
 - Parallax, bounce, overshoot or infinite loops other than the spinner.
 - Any motion that delays results, SQL errors or protected-state clearing.
 
-## Assumptions (my defaults; revise before implementation)
+## Decisions confirmed October 6, 2026
 
-The proposal's open questions were not answered individually, so these defaults
-were chosen and are open to revision:
+The user confirmed all four defaults (skeletons, chart wipe, conservative
+intensity, animations disabled in test captures). They are accepted decisions,
+not assumptions:
 
 1. **Skeletons** replace spinner-only banners for preview, schema and metric
    loading; the banner remains for announcements (`aria-live` unchanged).
@@ -178,6 +179,5 @@ produced when implementation is requested.
 
 ## Open items
 
-- Confirm or revise the four assumptions above.
-- Implementation authorization and priority relative to live-acceptance work.
+- Implementation authorization (the confirmations above do not grant it) and priority relative to live-acceptance work.
 - Visual sign-off for motion is separate from Figma fidelity evidence.
