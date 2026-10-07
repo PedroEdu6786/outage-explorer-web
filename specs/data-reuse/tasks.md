@@ -8,14 +8,20 @@ admission policy, as requested by the user. Overview date edits require explicit
 row retention remains deferred. See the [updated scope](scope-review.md) and
 [verification](verification/navigation-and-dates.md).
 
-## Scope revision — October 5, 2026
+## Historical scope revision — October 5, 2026
+
+The original checklist below retains task contracts, paths and completion
+provenance. Disabled-production gates are superseded by October 7 enabling;
+M3 replaced resource-repository paths with typed CatalogCache. See
+[current status](../../docs/development/current-status.md). Unchecked row/SQL-cache
+phases remain deferred proposals, not an active execution queue.
 - The user narrowed the immediate work to model/schema metadata reuse; row tables may reload on page visits. See [the selective resource review](scope-review.md).
 - Only phase 1's catalog foundation is currently executable. Phase 2/3 row-retention work and broad phase 4 acceptance below are deferred proposal history; revise their scope before implementation.
 - The user chose reuse until page reload and has now selected a production admission budget of one catalog entry / 256 KiB UTF-8 serialized JSON. Verify actual authorized catalog size and obtain explicit enabling authorization before production retention; it stays disabled meanwhile. Controlled policy verifies the seam. Existing access cleanup and explicit invalidation remain mandatory.
 
 - Follow-up to phase 1: known successful Admin publication now invalidates catalog metadata before Overview reloads. See [controlled publication evidence](verification/publication.md). This closes the documented callback gap without starting deferred row-retention phases or enabling production retention.
 
-## Overview
+## Historical checklist instructions
 - 24 tasks across four plan phases; three independently owned tasks marked [P]. Single-file layout.
 - Run one phase per implementation invocation. Checkboxes require integrated passing evidence; coordinator owns acceptance and shared contracts/configuration.
 - Existing feature/composition work is the predecessor baseline: `docs/specs/web-client/verification/phase-4.md`, `docs/specs/web-client/verification/phase-6.md` and `specs/backend-integration/verification/phase-4.md`. Revalidate affected consumers when contracts change.

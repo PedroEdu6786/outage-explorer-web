@@ -10,8 +10,8 @@ and [assessment](../integration-assessment.md) for current source hashes, remain
 state-management options and SQL-security recommendations.
 
 This update supersedes backend-pending statements below, which retain historical
-intake provenance. Prepared client adapters exist; production data registration
-and connected acceptance remain open. Backend analytical resources must be
+intake provenance. Client adapters and production data registration are implemented;
+connected acceptance remains open. See [current status](../../../development/current-status.md). Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 

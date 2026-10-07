@@ -4,7 +4,15 @@
 > is recorded in [execution state](execution-state.md); this runbook does not add
 > product scope or replace task acceptance criteria.
 
-## Current integration amendment — October 5, 2026
+## Current implementation reference — October 7, 2026
+
+Configured frontend auth/data registration is implemented. Use
+[current status](../../development/current-status.md) and
+[backend-integration Phase 5](../../../specs/backend-integration/tasks.md) for
+remaining connected acceptance. Original parallel delivery schedules below
+retain historical task dependencies, not instructions to recreate completed modules.
+
+## Historical integration amendment — October 5, 2026
 
 Use the [remaining sequence](plan.md#remaining-implementation-sequence--reconciled-october-5)
 and current [Phase 5 paths](tasks/phase-5.md) for outstanding work. Fixtures and

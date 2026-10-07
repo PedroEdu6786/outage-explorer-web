@@ -20,7 +20,11 @@ for controlled composition/build/browser evidence. Backend analytical resources 
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
-## Auth handoff update — October 5, 2026
+## Historical auth intake — October 5, 2026
+
+This predates registered frontend adapters. See
+[current status](../../development/current-status.md) for implemented behavior
+and the separate remaining live-acceptance gates.
 
 The user supplied auth endpoints and the full backend reference was read locally.
 The user now confirms backend auth works and is ready for frontend integration.
@@ -37,7 +41,7 @@ pending backend implementation; no live verification or web transport is implied
 See the [comparison report](../../specs/web-client/contracts/contract-review.md)
 for date-only filter scope, mapping differences and source artifact issues.
 
-## Verified implementation status on October 4 2026
+## Historical backend snapshot — October 4, 2026
 
 At the October 4 handoff, the Flask application registered only `GET /health`. It returns
 `status`, `service` and `checked_at` and sets `Cache-Control: no-store`.
@@ -54,21 +58,22 @@ state, S3/Parquet for durable analytical data, and isolated DuckDB execution
 against backend-cached authorized inputs. Deployment targets one backend
 replica on EC2. Local UI development does not require provisioning EC2.
 
-## Logical operations to agree with the backend
+## Current operation contracts
 
-These names identify adapter responsibilities only. They are not endpoint paths
-or finalized method/type declarations.
+These names identify frontend adapter responsibilities. Linked HTTP contracts
+are supplied; configured frontend adapters are implemented. Named-target live
+acceptance remains open for every operation.
 
 | Operation | Semantics/information needed | Still open |
 | --- | --- | --- |
-| Resolve session | `GET /api/auth/session`: identity, role, expiry and CSRF | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; capability/view-model mapping and live evidence pending |
-| Login/callback/logout | Flask owns Cognito flow/callback and cookie sessions; CSRF-protected logout | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; exact environment/proxy settings and live evidence pending |
-| List datasets/schema | GET datasets embeds authorized columns/coverage and stable national/facilities/generators SQL names | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); metadata/capability mapping and runtime pending |
-| Preview records | Date-only optional bounds; current/next cursors, fixed snapshot/size/15-minute expiry | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); facility-filter scope and date-validation reconciliation pending |
-| Read fleet metric | Prepared columns of national through preview/SQL; no separate endpoint | [Contract supplied](../../specs/web-client/contracts/metric.md); full-series assembly and exact-fraction mapping pending |
-| Execute SQL | POST query, SQL-only body, URL page/size; synchronous result | [Contract supplied](../../specs/web-client/contracts/sql.md); source issues, model/error mapping and runtime pending |
-| Read query page | GET query with ID/page/fixed size; 15-minute lifetime from completion | [Contract supplied](../../specs/web-client/contracts/sql.md); runtime and live verification pending |
-| Start/check refresh | Admin POST admission, GET latest/by-ID, idempotency and publication states | [Contract supplied](../../specs/web-client/contracts/refresh.md); runtime pending, UI still conditional |
+| Resolve session | `GET /api/auth/session`: identity, role, expiry and CSRF | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; frontend implemented; named-target live acceptance pending |
+| Login/callback/logout | Flask owns Cognito flow/callback and cookie sessions; CSRF-protected logout | [Auth contract](../../specs/web-client/contracts/auth.md) recorded; frontend implemented; named-target live acceptance pending |
+| List datasets/schema | GET datasets embeds authorized columns/coverage and stable national/facilities/generators SQL names | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); frontend implemented; named-target live acceptance pending |
+| Preview records | Date-only optional bounds; current/next cursors, fixed snapshot/size/15-minute expiry | [Contract supplied](../../specs/web-client/contracts/catalog-preview.md); frontend implemented; named-target live acceptance pending |
+| Read fleet metric | Prepared columns of national through preview/SQL; no separate endpoint | [Contract supplied](../../specs/web-client/contracts/metric.md); frontend implemented; named-target live acceptance pending |
+| Execute SQL | POST query, SQL-only body, URL page/size; synchronous result | [Contract supplied](../../specs/web-client/contracts/sql.md); frontend implemented; named-target live acceptance pending |
+| Read query page | GET query with ID/page/fixed size; 15-minute lifetime from completion | [Contract supplied](../../specs/web-client/contracts/sql.md); frontend implemented; named-target live acceptance pending |
+| Start/check refresh | Admin POST admission, GET latest/by-ID, idempotency and publication states | [Contract supplied](../../specs/web-client/contracts/refresh.md); frontend implemented; named-target live acceptance pending |
 
 Do not copy proposed `/api/...` paths from an earlier design and treat them as
 implemented. The earlier proposed `fleet_offline_share_daily` name is superseded
@@ -146,7 +151,10 @@ used, include provenance and preserve their access restrictions. Keep fixture
 data out of production client bundles, especially facility/generator examples
 that could be downloaded by a Viewer even when their screen is hidden.
 
-## Frontend contract adaptation — October 5, 2026
+## Historical frontend contract adaptation — October 5, 2026
+
+This section records intake before production registration. Its next steps and
+unavailable-production statements are historical, not current work instructions.
 
 The user accepted date-only filters and independently optional start/end bounds;
 valid ranges outside coverage show empty results. The user now confirms backend

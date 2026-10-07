@@ -1,6 +1,7 @@
 # Catalog and preview contract
 
-Data API v1; [source snapshots and provenance](data-api.md). Runtime pending.
+Data API v1; [source snapshots and provenance](data-api.md). Frontend adapter registered; named-target live acceptance pending.
+See [current status](../../../development/current-status.md).
 
 ## Catalog and schema
 

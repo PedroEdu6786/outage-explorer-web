@@ -1,5 +1,9 @@
 # Reproducible checks and evidence
 
+Use [current status](current-status.md) for implemented behavior and open release
+gates. Dated command outcomes below describe their recorded checkpoint; they
+are not expected results for every later configured build.
+
 T1.11 documents the installed workflow. The coordinator accepts task evidence
 under `docs/specs/web-client/verification/` and updates the execution ledger.
 No command listed as a workflow implies it has already passed for a later task.
@@ -147,8 +151,10 @@ checks exclude this spec and run on port6007. Production browser artifacts use
 `playwright-report/production-results` separately from Storybook `test-results`;
 serialize builds/captures and keep mutable browser output isolated. This scenario
 verifies unavailable configuration fails closed; connected backend-failure/live
-checks remain behind T6.L/T5.L. The explicit unavailable registration marker
-continues to fail `npm run check:release-boundaries` until T6.L is accepted.
+checks remain behind T6.L/T5.L. At this original unconfigured checkpoint the
+unavailable registration marker failed `npm run check:release-boundaries`.
+Configured production registration now passes that structural check; this
+does not accept T6.L or T5.L connected behavior.
 
 ## Contract adaptation checks — October 5
 

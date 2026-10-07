@@ -1,8 +1,11 @@
 # Spec: Outage Explorer web client
-> Status: draft; published prototype inspected, live contracts pending · Slug: web-client
+> Status: frontend implemented with registered HTTP contracts; live and final visual acceptance pending · Slug: web-client
+
+See the [dated implementation/evidence map](../../development/current-status.md).
+Original acceptance checkboxes below are not closed by registration or controlled tests.
 
 ## Problem
-Analysts need a trustworthy way to explore permitted U.S. nuclear outage observations without manually reshaping EIA records. The fixture frontend is implemented; integration needs shared acceptance boundaries so views do not duplicate UI, invent domain behavior or diverge from the supplied design.
+Analysts need a trustworthy way to explore permitted U.S. nuclear outage observations without manually reshaping EIA records. The frontend includes fixture and configured production compositions; live integration needs shared acceptance boundaries so views do not duplicate UI, invent domain behavior or diverge from the supplied design.
 
 ## Goal
 Deliver the accepted analytical workflows with inspectable design fidelity, accessible behavior and real backend enforcement, using atomic components first, parallel feature development next and individual page assembly last.
@@ -45,20 +48,20 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 
 ## Inputs & Outputs
 - Input: [supplied Figma Make prototype](https://www.figma.com/make/9k3dy9IWG5UavJ0VgaZJ1G/Outage-Explorer-Prototype) and user-supplied [published preview](https://apply-less-42002887.figma.site/). The Make resource reader failed, but the published HTML, application bundle, stylesheet and rendered screens were inspected. Four main views are Sign in, Overview, Dataset Explorer (Preview/Schema tabs) and SQL Workspace. See [design evidence](design-inventory.md); Q1 access is resolved for planning, without claiming editable Figma node inspection.
-- Input: backend identity, capabilities, expiry, permitted catalog/schema, coverage, preview rows/cursor/snapshot, national metric, SQL result columns/rows/query ID and failures. [NEEDS CLARIFICATION: Q2 — Auth routes, DTO/errors and cookie/CSRF transport are documented in the October 5 [auth handoff](contracts/auth.md); the user subsequently confirmed the current role-only DTO and supplied role restrictions, approving role presentation mapping. Local auth integration is implemented; full authenticated lifecycle acceptance remains pending. Data API v1 [contracts and comparison](contracts/data-api.md) are now received. Reconcile mappings/source issues and agree target version/environment and integration owner.]
-- Input: dataset selection, calendar-date filters, opaque preview cursor, user SQL, positive `page`/`page_size` and opaque `query_id`. The user accepted date-only v1 and independently optional inclusive bounds, including valid empty ranges outside coverage; see the [frontend adaptation](contracts/frontend-adaptation.md). Q3 contract values are supplied: SQL default100/max500, fixed15-minute lifetime from completion, synchronous POST and GET/out-of-range recovery; runtime and mapping verification remain pending.
+- Input: backend identity, capabilities, expiry, permitted catalog/schema, coverage, preview rows/cursor/snapshot, national metric, SQL result columns/rows/query ID and failures. [NEEDS CLARIFICATION: Q2 — Auth routes, DTO/errors and cookie/CSRF transport are documented in the October 5 [auth handoff](contracts/auth.md); the user subsequently confirmed the current role-only DTO and supplied role restrictions, approving role presentation mapping. Local auth integration is implemented; full authenticated lifecycle acceptance remains pending. Data API v1 [contracts and comparison](contracts/data-api.md) are now received. Frontend mappings are implemented; agree the named target version/environment and integration owner, then verify real behavior.]
+- Input: dataset selection, calendar-date filters, opaque preview cursor, user SQL, positive `page`/`page_size` and opaque `query_id`. The user accepted date-only v1 and independently optional inclusive bounds, including valid empty ranges outside coverage; see the [frontend adaptation](contracts/frontend-adaptation.md). Q3 contract values are supplied: SQL default100/max500, fixed15-minute lifetime from completion, synchronous POST and GET/out-of-range recovery; frontend mapping is implemented; named-target runtime acceptance remains pending.
 - Output: permitted accessible views, precise data presentation and deliberate recovery actions; no inferred outage causes/durations, synthetic findings or invented totals.
 - Output: requirement-linked component/feature acceptance evidence, followed by individual page and live integration evidence.
 - [NEEDS CLARIFICATION: Q4 — Confirm target viewports/browser support and any responsive states absent from the supplied design.]
 
 ## Scope
 ### In scope
-- Cognito sign-in/session/logout; Overview with its evidenced national trend chart and metric cards; authorized Dataset Explorer with Preview/Schema tabs; SQL Workspace and retained result navigation.
+- Cognito sign-in/session/logout; Overview with its evidenced national trend chart, metric cards and user-approved Admin refresh controls; authorized Dataset Explorer with Preview/Schema tabs; SQL Workspace and retained result navigation.
 - Atoms, molecules, contextual organisms and templates needed by those workflows, plus isolated feature previews and explicit fixture adapters.
 - Parallel feature lanes and final page assembly; design comparison and live integration verification.
 ### Out of scope (non-goals)
-- Implementation or deployment during this planning session.
-- Admin refresh UI, charts beyond the evidenced national Overview trend, or findings beyond core workflows; revisit when explicitly scoped with usable design and contracts. Backend refresh remains a backend requirement.
+- Deployment without separate authorization. The original planning-only boundary preceded subsequent implementation authorization.
+- A separate Admin page, charts beyond the evidenced national Overview trend, or findings beyond core workflows; revisit when explicitly scoped with usable design and contracts. Admin refresh controls on Overview were approved October 5; Flask owns ingestion. See the [refresh contract](contracts/refresh.md).
 - Deferred new-data status card; revisit after current delivery, per the context pack.
 - Registration, password recovery, role management, saved queries/history, exports, maps, collaboration, alerts, outage classification and automatic SQL retries; revisit only with a new requirement.
 - Frontend hosting selection, cloud provisioning, new backend engines or direct source/storage access.
@@ -97,6 +100,6 @@ Deliver the accepted analytical workflows with inspectable design fidelity, acce
 
 ## Open Clarifications
 - **Q1 resolved for planning:** Published prototype inspected; editable Make source and the four PNG roles remain unverified. Do not claim Figma node mappings or reuse unread assets.
-- **Q2:** Auth source contract recorded with revision/digest; Data API v1 is also recorded. Frontend mapping/source discrepancies, target configuration, backend runtime and integration owner remain pending. Blocks affected real adapters and live authorization/session acceptance, not fixture feature work.
-- **Q3:** SQL size/TTL/delivery/error contract supplied in [sql.md](contracts/sql.md); remaining source corrections, runtime and frontend reconciliation gate live SQL acceptance.
+- **Q2:** Auth source contract recorded with revision/digest; Data API v1 is also recorded. Frontend mappings and configured production registration are implemented. Named-target configuration, backend runtime acceptance and integration ownership remain open; these gate live authorization/session acceptance, not adapter implementation.
+- **Q3:** SQL size/TTL/delivery/error contract supplied in [sql.md](contracts/sql.md); frontend mappings are implemented; real execution/page/error traces against the named target still gate live SQL acceptance.
 - **Q4:** Viewport/browser matrix and missing responsive states; blocks final visual sign-off, not accessible semantic component work.

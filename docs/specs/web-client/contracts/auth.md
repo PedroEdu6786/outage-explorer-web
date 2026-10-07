@@ -26,13 +26,16 @@ session `401` → next login asks for credentials. Controlled tests cover the
 frontend transitions; an authenticated real Cognito browser lifecycle must
 separately establish provider-cookie clearance and the next credential prompt.
 
-Status: **backend authentication working and ready for frontend integration,
-user-confirmed October 5, 2026; web implementation and live verification pending**.
-Received October 5, 2026. This document records the supplied auth
-contract before implementation. The later [Data API v1 intake](data-api.md)
+Status: **frontend auth implemented; full authenticated lifecycle acceptance open**.
+Received October 5, 2026. This document retains supplied contracts and earlier
+proposals alongside the newer accepted role response. See
+[current status](../../../development/current-status.md). The [Data API v1 intake](data-api.md)
 supplies the service contracts and extends CSRF usage to SQL/refresh POST.
 
-## Backend readiness confirmation — October 5, 2026
+## Historical backend readiness confirmation — October 5, 2026
+
+This records intake before the frontend auth implementation. The subsequent
+role-response decision below supersedes its capability-only assumption and next steps.
 
 The user confirms auth already works and is ready to implement in the web client.
 Proceed with the [next implementation sequence](../plan.md#remaining-implementation-sequence--reconciled-october-5)
@@ -47,7 +50,14 @@ response without capabilities. Capture the current response/contract at intake
 before finalizing capability field mappings; the proposal below stays illustrative.
 Do not infer capabilities from roles or treat absent fields as permission grants.
 
-## Accepted authorization boundary — October 5, 2026
+<a id="accepted-authorization-boundary--october-5-2026"></a>
+
+## Historical authorization proposal — superseded October 5, 2026
+
+The capability-only response proposal in this section was superseded by the
+[current response and revised user decision](#current-response-and-revised-user-decision--october-5).
+Backend authority and the prohibition on client-sent permission claims remain;
+the requirement to wait for capability fields and forbid role-derived presentation does not.
 
 Roles are assigned by the backend, and effective capabilities are controlled by
 the backend. The frontend never assigns, sends or overrides either one.

@@ -1,6 +1,7 @@
 # SQL execution and retained-page contract
 
-Data API v1; [source snapshots, serialization and errors](data-api.md). Runtime pending.
+Data API v1; [source snapshots, serialization and errors](data-api.md). Frontend adapter registered; named-target live acceptance pending.
+See [current status](../../../development/current-status.md).
 
 ## Current integration intake — October 5, 2026
 

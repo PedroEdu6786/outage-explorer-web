@@ -33,9 +33,10 @@ decisions with their rationale. Revalidate historical findings.
 
 ## Implementation boundaries
 
-- Use the selected React, Next.js, TypeScript and Tailwind CSS stack. App Router,
-  source layout and supporting libraries remain recommendations or open choices
-  as described in the [architecture](docs/context/ui-client/03-component-architecture.md).
+- Use the selected React, Next.js, TypeScript and Tailwind CSS stack. App Router
+  and supporting libraries are now implemented; the illustrative source layout
+  in [architecture](docs/context/ui-client/03-component-architecture.md) is not a
+  requirement to reorganize current modules.
 - Inspect the supplied Figma design before making visual decisions. If access
   is missing, request it and continue independent work; do not claim fidelity.
 - Keep shared atoms/molecules domain-free, pages thin and templates reusable.
@@ -54,7 +55,8 @@ decisions with their rationale. Revalidate historical findings.
 - Label proposed API contracts and synthetic fixtures explicitly. Keep fixtures
   isolated from production; never silently substitute them after API failures.
   Finalize session transport with the backend rather than assuming it exists.
-- Keep the Admin UI conditional and the new-data status card deferred as stated
+- Admin refresh controls are enabled on Overview; a separate Admin page remains
+  conditional. Keep the new-data status card deferred as stated
   in [delivery and acceptance](docs/context/ui-client/05-delivery-and-acceptance.md).
 
 ## Conversation devlog before commits

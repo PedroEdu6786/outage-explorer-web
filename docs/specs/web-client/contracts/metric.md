@@ -1,11 +1,13 @@
 # National metric contract
 
-Data API v1; [source snapshots and provenance](data-api.md). Runtime pending.
+Data API v1; [source snapshots and provenance](data-api.md). Frontend adapter registered; named-target live acceptance pending.
+See [current status](../../../development/current-status.md).
 
 The prepared metric is part of **`national`**, available through national preview
 and authorized SQL. There is no separate metric dataset or endpoint. The source
 HTTP reference records this as a backend-side user decision; the frontend
-`readNationalSeries` operation must adapt to it before live integration.
+`readNationalSeries` operation now assembles the complete authorized series
+from cursor previews; named-target live acceptance remains open.
 
 | National column | Meaning / client treatment |
 | --- | --- |
@@ -26,7 +28,8 @@ The frontend now has a rational percentage model alongside legacy decimal
 fixtures. Numerator, denominator, rounded decimal and display remain separate;
 only plot coordinates approximate the fraction. Backend display is authoritative.
 
-Implemented locally through injected transport, **not connected to a live API**: use national preview with
+Registered in configured production composition, with controlled HTTP evidence
+and live acceptance still open: use national preview with
 the requested range, follow cursor pages on the same generation until complete,
 then build the series in ascending calendar order for the existing chart.
 Never show a single default 100-row page as a complete longer series. Abort on
@@ -40,4 +43,4 @@ server-returned field. Valid rows are non-nullable; absent observation dates
 remain gaps/unavailable, never zero or interpolation. Preserve `0.00%` as valid.
 
 The existing metric meaning, half-up display, same-observation comparison and
-no-discrepancy-badge rules remain. Actual endpoint/mapping verification is pending.
+no-discrepancy-badge rules remain. Named-target endpoint/mapping acceptance remains pending.

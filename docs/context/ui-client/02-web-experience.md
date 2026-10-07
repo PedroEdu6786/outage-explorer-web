@@ -1,8 +1,8 @@
 # Web experience and Figma implementation
 
-This file defines behavioral expectations. Screen grouping, navigation,
-typography and visual composition come from the supplied Figma design, which
-has not yet been inspected. Component names below are illustrative.
+This file defines behavioral expectations. The supplied published prototype
+has been inspected; see the [design inventory](../../specs/web-client/design-inventory.md).
+Component names below are illustrative. Inspection is separate from final visual sign-off.
 
 ## Figma workflow
 
@@ -24,7 +24,7 @@ turn a designed password form into an unapproved custom authentication flow.
 The initial app can have a sign-in entry, permitted dataset browsing and a SQL
 workspace, combined or separated according to Figma. Exact routes are a UI
 design choice. National metrics fit the relevant analysis screen. Refresh
-controls are conditional on confirmed Admin UI scope.
+controls are approved on Overview for Admins; a separate Admin page remains conditional.
 
 Use Cognito managed login with Authorization Code + PKCE. The accepted
 application session lasts one hour by default; it does not automatically renew.
@@ -49,7 +49,7 @@ distinguishable. Render source strings as text, never trusted HTML.
 
 The October 5 [preview contract](../../specs/web-client/contracts/catalog-preview.md)
 selects date-only filters, independently optional inclusive bounds and page revisit
-cursors. Current frontend facility/date validation differs; see
+cursors. Historical frontend facility/date differences are recorded in
 [comparison F1/F2](../../specs/web-client/contracts/contract-review.md).
 
 Preview filters are applied by the backend. Validate date input and ranges
@@ -149,7 +149,10 @@ and announcements for important asynchronous outcomes. Charts, if in scope,
 need an accessible data alternative. On narrow screens, keep filters and actions
 usable and contain wide-table overflow without dropping meaningful columns.
 
-## Frontend contract adaptation — October 5, 2026
+## Historical frontend contract adaptation — October 5, 2026
+
+This section records intake before production registration. Its next steps and
+unavailable-production statements are historical, not current work instructions.
 
 The user accepted date-only filters and independently optional start/end bounds;
 valid ranges outside coverage show empty results. The user now confirms backend

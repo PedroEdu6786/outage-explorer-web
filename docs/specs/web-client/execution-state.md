@@ -9,7 +9,11 @@ This does not close live, visual or release gates.
 > [technical execution plan](execution-plan.md). This file records runtime
 > scheduling; the [task files](tasks.md) remain authoritative for task completion.
 
-## Current run
+## Historical execution notes — October 5
+
+These notes retain dispatch/intake provenance, including the superseded
+capability-only response assumption. Use [current status](../../development/current-status.md)
+and newer dated records below for implemented behavior and open gates.
 
 - Latest October 5 planning reconciliation: main plan, task manifest and Phase 5
   records now reflect prepared data modules, accepted date-only optional bounds

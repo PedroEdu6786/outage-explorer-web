@@ -18,7 +18,26 @@ admission policy, as requested by the user. Overview date edits require explicit
 row retention remains deferred. See the [updated scope](scope-review.md) and
 [verification](verification/navigation-and-dates.md).
 
-## Scope revision — October 5, 2026
+## Current accepted subset and invariants
+
+Catalog listing/schema reuse (FR2) is accepted; broad observation/preview and
+additional SQL-page retention (FR1/FR9) remain deferred. The accepted catalog
+work preserves protected cleanup and stale-response rejection (FR4/FR5),
+authorized ownership (TR1), exact value semantics (TR4), and retrieval/recovery
+when reuse is unavailable (FR3). Existing preview/SQL deadlines and explicit
+execution rules (FR6–FR8/TR2) still apply to their own workflows.
+
+Reuse ends at page reload or existing invalidation events; no added TTL, polling
+or durable storage is approved. The selected one-entry/256 KiB admission policy
+is enabled. See [current implementation and evidence](../../docs/development/current-status.md).
+
+> The sections below preserve the original broad proposal and dated checkpoints
+> for traceability. Their requirement IDs include both the accepted subset above
+> and deferred work; they are not an active implementation queue. Disabled-
+> production gates and generic repository details are superseded by October 7
+> decisions. Existing security, data and SQL invariants remain requirements.
+
+## Historical — Scope revision — October 5, 2026
 
 The user clarified that models/schemas should be reused while row tables may
 reload on page visits. See [the selective reuse review](scope-review.md).
@@ -31,7 +50,7 @@ known publication invalidation and original preview/SQL deadlines still apply.
 Revise the deferred requirements and their acceptance criteria before implementing
 row retention.
 
-## Retention budget decision — October 6, 2026
+## Historical — Retention budget decision — October 6, 2026
 
 The user selected a one-entry, 256 KiB UTF-8 serialized JSON admission cap for
 the catalog bundle. No TTL is added; existing invalidation and page-reload
@@ -42,17 +61,17 @@ disabled until the live authorized catalog size is checked and production
 enabling is explicitly authorized. Row and SQL-page retention remain outside
 the accepted scope.
 
-## Problem
+## Historical — Problem
 Outage Explorer users repeatedly wait for information the app has already
 retrieved when revisiting pages or using the same information elsewhere. This
 slows ordinary navigation and consumes endpoints unnecessarily.
 
-## Goal
+## Historical — Goal
 Make previously fetched, still usable information promptly available wherever
 needed, without redundant requests or weakening existing access and expiry rules.
 
-## Requirements
-### Functional (EARS)
+## Historical — Requirements
+### Historical — Functional (EARS)
 - **FR1:** WHEN a user returns to Overview or Dataset Explorer and the requested data is already available and still usable THE SYSTEM SHALL display that data without fetching it again.
 - **FR2:** WHEN a permitted page needs dataset listings or schemas already available and still usable THE SYSTEM SHALL reuse that information without fetching it again.
 - **FR3:** WHEN a user requests permitted information without a usable previously fetched copy THE SYSTEM SHALL retain the existing retrieval and recovery behavior for that information.
@@ -63,32 +82,32 @@ needed, without redundant requests or weakening existing access and expiry rules
 - **FR8:** WHEN a user revisits SQL results THE SYSTEM SHALL avoid automatically executing SQL again.
 - **FR9:** WHEN a user requests a previously fetched, still usable page of the same retained SQL execution THE SYSTEM SHALL reuse that page without fetching it again.
 
-### Technical / Non-functional
+### Historical — Technical / Non-functional
 - **TR1:** Reusable data must match its authorized request context: current identity and permissions, requested information, associated generation, and applicable preview snapshot or SQL execution with fixed page size. Metadata and a newer preview need not share a generation.
 - **TR2:** Reuse must not extend preview expiry beyond 15 minutes from the first page or SQL result expiry beyond 15 minutes from execution completion.
 - **TR3:** Data usability beyond existing access and expiry rules remains unresolved: [NEEDS CLARIFICATION: How long should each kind of data remain usable, and which events should require updated data?]
 - **TR4:** Reused data must preserve existing identifiers, calendar dates, missing-versus-zero distinctions, row and column order, duplicate SQL rows and metric presentation.
 
-## Inputs & Outputs
+## Historical — Inputs & Outputs
 - Inputs: the current session and permissions; requested dataset listings, schemas, Overview national data, preview selection/page or retained SQL execution/page; previously fetched data and its existing snapshot, execution and expiry information.
 - Outputs: matching permitted data without another data request when reusable; the existing loading, empty, error or explicit recovery state when no usable data is available.
 
-## Scope
-### In scope
+## Historical — Scope
+### Historical — In scope
 - Data reuse during navigation between permitted pages in the open app.
 - Reuse of dataset listings and schemas across Overview, Dataset Explorer and SQL Workspace.
 - Reuse of fetched Overview data, preview pages and retained SQL result pages under existing access and lifetime constraints.
 - Reuse beyond the open app: [NEEDS CLARIFICATION: Must fetched data also be reusable after a browser reload or closing and reopening the app?]
 
-### Out of scope (non-goals)
+### Historical — Out of scope (non-goals)
 - Restoring navigation position, selected controls or unfinished work as a separate feature.
 - Durable query history, saved queries, exports or browser-offline support.
 - A new-data status card, expanded permissions or changes to preview/SQL execution semantics.
 
-## Assumptions
+## Historical — Assumptions
 _None._
 
-## Acceptance Criteria
+## Historical — Acceptance Criteria
 - [ ] **AC1:** After data loads on Overview or Dataset Explorer, navigating away and returning while that same data remains usable displays it without another request for that data. (verifies FR1)
 - [ ] **AC2:** After permitted dataset listings and schemas load, another permitted page can use the same usable information without another request for it. (verifies FR2)
 - [ ] **AC3:** Requesting different or previously unavailable information still follows the existing retrieval and recovery behavior rather than displaying a mismatched retained response. (verifies FR3, TR1)
@@ -100,6 +119,6 @@ _None._
 - [ ] **AC9:** Reused records and metrics retain the same identifiers, dates, null/zero distinctions, row and column order, duplicate rows and metric presentation as when first displayed. (verifies TR4)
 - [ ] **AC10:** After a SQL result page loads, revisiting that page while it remains usable displays it without another request for the page. (verifies FR9)
 
-## Open Clarifications
+## Historical — Open Clarifications
 - [NEEDS CLARIFICATION: How long should each kind of data remain usable, and which events should require updated data?]
 - [NEEDS CLARIFICATION: Must fetched data also be reusable after a browser reload or closing and reopening the app?]

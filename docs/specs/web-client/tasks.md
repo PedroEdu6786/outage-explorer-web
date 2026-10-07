@@ -67,13 +67,21 @@ request that includes those phases; planning does not start execution.
 - AC19, AC21: per-lane readiness, all four feature checkpoints, `T5.H`, `T6.C`, `T7.C`.
 - Every FR1–FR21 and TR1–TR10 has implementation/verification tasks; checkpoints state the difference between fixture proof and actual release acceptance. A document being written never satisfies an unrun behavior check.
 
-## Next step
+## Current next step — October 7
+
+Configured auth/data registration is implemented. Remaining work is named-target
+live/lifecycle and final visual acceptance, tracked in
+[backend-integration Phase 5](../../../specs/backend-integration/tasks.md).
+See [current status](../../development/current-status.md). No live checkbox is
+closed by this documentation correction.
+
+## Historical next step — before data registration
 
 - Follow the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5): working backend auth intake (T5.3 Auth) → proxy/composition (T5.4) → session adapter (T5.5) → reuse data adapters → production registration and live scenarios → actual live/release verification.
 - Date-only optional bounds and backend-only authorization ownership are accepted. Use only the user-approved role presentation restrictions; never assign roles or send client permission claims.
 - Local preparation evidence does not close live checkboxes. Existing P1–P4 preparation is recorded in [Phase 5](tasks/phase-5.md); no additional task IDs or completed live tasks are implied.
 
-## Auth integration update — October 5
+## Historical auth integration update — October 5
 
 T5.3 Auth intake and exact-path expansion accepted for implementation; T5.4/T5.5
 verified with current role DTO, scoped CSRF and local Flask8000/Next3000 transport.

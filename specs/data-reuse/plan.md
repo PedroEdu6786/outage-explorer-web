@@ -22,7 +22,13 @@ admission policy, as requested by the user. Overview date edits require explicit
 row retention remains deferred. See the [updated scope](scope-review.md) and
 [verification](verification/navigation-and-dates.md).
 
-## Scope and decisions
+> The sections below retain the earlier implementation checkpoints. Disabled-
+> production gates and generic repository details are historical; October 7
+> enabling and the typed catalog implementation above are current. Historical
+> labeling does not retire accepted security/data invariants; see the
+> [current accepted subset](spec.md#current-accepted-subset-and-invariants).
+
+## Historical — Scope and decisions
 
 The October 5, 2026 scope review is authoritative. Reuse is limited to the
 decoded catalog bundle: authorized dataset and SQL relation names, coverage,
@@ -57,7 +63,7 @@ cap. Production completed-response retention remains disabled pending a live
 authorized catalog size check and explicit production enabling; live and visual
 release evidence also remains open. See the [budget decision](scope-review.md#retention-budget-decision--october-6-2026).
 
-## Approach
+## Historical — Approach
 
 Use the existing React Context and subscribed-controller architecture. An
 application-owned repository supplies one decoded catalog bundle to the
@@ -75,7 +81,7 @@ cache. Keep `executeQuery` uncached and non-deduplicated; page retrieval accepts
 only the existing execution identity and page inputs and never submits SQL.
 (FR1–FR9, TR1–TR4)
 
-## Components affected
+## Historical — Components affected
 
 - **Application composition and repository** — own the shared catalog loader,
   pending-read coordination, protected metadata, invalidation epochs, and
@@ -95,7 +101,7 @@ only the existing execution identity and page inputs and never submits SQL.
   query execution, page retrieval, expiry, and recovery contracts remain in
   force. (FR1, FR3, FR6–FR9, TR2)
 
-## Implementation phases
+## Historical — Implementation phases
 
 1. **Shared catalog foundation — complete.** Decoded catalog sharing, pending-
    read coordination, protected ownership and lifecycle are implemented and
@@ -114,7 +120,7 @@ only the existing execution identity and page inputs and never submits SQL.
    Overview/Explorer row reuse, retained preview sequence, or additional SQL
    page cache requires a fresh scope decision and revised requirements/ACs.
 
-## Data and interface contracts
+## Historical — Data and interface contracts
 
 - **Catalog bundle** — one decoded value contains authorized dataset summaries,
   ordered embedded schemas, coverage, and `generationId`. Successful empty
@@ -146,7 +152,7 @@ only the existing execution identity and page inputs and never submits SQL.
   use explicitly synthetic injected policy/loaders, isolated from production.
   (FR4, TR1, TR4)
 
-## Implementation status and acceptance traceability
+## Historical — Implementation status and acceptance traceability
 
 The controlled catalog ownership foundation and publication invalidation
 follow-up are implemented. Evidence includes repository, adapter, session,
@@ -172,7 +178,7 @@ Named-target live authorization and visual comparison are separate open release
 gates. Controlled checks do not close them or establish backend-only access
 change discovery.
 
-## Dependencies & integrations
+## Historical — Dependencies & integrations
 
 - Continue using the accepted [catalog/preview](../../docs/specs/web-client/contracts/catalog-preview.md),
   [SQL](../../docs/specs/web-client/contracts/sql.md), and
@@ -186,7 +192,7 @@ change discovery.
   for any future work. Named-target live scenarios require authorized backend
   access; they remain distinct from controlled synthetic evidence.
 
-## Risks & tradeoffs
+## Historical — Risks & tradeoffs
 
 - **Backend-only access changes are not discovered on a catalog memory hit.**
   Existing session resolution/expiry, fresh backend enforcement on row reads,
@@ -203,7 +209,7 @@ change discovery.
   backend enforcement, backend-only permission-change discovery, broad row
   retention, or Figma fidelity. Keep those release claims open. (AC1–AC10)
 
-### Alternatives considered
+### Historical — Alternatives considered
 
 - **Redux/RTK Query or another cache dependency** — unnecessary for the
   accepted Context and repository seam; no dependency was added. (FR1, FR2)
@@ -212,7 +218,7 @@ change discovery.
 - **Browser/durable caching** — outside the chosen lifetime, which ends at page
   reload; protected browser persistence was not approved. (FR4, TR1)
 
-## Test strategy and evidence
+## Historical — Test strategy and evidence
 
 No new implementation phase is authorized by this plan; the in-scope work is
 complete. Refer to [phase 1 verification](verification/phase-1.md) for catalog
@@ -229,7 +235,7 @@ Do not change preview/SQL deadlines or explicit execution rules.
 Any expansion into row or SQL-page retention requires a fresh scope decision and
 must not be inferred from the original broad spec.
 
-## Assumptions
+## Historical — Assumptions
 
 - **Decided:** catalog metadata reuse lasts until page reload when enabled;
   there is no added TTL, route-change invalidation, automatic polling, or
@@ -239,7 +245,7 @@ must not be inferred from the original broad spec.
   explicit and SQL page GET behavior remains unchanged. (Scope review; FR1,
   FR6–FR9)
 
-## Open decisions
+## Historical — Open decisions
 
 - Verify the actual authorized catalog size against the selected one-entry,
   256 KiB serialized JSON admission cap, then obtain explicit authorization to

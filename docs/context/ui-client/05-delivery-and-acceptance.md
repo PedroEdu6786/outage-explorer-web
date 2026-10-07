@@ -105,17 +105,17 @@ or successful compilation.
 
 | Input | Work it affects |
 | --- | --- |
-| Application setup in `outage-explorer-web` (repository established; documentation only) | Scaffolding and tooling |
-| Figma URL, relevant nodes, assets and access | Visual inventory and fidelity |
+| Named enabled backend resources and authorized persona accounts | Full connected acceptance; frontend scaffolding/tooling already implemented |
+| Final design/browser review against the inspected prototype | Visual sign-off; inventory and implemented screens already exist |
 | Backend environment and version | Live integration |
-| Auth and [Data API v1](../../specs/web-client/contracts/data-api.md) contracts received; backend auth confirmed ready for frontend integration; data runtime and source discrepancies pending | Service adapter mappings, capability composition and live evidence |
-| Exact Cognito callback/client, origins and local proxy configuration; cookie/CSRF transport documented in auth handoff | Real login/logout integration and live verification |
-| SQL default100/max500, 15-minute TTL, synchronous delivery and errors supplied; recovery/type mapping still pending | Final SQL controls, decoding and live verification |
-| Inclusion of Admin UI and any optional charts/findings | Scope beyond the core workflows |
+| Auth and [Data API v1](../../specs/web-client/contracts/data-api.md) contracts and frontend mappings implemented; backend readiness is a dated handoff claim | Named-target data/session acceptance |
+| Named-target Cognito/browser lifecycle evidence; local callback/proxy and cookie/CSRF transport are implemented | Full authenticated live acceptance |
+| SQL defaults, fixed expiry, synchronous delivery, errors and recovery mapping implemented | Named-target execution/page/failure traces |
+| Dedicated Admin page or additional findings UI, beyond approved Overview refresh/metric/chart controls | New scope decision |
 | Target viewports and any additional accessibility/browser requirements | Design extensions and verification matrix |
 | Frontend hosting, domain and release configuration | Deployment; independent of UI implementation |
 
-## Backend source index
+## Historical backend source index — October 4–5 handoff
 
 These are repository-relative paths in the **backend** repository, not required
 imports into the UI repository. The pack already summarizes the needed content.
@@ -144,7 +144,10 @@ do not revive them when reading individual records. The backend's Python
 directory layout, dependency checks and Git workflow do not automatically
 govern the new TypeScript repository.
 
-## Frontend contract adaptation — October 5, 2026
+## Historical frontend contract adaptation — October 5, 2026
+
+This section records intake before production registration. Its next steps and
+unavailable-production statements are historical, not current work instructions.
 
 The user accepted date-only filters and independently optional start/end bounds;
 valid ranges outside coverage show empty results. The user now confirms backend

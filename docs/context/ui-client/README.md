@@ -18,7 +18,13 @@ The user subsequently provided a Make project and deployed preview; see the
 screen evidence, planning decisions and tasks. Statements about missing design
 access in the imported documents describe the earlier handoff snapshot.
 
-## Current integration intake — October 5, 2026
+## Current implementation reference — October 7, 2026
+
+Use [current status](../../development/current-status.md) to distinguish implemented
+web behavior from open live/visual acceptance. Imported product requirements
+remain applicable; explicitly historical intake sections are not current status.
+
+## Backend source intake — October 5, 2026
 
 The user confirms the documented backend services are implemented and ready for
 frontend integration. The updated source handoff confirms all seven operations
@@ -58,7 +64,7 @@ transport and endpoints; current role mapping, local configuration and auth
 adapter are implemented. Full authenticated lifecycle checks remain pending;
 see [auth integration evidence](../../specs/web-client/verification/auth-integration.md). The subsequent [Data API v1 handoff](../../specs/web-client/contracts/data-api.md)
 now supplies service contracts, with [frontend/source differences](../../specs/web-client/contracts/contract-review.md);
-backend runtime remains pending. Published prototype asset sources and font licenses are
+frontend adapters are registered; named-target live acceptance remains pending. Published prototype asset sources and font licenses are
 recorded in the [asset ledger](../../specs/web-client/assets.md); local licensed fonts and actual loaded-weight evidence are now recorded in the
 [token map](../../specs/web-client/token-map.md) and
 [Phase 2 verification](../../specs/web-client/verification/phase-2.md). Shared
@@ -66,16 +72,17 @@ molecules, table/navigation organisms and slot templates are implemented with
 per-feature readiness records in
 [Phase 3 verification](../../specs/web-client/verification/phase-3.md). Auth, Overview, Explorer and Queries fixture compositions are now accepted;
 see [Phase 4 verification](../../specs/web-client/verification/phase-4.md).
-The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 auth configuration/adapter are implemented; data live acceptance remains pending; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Auth is opt-in through configured transport; data operations fail closed until combined live registration.
+The composed harness is accepted; see [Phase 5 verification](../../specs/web-client/verification/phase-5.md). Phase 5 auth configuration/adapter are implemented; data live acceptance remains pending; the four fixture page compositions are now accepted under [Phase 6](../../specs/web-client/verification/phase-6.md). Auth is opt-in through configured transport; configured production auth/data operations are registered and fail closed on unavailability.
 See the
 [project README](../../../README.md) and [agent guidance](../../../AGENTS.md)
 for repository entry points. Keep accepted requirements separate from suggested
 implementation choices when updating this context.
 
-## Optional starting prompt
+## Historical starting prompt — October 4, 2026
 
-The following handoff prompt is retained for a future planning session. It is
-context, not an instruction to start implementation as part of this import.
+The original prompt is retained as provenance. Its health-only API status and
+unfinished-contract instructions describe October 4, not the current project.
+Do not use it as a new implementation brief.
 
 ```text
 You are working on the Outage Explorer web client in a separate repository
@@ -131,7 +138,10 @@ Report checks actually run and separate fixture validation, live integration
 and visual comparison results.
 ```
 
-## Frontend contract adaptation — October 5, 2026
+## Historical frontend contract adaptation — October 5, 2026
+
+This section records intake before production registration. Its next steps and
+unavailable-production statements are historical, not current work instructions.
 
 The user accepted date-only filters and independently optional start/end bounds;
 valid ranges outside coverage show empty results. The user now confirms backend

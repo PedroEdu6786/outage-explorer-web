@@ -9,6 +9,11 @@ boundaries below. These are handoff recommendations, not previously approved
 library, hosting or authentication-transport decisions. Adapt filenames to real
 features without weakening the separation of responsibilities.
 
+The repository now uses App Router and the supporting libraries recorded in
+[the toolchain](../../development/toolchain.md). The layout below remains an
+illustration, not a requirement to reorganize implemented feature folders.
+See [current status](../../development/current-status.md) for implemented choices.
+
 ## Atomic design responsibilities
 
 | Level | Responsibility | Examples | Keep outside |

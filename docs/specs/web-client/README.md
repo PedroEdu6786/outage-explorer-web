@@ -1,5 +1,9 @@
 # Web client implementation handoff
 
+For source-checked implementation and open gates, see
+[current status](../../development/current-status.md). Dated intake below is
+provenance; it does not require rebuilding adapters already registered.
+
 October 7 follow-up: production now reuses one authorized catalog across route
 navigation under the agreed 256 KiB admission cap; Overview dates are applied
 explicitly. See [correction evidence](../../../specs/data-reuse/verification/navigation-and-dates.md).
@@ -119,9 +123,14 @@ login replaces the local password form; role selection stays outside production;
 preview cursors replace fixed counts; SQL pages retain one execution; exact
 percentages replace inconsistent rounding. Required states absent from the
 prototype are documented extensions. The Overview national trend is included;
-Admin refresh controls and the deferred new-data card remain excluded.
+Admin refresh controls on Overview are approved and implemented. A separate
+Admin page and the deferred new-data card remain outside current scope.
 
-## Remaining inputs
+## Historical remaining inputs — before data registration
+
+This section records the earlier auth-only checkpoint. Data adapters have since
+been registered; current remaining work is named-target live acceptance and
+visual/release evidence, as listed in the current-status reference above.
 
 **Auth integration is implemented; connected data and full live acceptance are next.** The user confirmed backend auth is
 ready on October 5. Read the [remaining implementation sequence](plan.md#remaining-implementation-sequence--reconciled-october-5),
@@ -155,7 +164,10 @@ closure round. Its full record is [anchor](council/00-problem.md),
 [decisions](council/03-decisions.md), [debate](council/04-debate.md) and
 [risks](council/05-risks-and-tests.md).
 
-## Frontend contract adaptation — October 5, 2026
+## Historical frontend contract adaptation — October 5, 2026
+
+This section records intake before production registration. Its next steps and
+unavailable-production statements are historical, not current work instructions.
 
 The user accepted date-only filters and independently optional start/end bounds;
 valid ranges outside coverage show empty results. The user now confirms backend

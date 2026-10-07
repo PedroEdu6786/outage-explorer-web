@@ -1,8 +1,8 @@
 # Data API v1 contract intake
 
-Received October 5, 2026. **Contract artifacts available; all seven data/refresh
-operations remain pending backend implementation.** This is documentation-only
-intake, not transport implementation, endpoint availability or live acceptance.
+Received October 5, 2026; updated handoff confirms backend implementation, and
+frontend adapters are now registered. These are supplied contract/source claims,
+not a new verification of backend deployment or named-target live acceptance.
 Auth remains governed by [auth.md](auth.md).
 
 ## Current integration intake — October 5, 2026
@@ -15,8 +15,8 @@ and [assessment](../integration-assessment.md) for current source hashes, remain
 state-management options and SQL-security recommendations.
 
 This update supersedes backend-pending statements below, which retain historical
-intake provenance. Prepared client adapters exist; production data registration
-and connected acceptance remain open. Backend analytical resources must be
+intake provenance. Client adapters and production data registration are implemented;
+connected acceptance remains open. See [current status](../../../development/current-status.md). Backend analytical resources must be
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 

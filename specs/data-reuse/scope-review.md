@@ -43,7 +43,10 @@ of its Overview, Explorer and SQL page caches.
 | Admin refresh-job status | Keep deliberate status checks fresh | Job status changes while work runs; a reused old response would hide progress or completion. Admission remains an explicit action. |
 | Display formatting and table column presentation | Derive from current decoded values | Local formatting needs no extra endpoint or cross-route response cache. Preview/query response columns remain authoritative for their own rows. |
 
-## Lifetime and invalidation
+## Lifetime and invalidation — October 5 checkpoint
+
+The last bullet records the then-deferred budget/enabling decision; October 7
+explicitly enabled retention as described above. Other boundaries remain.
 
 - The user answered "until page is reloaded": no extra numeric freshness timer
   and no persistence across page reload/reopen. Ordinary route changes alone
@@ -87,7 +90,12 @@ deferred by this clarification; revise them before any later implementation.
 This foundation does not close production enabling, live or visual release gates.
 
 
-## Retention budget decision — October 6, 2026
+<a id="retention-budget-decision--october-6-2026"></a>
+
+## Historical retention budget decision — October 6, 2026
+
+The size cap remains current; the enabling gate in the last paragraph was
+superseded on October 7. No live size measurement is claimed.
 
 The user accepted a starting production admission budget of one completed
 catalog bundle, with a 256 KiB maximum UTF-8 serialized JSON size. Reuse remains

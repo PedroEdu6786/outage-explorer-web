@@ -20,10 +20,10 @@ implemented in Python/Flask.
 
 | Capability | Viewer | Analyst | Admin |
 | --- | --- | --- | --- |
-| National catalog, schema, previews and metric | Yes | Yes | Yes |
-| Facility/generator catalog, schemas and records | No | Yes | Yes |
-| Read-only SQL | National datasets only | All permitted analytical datasets | Same as Analyst |
-| Start/check refresh | No | No | Yes, backend capability; UI conditional |
+| National Overview and its metadata | Yes | Yes | Yes |
+| Dataset Explorer and authorized previews/schemas | No | Yes | Yes |
+| Read-only SQL Workspace | No | All permitted analytical datasets | Same as Analyst |
+| Start/check refresh on Overview | No | No | Yes |
 | Identity/session tables or engine internals through SQL | No | No | No |
 
 The backend's PostgreSQL authorization tables determine permissions. Cognito
@@ -41,7 +41,8 @@ available for Overview. Analyst/Admin retain both analytical pages. This fronten
 restriction supersedes the earlier Viewer national SQL UI scope; it does not
 change the backend authorization policy.
 
-The persona table describes backend policy. The frontend never sends or assigns
+The table describes current web access. Backend policy may permit national SQL
+for Viewers; the web deliberately restricts them to Overview. The frontend never sends or assigns
 roles. On October 5 the user confirmed the current role-only session response
 and supplied role restrictions, authorizing a presentation mapping into the
 existing frontend capability model. This supersedes the earlier capability-only
@@ -66,6 +67,8 @@ decision; the backend authorizes every request. See the
 Backend Admin refresh is required, but a dedicated Admin screen remains
 deferred unless included in the agreed UI scope. Its semantics are documented
 in this pack so a future screen does not invent an approval workflow.
+Admin-only refresh controls on Overview were approved and implemented on
+October 5; they do not require a dedicated Admin screen.
 
 ## Data meaning
 
