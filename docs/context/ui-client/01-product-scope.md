@@ -99,6 +99,12 @@ Do not average facility percentages to recreate the national metric. Do not
 add match/mismatch badges or discrepancy flags between the two percentages.
 Source-percentage differences alone do not invalidate an observation.
 
+As requested on October 6, Overview MW values in the Offline capacity and
+Reported fleet capacity cards and Daily observations table display at most two
+decimal places, truncating extra digits without changing exact source values.
+Percentage displays retain the two-decimal half-up behavior above. The requested
+20-row daily table pagination is deferred to a separate update.
+
 Use observation dates as calendar dates, without timezone shifts. Missing or
 excluded observations are unavailable, not zero. A valid zero outage displays
 as `0.00%`. Never interpolate missing observations and present them as measured.

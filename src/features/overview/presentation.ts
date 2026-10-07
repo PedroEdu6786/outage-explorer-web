@@ -1,9 +1,15 @@
 import type { NationalObservation } from "../../contracts/observations";
-import type { PercentageValue, TableCell, TableData } from "../../contracts/table";
+import type { DecimalValue, PercentageValue, TableCell, TableData } from "../../contracts/table";
 
-/** Exact/display values remain untouched; Number conversion is confined to SVG coordinates. */
+/** Truncate MW display text without coercing or changing the exact source value. */
+export function capacityLabel(value: DecimalValue | null): string | null {
+  return value?.display.replace(/(\.\d{2})\d+$/, "$1") ?? null;
+}
+
+/** Exact values remain untouched; Number conversion is confined to SVG coordinates. */
 export function observationTable(observations: readonly NationalObservation[]): TableData {
   const decimal = (value: PercentageValue | null): TableCell => value === null ? { kind: "null" } : "numerator" in value ? { kind: "rational", ...value } : { kind: "decimal", ...value };
+  const capacity = (value: DecimalValue | null): TableCell => value === null ? { kind: "null" } : { kind: "decimal", ...value, display: capacityLabel(value) ?? value.display };
   return {
     columns: [
       { id: "date", label: "Date", kind: "date", unit: null, nullable: false },
@@ -14,7 +20,10 @@ export function observationTable(observations: readonly NationalObservation[]): 
     ],
     rows: observations.map((row, position) => ({ position, cells: [
       { kind: "date", value: row.date },
-      ...["calculatedPercentage", "outageMw", "capacityMw", "reportedPercentage"].map((key) => decimal(row.status === "available" ? row[key as "capacityMw" | "outageMw" | "reportedPercentage" | "calculatedPercentage"] : null)),
+      decimal(row.status === "available" ? row.calculatedPercentage : null),
+      capacity(row.status === "available" ? row.outageMw : null),
+      capacity(row.status === "available" ? row.capacityMw : null),
+      decimal(row.status === "available" ? row.reportedPercentage : null),
     ] })),
   };
 }

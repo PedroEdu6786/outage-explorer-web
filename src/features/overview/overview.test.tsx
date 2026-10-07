@@ -8,10 +8,12 @@ import { syntheticObservations } from "../../../tests/fixtures/scenarios";
 import { useOverview } from "./useOverview";
 import { OverviewFeature } from "./OverviewFeature";
 import { NationalMetricCards } from "./NationalMetricCards";
+import { DailyObservations } from "./DailyObservations";
 import { NationalTrend } from "./NationalTrend";
 import { observationTable, plotSegments } from "./presentation";
 import { validCalendarDate, validRange } from "./service";
 import type { NavigationIntent } from "../../contracts/navigation";
+import type { NationalObservation } from "../../contracts/observations";
 
 function setup(persona: "viewer" | "analyst" = "viewer") {
   const fixture = createFixtureOperations({ persona });
@@ -20,6 +22,22 @@ function setup(persona: "viewer" | "analyst" = "viewer") {
   return { fixture, runtime };
 }
 describe("Overview exact observation behavior", () => {
+  it("truncates long MW displays in cards and daily rows without losing exact precision", () => {
+    const observation: NationalObservation = {
+      status: "available", date: "2026-09-01",
+      outageMw: { exact: "1234.56789", display: "1234.56789" },
+      capacityMw: { exact: "9007199254740993.99999", display: "9007199254740993.99999" },
+      calculatedPercentage: { exact: "1.005", display: "1.01" },
+      reportedPercentage: { exact: "1.005", display: "1.01" },
+    };
+    render(<><NationalMetricCards observation={observation} /><DailyObservations observations={[observation]} /></>);
+    expect(screen.getAllByText("1234.56")).toHaveLength(2);
+    expect(screen.getAllByText("9007199254740993.99")).toHaveLength(2);
+    expect(screen.queryByText("1234.56789")).toBeNull();
+    expect(screen.getAllByText("1.01")).toHaveLength(3);
+    expect(observationTable([observation]).rows[0]?.cells[2]).toEqual({ kind: "decimal", exact: "1234.56789", display: "1234.56" });
+    expect(observation.outageMw?.display).toBe("1234.56789");
+  });
   it("preserves half-up tie display and distinguishes zero/null in cards and table", () => {
     const { rerender } = render(<NationalMetricCards observation={syntheticObservations[0]} />);
     expect(screen.getByText("1.01")).toBeVisible();

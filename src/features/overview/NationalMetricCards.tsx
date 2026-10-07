@@ -2,7 +2,7 @@ import type { NationalObservation } from "../../contracts/observations";
 import { MetricValue } from "../../components/molecules/MetricValue";
 import { Skeleton } from "../../components/atoms/Skeleton";
 import { Surface } from "../../components/atoms/Surface";
-import { percentageLabel } from "./presentation";
+import { capacityLabel, percentageLabel } from "./presentation";
 
 /** Cards enter with a capped stagger on mount; values are present immediately. */
 const cardStagger = ["[--stagger-index:0]", "[--stagger-index:1]", "[--stagger-index:2]"] as const;
@@ -25,7 +25,7 @@ export function NationalMetricCards({ observation, loading }: { readonly observa
   const metadata = <>{observation?.date ?? "No observation"}</>;
   return <div className="grid grid-cols-3 gap-[14px] [@media(width<=760px)]:grid-cols-1">
     <Surface className={card(0)}><MetricValue loading={false} label="Fleet capacity offline" value={row?.calculatedPercentage?.display ?? null} unit="%" metadata={<>{metadata}<br />EIA reported: {percentageLabel(row?.reportedPercentage ?? null)}</>} /></Surface>
-    <Surface className={card(1)}><MetricValue loading={false} label="Offline capacity" value={row?.outageMw?.display ?? null} unit="MW" metadata={metadata} /></Surface>
-    <Surface className={card(2)}><MetricValue loading={false} label="Reported fleet capacity" value={row?.capacityMw?.display ?? null} unit="MW" metadata={metadata} /></Surface>
+    <Surface className={card(1)}><MetricValue loading={false} label="Offline capacity" value={capacityLabel(row?.outageMw ?? null)} unit="MW" metadata={metadata} /></Surface>
+    <Surface className={card(2)}><MetricValue loading={false} label="Reported fleet capacity" value={capacityLabel(row?.capacityMw ?? null)} unit="MW" metadata={metadata} /></Surface>
   </div>;
 }
