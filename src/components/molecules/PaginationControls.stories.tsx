@@ -36,3 +36,13 @@ export const EndOfSequence: Story = {
 export const LongSummary: Story = {
   args: { label: "Synthetic result navigation", summary: "This caller-supplied summary explains the current retained result without inventing a matching-record count.", next: { label: "Next", onSelect: () => { /* Static wrapping specimen. */ } } },
 };
+
+function CurrentPageSwitch() {
+  const [current, setCurrent] = useState(1);
+  return <div className="max-w-2xl rounded-panel border border-border bg-surface">
+    <PaginationControls label="Synthetic retained pages" summary={`Retained page ${String(current)}`} pages={[1, 2, 3].map((page) => ({ key: String(page), label: String(page), current: page === current, onSelect: () => { setCurrent(page); } }))} />
+  </div>;
+}
+
+/** The current-page highlight moves between pages (color crossfade; toolbar Motion global on). */
+export const CurrentPageReview: Story = { render: () => <CurrentPageSwitch /> };

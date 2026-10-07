@@ -128,4 +128,57 @@ describe("Overview exact observation behavior", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.getByText("Sign in to view national observations")).toBeVisible(); view.unmount(); runtime.dispose();
   });
+  it("shows skeleton cards on first load without zero or Unavailable, one announcement, then exact values", async () => {
+    const { runtime, fixture } = setup(); const deferred = fixture.deferNext("readNationalSeries");
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await waitFor(() => { expect(fixture.callLog.read().some((entry) => entry.operation === "readNationalSeries")).toBe(true); });
+    const banners = screen.getAllByRole("status");
+    expect(banners).toHaveLength(1);
+    expect(banners[0]).toHaveTextContent("Loading national observations");
+    const labels = ["Fleet capacity offline", "Offline capacity", "Reported fleet capacity"];
+    for (const label of labels) {
+      const metric = screen.getByText(label).closest("dl");
+      expect(metric).toHaveAttribute("aria-busy", "true");
+      expect(metric?.querySelector("[aria-hidden=true]")).not.toBeNull();
+      expect(metric).not.toHaveTextContent(/Unavailable|No observation|EIA reported|\d|%|MW/);
+    }
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    await act(async () => { deferred.release(); await Promise.resolve(); });
+    await screen.findByRole("table", { name: "Daily national observations" });
+    // The latest synthetic observation (2026-09-04) is unavailable: unchanged presentation, no skeleton left behind.
+    expect(screen.getAllByText("Unavailable")).toHaveLength(3);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(document.querySelector("[aria-busy=true]")).toBeNull();
+    view.unmount(); runtime.dispose();
+  });
+  it("replaces skeletons with exact metric text and keeps no stale values while a new range loads", async () => {
+    const { runtime, fixture } = setup(); const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    const deferred = fixture.deferNext("readNationalSeries");
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    await waitFor(() => { expect(screen.getByRole("status")).toHaveTextContent("Loading national observations"); });
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(3);
+    await act(async () => { deferred.release(); await Promise.resolve(); });
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(screen.getAllByText("0.00").length).toBeGreaterThanOrEqual(2);
+    expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(0);
+    view.unmount(); runtime.dispose();
+  });
+  it("leaves the empty, unavailable and failure presentations without skeleton cards", async () => {
+    for (const dataState of ["empty", "unavailable"] as const) {
+      const fixture = createFixtureOperations({ persona: "viewer", dataState }); const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution());
+      const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+      await waitFor(() => { expect(screen.queryByRole("status")?.textContent ?? "").not.toContain("Loading national observations"); });
+      expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(0);
+      view.unmount(); runtime.dispose();
+    }
+    const { runtime, fixture } = setup(); fixture.failNext("readNationalSeries", { kind: "service-failure", message: "Synthetic failure" });
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByText("Synthetic failure");
+    expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(0);
+    expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled();
+    view.unmount(); runtime.dispose();
+  });
 });

@@ -242,11 +242,12 @@ persona/lifecycle scenarios are verified.
 ## UI motion improvements — October 6, 2026
 
 Subtle animations and micro-interactions across views and components are
-accepted in scope and **in progress (phase 1 of 4 verified: tokens, reduced-motion
+accepted in scope and **in progress (phases 1–2 of 4 verified: tokens, reduced-motion
 rule, motion-off test harness, control feedback, Tabs and desktop navigation
-indicators)**; the catalog, exclusions (no count-up
+indicators, status/empty/loading transitions, skeleton placeholders and
+retained-page dimming)**; the catalog, exclusions (no count-up
 metrics, no chart interpolation, no hover-lift), assumptions and acceptance
 criteria are in the [motion spec](specs/ui-motion/spec.md), with a design
 [plan](specs/ui-motion/plan.md) and a phased [task list](specs/ui-motion/tasks.md)
-(136 tasks, 4 phases). Phases 2–4 await an explicit request; phase records are in
+(136 tasks, 4 phases). Phases 3–4 await an explicit request; phase records are in
 `specs/ui-motion/verification/`.

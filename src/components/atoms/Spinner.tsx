@@ -14,6 +14,7 @@ export type SpinnerProps = Omit<
 
 /**
  * A3: source 13px / 2px ring, 800ms linear rotation (the `spinner` animation token).
+ * B6: the whole spinner fades in over 150ms (`appear`) so brief loads do not flash.
  * D5 extension: reduced motion (token-level) keeps a static ring and the same
  * accessible loading text.
  * Use decorative inside a button that already supplies its loading name.
@@ -31,7 +32,7 @@ export function Spinner({
       role={decorative ? undefined : "status"}
       aria-live={decorative ? undefined : "polite"}
       aria-hidden={decorative ? true : undefined}
-      className={`inline-flex items-center ${className}`}
+      className={`animate-appear inline-flex items-center ${className}`}
     >
       <span
         aria-hidden="true"

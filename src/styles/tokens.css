@@ -101,6 +101,8 @@
    motion.css; ad-hoc durations, easings or keyframes live in src/styles. */
 :root {
   --duration-fast: 120ms;
+  /* Appear class: short fade so brief loads do not flash (Spinner, loaded values). */
+  --duration-appear: 150ms;
   --duration-base: 200ms;
   --duration-enter: 260ms;
   /* Movement-class alias: collapses to zero under reduced motion. */
@@ -128,6 +130,7 @@
     --stagger-step: 0ms;
     --duration-move: 0s;
     --duration-fast: 60ms;
+    --duration-appear: 100ms;
     --duration-base: 100ms;
     --duration-enter: 100ms;
     --animate-nudge: none;

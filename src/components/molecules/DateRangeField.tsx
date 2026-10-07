@@ -24,7 +24,11 @@ export interface DateRangeFieldProps {
   className?: string;
 }
 
-/** Calendar strings pass through unchanged; callers own range/coverage policy. */
+/**
+ * Calendar strings pass through unchanged; callers own range/coverage policy.
+ * B11: validation color changes ease in (inputs via `motion-field`; the compact
+ * container border, whose inputs have none, tints with the same transition).
+ */
 export function DateRangeField({
   label = "Date range", startLabel = "Start date", endLabel = "End date",
   start, end, onStartChange, onEndChange, startError, endError, disabled = false,
@@ -33,7 +37,7 @@ export function DateRangeField({
   const compact = variant === "compact";
   const compactStyle = compact ? { border: 0, background: "transparent", height: "auto", padding: "2px", fontSize: "12px" } : undefined;
   return (
-    <fieldset className={`${compact ? "flex items-start gap-2 rounded-[7px] border border-border bg-surface px-[10px] py-[7px] shadow-panel" : "grid grid-cols-2 gap-[10px] [@media(width<=480px)]:grid-cols-1"} min-w-0 ${className}`} disabled={disabled}>
+    <fieldset className={`${compact ? "motion-colors flex items-start gap-2 rounded-[7px] border border-border bg-surface px-[10px] py-[7px] shadow-panel has-[[aria-invalid=true]]:border-error" : "grid grid-cols-2 gap-[10px] [@media(width<=480px)]:grid-cols-1"} min-w-0 ${className}`} disabled={disabled}>
       <legend className="sr-only">{label}</legend>
       {compact && <Icon name="calendar" size={16} className="mt-1 text-text-muted [@media(width<=480px)]:hidden" />}
       <FormField label={startLabel} labelVisuallyHidden={compact} error={startError} className="flex-1">

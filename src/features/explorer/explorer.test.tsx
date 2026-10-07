@@ -1,7 +1,8 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createFixtureOperations, type FixtureOptions } from "../../../tests/fixtures/operations";
+import { syntheticSettings } from "../../../tests/fixtures/scenarios";
 import { createSessionRuntime } from "../../session/session-runtime";
 import { ExplorerFeature } from "./ExplorerFeature";
 import { isCalendarDate } from "./preview-state";
@@ -277,5 +278,155 @@ describe("Explorer feature interaction", () => {
       expect(screen.queryByRole("table")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Restart browsing" })).toBeInTheDocument();
     }
+  });
+});
+
+describe("Explorer loading treatments (FR4, AC3, AC5)", () => {
+  function mount(options: FixtureOptions = { persona: "analyst" }) {
+    const fixture = createFixtureOperations(options);
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+    const view = render(<ExplorerFeature operations={fixture.operations} runtime={runtime} initialPageSize={1} {...(options.now ? { now: options.now } : {})} />);
+    return { fixture, runtime, view };
+  }
+  const dimmed = () => document.querySelector("[inert][aria-busy=true]");
+
+  it("shows hidden skeleton rows above the single preview banner while the first page loads, then the exact table", async () => {
+    const fixture = createFixtureOperations({ persona: "analyst" });
+    const hold = fixture.deferNext("startPreview"); releases.push(() => { hold.release(); });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+    render(<ExplorerFeature operations={fixture.operations} runtime={runtime} initialPageSize={1} />);
+    const banner = await screen.findByText("Loading preview");
+    expect(screen.getAllByText("Loading preview")).toHaveLength(1);
+    expect(banner.closest("[role=status]")).not.toBeNull();
+    const skeleton = document.querySelector("[aria-busy=true] > div[aria-hidden=true]");
+    expect(skeleton).not.toBeNull();
+    expect(skeleton).toHaveTextContent("");
+    expect(skeleton?.querySelector("table, [role]")).toBeNull();
+    expect(screen.queryByRole("table", { name: "Synthetic national observations preview" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(screen.queryByText("Loading preview")).not.toBeInTheDocument();
+    expect(dimmed()).toBeNull();
+    expect(document.querySelector("[aria-busy=true]")).toBeNull();
+  });
+
+  it("shows skeleton rows with the schema banner while the schema loads", async () => {
+    const user = userEvent.setup();
+    const fixture = createFixtureOperations({ persona: "analyst" });
+    const schemaHold = fixture.deferNext("readSchema"); releases.push(() => { schemaHold.release(); });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+    render(<ExplorerFeature operations={fixture.operations} runtime={runtime} initialPageSize={1} />);
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    await user.click(screen.getByRole("tab", { name: "Schema" }));
+    const panel = screen.getByRole("tabpanel", { name: "Schema" });
+    expect(within(panel).getByText("Loading schema")).toBeVisible();
+    expect(within(panel).getAllByRole("status")).toHaveLength(1);
+    expect(panel.querySelector("div[aria-hidden=true] > div")).not.toBeNull();
+    expect(within(panel).queryByRole("table")).not.toBeInTheDocument();
+    await act(async () => { schemaHold.release(); await Promise.resolve(); });
+    await within(panel).findByRole("table", { name: "Authorized dataset schema" });
+    expect(within(panel).queryByText("Loading schema")).not.toBeInTheDocument();
+  });
+
+  it("dims the retained page during next(), then replaces it without leaving the dim", async () => {
+    const user = userEvent.setup();
+    const { fixture } = mount();
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    const first = Array.from(screen.getByRole("table", { name: "Synthetic national observations preview" }).querySelectorAll("td")).map((cell) => cell.textContent);
+    const hold = fixture.deferNext("continuePreview"); releases.push(() => { hold.release(); });
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Loading preview");
+    const stale = dimmed();
+    expect(stale).not.toBeNull();
+    expect(stale).toHaveAttribute("aria-hidden", "true");
+    // Stale rows are retained byte-for-byte but are neither exposed nor interactive.
+    expect(Array.from(stale?.querySelectorAll("tbody td") ?? []).map((cell) => cell.textContent)).toEqual(first);
+    expect(screen.queryByRole("table", { name: "Synthetic national observations preview" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("Loading preview")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    await waitFor(() => { expect(dimmed()).toBeNull(); });
+    const table = await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(table.closest("[aria-busy=true]")).toBeNull();
+    expect(screen.getByRole("button", { name: "Previous" })).toBeEnabled();
+  });
+
+  it("removes the dimmed page with the session state on logout and ignores a late response", async () => {
+    const user = userEvent.setup();
+    const { fixture, runtime } = mount();
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    const hold = fixture.deferNext("continuePreview");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Loading preview");
+    expect(dimmed()).not.toBeNull();
+    act(() => { runtime.invalidate(); });
+    // Same commit as the session change: nothing from the retained page remains.
+    expect(dimmed()).toBeNull();
+    expect(document.querySelector("table")).toBeNull();
+    expect(document.querySelector("tbody")).toBeNull();
+    expect(screen.queryByText("Synthetic national observations")).not.toBeInTheDocument();
+    expect(screen.getByText("Sign in to explore datasets")).toBeVisible();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    expect(dimmed()).toBeNull();
+    expect(document.querySelector("table")).toBeNull();
+    expect(screen.queryByText("Loading preview")).not.toBeInTheDocument();
+  });
+
+  it("removes the dimmed page on session expiry (invalidate) and never restores it", async () => {
+    const user = userEvent.setup();
+    const { fixture, runtime } = mount();
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    const hold = fixture.deferNext("continuePreview");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Loading preview");
+    act(() => { runtime.invalidate("expired"); });
+    expect(dimmed()).toBeNull();
+    expect(document.querySelector("table")).toBeNull();
+    expect(screen.getByText("Session expired")).toBeVisible();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    expect(document.querySelector("table")).toBeNull();
+    expect(screen.getByText("Session expired")).toBeVisible();
+  });
+
+  it("removes the dimmed page when capabilities shrink and does not restore it from a late response", async () => {
+    const user = userEvent.setup();
+    const { fixture, runtime } = mount();
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(screen.getByText("Synthetic facility observations")).toBeVisible();
+    const hold = fixture.deferNext("continuePreview");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Loading preview");
+    expect(dimmed()).not.toBeNull();
+    act(() => { fixture.setPersona("viewer"); runtime.setResolution(fixture.sessionResolution()); });
+    expect(dimmed()).toBeNull();
+    expect(screen.queryByText("Synthetic facility observations")).not.toBeInTheDocument();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(dimmed()).toBeNull();
+    expect(screen.queryByText("Synthetic facility observations")).not.toBeInTheDocument();
+    expect(fixture.callLog.read().filter((call) => call.operation === "continuePreview")).toHaveLength(1);
+  });
+
+  it("removes the dimmed page when the preview expires during next() and ignores the late response", async () => {
+    const user = userEvent.setup();
+    const start = Date.now(); let time = start;
+    const { fixture } = mount({ persona: "analyst", now: () => time });
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    const expiry = start + syntheticSettings.previewLifetimeMs;
+    time = expiry - 80;
+    const hold = fixture.deferNext("continuePreview");
+    await user.click(screen.getByRole("button", { name: "Next" }));
+    await screen.findByText("Loading preview");
+    expect(dimmed()).not.toBeNull();
+    time = expiry + 1000;
+    await screen.findByText("Preview expired");
+    expect(dimmed()).toBeNull();
+    expect(screen.queryByRole("table", { name: "Synthetic national observations preview" })).not.toBeInTheDocument();
+    await act(async () => { hold.release(); await Promise.resolve(); });
+    expect(screen.queryByRole("table", { name: "Synthetic national observations preview" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Loading preview")).not.toBeInTheDocument();
+    expect(dimmed()).toBeNull();
+    expect(screen.getByRole("button", { name: "Restart browsing" })).toBeEnabled();
   });
 });

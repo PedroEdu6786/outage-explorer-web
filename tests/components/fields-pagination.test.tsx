@@ -66,6 +66,21 @@ describe("caller-owned field compositions", () => {
     expect(change).not.toHaveBeenCalled();
   });
 
+  it("keeps validation messaging, invalid state and association unchanged in both variants", () => {
+    for (const variant of ["fields", "compact"] as const) {
+      const { unmount, rerender } = render(<DateRangeField variant={variant} start="2026-09-04" end="2026-09-01" onStartChange={() => undefined} onEndChange={() => undefined} startError="Start is after end." />);
+      const start = screen.getByLabelText("Start date");
+      expect(start).toHaveAttribute("aria-invalid", "true");
+      expect(start).toHaveAccessibleDescription("Start is after end.");
+      expect(screen.getByLabelText("End date")).not.toHaveAttribute("aria-invalid");
+      expect(screen.getAllByText("Start is after end.")).toHaveLength(1);
+      rerender(<DateRangeField variant={variant} start="2026-09-01" end="2026-09-04" onStartChange={() => undefined} onEndChange={() => undefined} />);
+      expect(screen.getByLabelText("Start date")).not.toHaveAttribute("aria-invalid");
+      expect(screen.queryByText("Start is after end.")).not.toBeInTheDocument();
+      unmount();
+    }
+  });
+
   it("reports controlled search changes and clearing; caller rerenders the value", async () => {
     const user = userEvent.setup();
     const change = vi.fn();
@@ -113,5 +128,20 @@ describe("supplied pagination actions", () => {
     await user.click(screen.getByRole("button", { name: "7" }));
     expect(select).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("button", { name: "4" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("keeps the current-page marker and disabled semantics when the current page changes", async () => {
+    const user = userEvent.setup();
+    function Pages() {
+      const [current, setCurrent] = useState(1);
+      return <PaginationControls label="Result navigation" disabled={current === 3} pages={[1, 2, 3].map((page) => ({ key: String(page), label: String(page), current: page === current, onSelect: () => { setCurrent(page); } }))} />;
+    }
+    render(<Pages />);
+    await user.click(screen.getByRole("button", { name: "2" }));
+    expect(screen.getByRole("button", { name: "2" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("button", { name: "1" })).not.toHaveAttribute("aria-current");
+    expect(screen.getAllByRole("button").filter((button) => button.getAttribute("aria-current") === "page")).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "3" }));
+    for (const button of screen.getAllByRole("button")) expect(button).toBeDisabled();
   });
 });

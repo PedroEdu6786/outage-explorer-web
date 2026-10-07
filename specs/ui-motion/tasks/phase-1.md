@@ -1,5 +1,5 @@
 # Tasks — Phase 1: Foundation and controls
-> Status: phase 1 verified (T1.37 devlog pending commit) · Slug: ui-motion · Manifest: [../tasks.md](../tasks.md) · Plan: [../plan.md](../plan.md) · Spec: [../spec.md](../spec.md)
+> Status: phase 1 verified and committed (36936b1) · Slug: ui-motion · Manifest: [../tasks.md](../tasks.md) · Plan: [../plan.md](../plan.md) · Spec: [../spec.md](../spec.md)
 
 Plan phase 1 (A1–A3, B1–B5, B7, C1, Spinner rotation migration; FR1, FR2, FR5; AC1, AC2, AC4, AC6, AC7).
 Paths marked (new) are created. `[P]` = independent of sibling tasks once its stated predecessors are done, with disjoint files.
@@ -49,7 +49,7 @@ Paths marked (new) are created. `[P]` = independent of sibling tasks once its st
 ## Documentation
 - [x] **T1.35** Document the `motion` Storybook global (default off, toggle), the `tests/motion` command (`npm run test:e2e -- tests/motion --workers=1` after `build-storybook`), the real-route `reducedMotion` default and the AC7 capture-comparison method — `docs/development/verification.md`  (AC6, AC7)
 - [x] **T1.36** Update the motion paragraph and spec status line from "not implemented" to "in progress, phase 1 verified" — `README.md`, `specs/ui-motion/spec.md`  (AC6)
-- [ ] **T1.37** At commit time, append the devlog entry (request, decisions, changes, checks run, limitations) and stage it with the implementation — `docs/devlog/<commit-date>.md`  (AGENTS.md devlog rule)
+- [x] **T1.37** At commit time, append the devlog entry (request, decisions, changes, checks run, limitations) and stage it with the implementation — `docs/devlog/<commit-date>.md`  (AGENTS.md devlog rule)
 
 ## Checkpoint
 - [x] **T1.C** Checkpoint: run the phase gate list in [../tasks.md](../tasks.md#phase-gate-commands) (plus `playwright.production.config.ts` with `OUTAGE_API_ORIGIN=''` build and `playwright.controlled.config.ts` with a configured build, because T1.7 changed both); regenerate captures with motion off and compare file-by-file with T1.1, differing only for Checkbox, Tabs and nav indicator; confirm no `package.json`/lockfile diff; record revision, digest, commands and intentional differences — `specs/ui-motion/verification/phase-1.md` (new), `specs/ui-motion/tasks/phase-1.md`  (AC1, AC2, AC4 for controls, AC6, AC7)
@@ -62,4 +62,4 @@ Evidence: [verification/phase-1.md](../verification/phase-1.md); baseline: [veri
 - T1.15: `SearchField.tsx` needed no edit; it renders the `Input` atom, which carries the focus/invalid treatment.
 - T1.16: the unchecked checkbox border uses `--color-text-muted` (non-text contrast) rather than the field border color.
 - T1.25: the desktop indicator jsdom no-op check lives in `tests/components/shell.test.tsx` (it reuses that file's `matchMedia` stub); Tabs/NavigationItem checks are in `navigation.test.tsx`.
-- T1.37 is intentionally left for the coordinator (devlog and commit).
+- T1.37 (devlog and commit) was completed by the coordinator in commit 36936b1.

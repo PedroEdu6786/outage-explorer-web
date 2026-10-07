@@ -5,6 +5,7 @@
 
 @theme {
   --animate-fade-in: fade-in var(--duration-base) var(--ease-out) backwards;
+  --animate-appear: fade-in var(--duration-appear) var(--ease-out) backwards;
   --animate-fade-rise: fade-rise var(--duration-enter) var(--ease-out) backwards;
   --animate-scale-in: scale-in var(--duration-enter) var(--ease-out) backwards;
   --animate-settle: settle var(--duration-enter) var(--ease-out);
@@ -99,6 +100,18 @@
 @utility motion-stagger {
   animation: var(--animate-fade-rise);
   animation-delay: calc(var(--stagger-index, 0) * var(--stagger-step));
+}
+
+/* Status banner mount plus the success border-tint settle (two animations, one element). */
+@utility motion-enter-settle {
+  animation: var(--animate-fade-rise), var(--animate-settle);
+}
+
+/* Optional placeholder shimmer (E1): unused by call sites; none under reduced motion. */
+@utility motion-shimmer {
+  background-image: linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-surface) 70%, transparent) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
 }
 
 /* Sliding indicator: JS writes only the custom properties; CSS moves it. The

@@ -7,6 +7,7 @@ import { Button } from "../../components/atoms/Button";
 import { Surface } from "../../components/atoms/Surface";
 import { StatusMessage } from "../../components/molecules/StatusMessage";
 import { Tabs } from "../../components/molecules/Tabs";
+import { TableSkeleton } from "../../components/molecules/TableSkeleton";
 import { ExplorerTemplate } from "../../components/templates/ExplorerTemplate";
 import { DatasetCatalog } from "./DatasetCatalog";
 import { DatasetHeader } from "./DatasetHeader";
@@ -42,7 +43,7 @@ export function ExplorerFeature({ onNavigate, intent, ...options }: ExplorerFeat
     if (next && options.runtime.isCurrent({ generation: next.generation })) onNavigate(next);
   } : undefined;
   const preview = selection && selected ? <><PreviewFilters key={JSON.stringify(selection)} dataset={selected} selection={selection} onApply={(filters, size) => { controller.select(selected.id, filters, size); }} /><DatasetPreview state={state} onNext={() => { controller.next(); }} onPrevious={() => { controller.previous(); }} onRestart={() => { controller.restart(); }} /></> : null;
-  const schema = state.schemaStatus === "loading" ? <StatusMessage title="Loading schema" pending className="m-3" /> : state.schemaFailure ? <StatusMessage title="Schema unavailable" description={state.schemaFailure.message} tone="warning" className="m-3" actions={<Button variant="secondary" onClick={() => { controller.restart(); }}>Reload dataset</Button>} /> : state.schema ? <DatasetSchema schema={state.schema} /> : null;
+  const schema = state.schemaStatus === "loading" ? <><StatusMessage title="Loading schema" pending className="m-3" /><TableSkeleton rows={5} columns={4} /></> : state.schemaFailure ? <StatusMessage title="Schema unavailable" description={state.schemaFailure.message} tone="warning" className="m-3" actions={<Button variant="secondary" onClick={() => { controller.restart(); }}>Reload dataset</Button>} /> : state.schema ? <DatasetSchema schema={state.schema} /> : null;
   return <ExplorerTemplate
     heading={<><h1 className="text-page-title">Dataset Explorer</h1><p className="mt-2 text-[13px] text-text-muted">Discover authorized datasets, inspect schemas, and preview stored observations.</p></>}
     catalog={state.catalogStatus === "loading" ? <StatusMessage title="Loading authorized datasets" pending /> : <DatasetCatalog datasets={state.catalog} selectedId={selected?.id} onSelect={(datasetId) => { setTab("preview"); controller.select(datasetId); }} />}

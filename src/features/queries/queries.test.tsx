@@ -324,4 +324,57 @@ describe("Queries explicit execution lifecycle", () => {
     expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
     act(() => { runtime.invalidate("pending"); }); await waitFor(() => { expect(screen.queryByRole("textbox", { name: "SQL statement" })).not.toBeInTheDocument(); }); expect(screen.queryByText("9007199254740993")).not.toBeInTheDocument();
   });
+
+  describe("paging dim (FR4, AC3, AC5)", () => {
+    const dimmed = () => document.querySelector("[inert][aria-busy=true]");
+    async function pagingFeature() {
+      const { fixture, runtime } = setup(); render(<QueriesFeature runtime={runtime} operations={fixture.operations} initialPageSize={2} maximumPageSize={100} />);
+      fireEvent.change(screen.getByRole("textbox", { name: "SQL statement" }), { target: { value: sql } }); fireEvent.click(screen.getByRole("button", { name: "Run query" }));
+      await screen.findByText("Query succeeded");
+      const cells = () => Array.from(screen.getByRole("table", { name: "SQL query results" }).querySelectorAll("td")).map((cell) => cell.textContent);
+      return { fixture, runtime, firstPage: cells() };
+    }
+    it("dims the retained page and hides it from assistive technology only while paging, without changing cells", async () => {
+      const { fixture, firstPage } = await pagingFeature();
+      expect(dimmed()).toBeNull();
+      const hold = fixture.deferNext("readQueryPage");
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => { expect(dimmed()).not.toBeNull(); });
+      const stale = dimmed();
+      expect(stale).toHaveAttribute("aria-hidden", "true");
+      expect(Array.from(stale?.querySelectorAll("td") ?? []).map((cell) => cell.textContent)).toEqual(firstPage);
+      expect(screen.queryByRole("table", { name: "SQL query results" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
+      expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+      await act(async () => { hold.release(); await Promise.resolve(); });
+      await waitFor(() => { expect(dimmed()).toBeNull(); });
+      await screen.findByText(/^Page 2 of/);
+      expect(screen.getByRole("table", { name: "SQL query results" }).closest("[aria-busy=true]")).toBeNull();
+      expect(fixture.callLog.read().filter((call) => call.operation === "executeQuery")).toHaveLength(1);
+    });
+    it.each([["logout", "unauthenticated"], ["expiry", "expired"], ["access change", "pending"]] as const)("removes the dimmed result on %s during paging and a late page does not restore it", async (_name, reason) => {
+      const { fixture, runtime } = await pagingFeature();
+      const hold = fixture.deferNext("readQueryPage");
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => { expect(dimmed()).not.toBeNull(); });
+      act(() => { runtime.invalidate(reason); });
+      expect(dimmed()).toBeNull();
+      expect(document.querySelector("table")).toBeNull();
+      expect(screen.queryByText("Retained query results")).not.toBeInTheDocument();
+      expect(screen.queryByRole("region", { name: "Retained query results" })).not.toBeInTheDocument();
+      await act(async () => { hold.release(); await Promise.resolve(); });
+      expect(dimmed()).toBeNull();
+      expect(document.querySelector("table")).toBeNull();
+      expect(screen.queryByRole("region", { name: "Retained query results" })).not.toBeInTheDocument();
+    });
+    it("removes the dimmed result when paging is forbidden mid-flight", async () => {
+      const { fixture } = await pagingFeature();
+      const hold = fixture.deferNext("readQueryPage"); fixture.failNext("readQueryPage", { kind: "forbidden", message: "Synthetic denial" });
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+      await waitFor(() => { expect(dimmed()).not.toBeNull(); });
+      await act(async () => { hold.release(); await Promise.resolve(); });
+      await waitFor(() => { expect(dimmed()).toBeNull(); });
+      expect(document.querySelector("table")).toBeNull();
+    });
+  });
 });

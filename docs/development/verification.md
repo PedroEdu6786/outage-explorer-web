@@ -258,3 +258,25 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
   files even on an unmodified tree; the baseline lists them. Keep regenerated
   PNGs only when the differences are intentional and recorded; otherwise restore
   them with `git checkout`.
+
+### Skeleton and loading conventions
+
+- **Skeletons are decorative.** `Skeleton` and `TableSkeleton` are always
+  `aria-hidden`, render no text, number or status, and never animate (shimmer is an
+  unused, default-off option). They stand in for a value that has not arrived and
+  must never show zero, "Unavailable" or a date.
+- **Banners announce.** The existing `StatusMessage` banner ("Loading national
+  observations", "Loading preview", "Loading schema") keeps its node, role and text;
+  it is the only live region. Its icon swap is decorative (`aria-hidden`).
+- **`loading` props.** `MetricValue.loading` swaps the value slot for a placeholder
+  (explicit `false` fades the real value in). `DataTable.loading` dims content that
+  the caller retained: `aria-busy`, `inert` and `aria-hidden`, cells untouched. The
+  caller owns what is retained; Explorer and SQL paging reuse controller state that
+  logout, expiry and access change already clear, so no stale rows survive. Overview
+  shows first-load skeleton cards only (no retained series yet).
+- **Geometry.** Skeletons use the real padding and line-height strut so the swap does
+  not shift layout (`tests/motion/status-loading.spec.ts` compares card and row
+  heights). Skeleton-bearing pending states are expected, recorded capture differences.
+- **Checks.** `tests/motion/status-loading.spec.ts` (reduce vs no-preference, one live
+  region, text identical with motion on/off); RTL scenarios in the Overview, Explorer
+  and Queries feature tests cover first-load skeletons and paging dim/invalidation.

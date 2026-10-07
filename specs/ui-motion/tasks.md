@@ -1,5 +1,5 @@
 # Tasks: Animations and micro-interactions
-> Status: draft · Slug: ui-motion · Plan: ./plan.md · Spec: ./spec.md · Layout: hybrid (manifest + `tasks/phase-N.md`)
+> Status: phases 1–2 verified (phase 2 devlog/commit pending) · Slug: ui-motion · Plan: ./plan.md · Spec: ./spec.md · Layout: hybrid (manifest + `tasks/phase-N.md`)
 
 ## Overview
 136 tasks across 4 phases; 62 tasks parallelizable [P] (phase 1: 38/18, phase 2: 34/14, phase 3: 34/16, phase 4: 30/14).
@@ -13,8 +13,8 @@
 ## Phases
 | Phase | File | Scope | Status |
 | --- | --- | --- | --- |
-| 1 | [tasks/phase-1.md](tasks/phase-1.md) | Baseline; A1–A3; B1–B5, B7; C1; Spinner token migration | verified (T1.37 devlog/commit pending) |
-| 2 | [tasks/phase-2.md](tasks/phase-2.md) | Skeleton/TableSkeleton; B6, B8–B12; C5 loading; D2 first-load cards; D3 skeletons | not started |
+| 1 | [tasks/phase-1.md](tasks/phase-1.md) | Baseline; A1–A3; B1–B5, B7; C1; Spinner token migration | verified and committed (36936b1) |
+| 2 | [tasks/phase-2.md](tasks/phase-2.md) | Skeleton/TableSkeleton; B6, B8–B12; C5 loading; D2 first-load cards; D3 skeletons | verified (T2.33 devlog/commit pending) |
 | 3 | [tasks/phase-3.md](tasks/phase-3.md) | C2–C4, C5 stagger, C6, C7, D1; D2 chart wipe, metric entrance, guarded range-change dim | not started |
 | 4 | [tasks/phase-4.md](tasks/phase-4.md) | Remaining D2; D3; D4; E1 left off; final evidence | not started |
 

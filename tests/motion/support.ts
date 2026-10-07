@@ -6,7 +6,8 @@ export type MotionPreference = "reduce" | "no-preference";
 export async function openMotionStory(page: Page, id: string, preference: MotionPreference = "no-preference") {
   await page.emulateMedia({ reducedMotion: preference });
   await page.goto(`/iframe.html?id=${id}&viewMode=story&globals=motion:on`);
-  await expect(page.getByRole("note")).toHaveText("Synthetic fixture preview — not live EIA data.");
+  // Feature stories also render their own "Synthetic fixture demo" note; the preview note is always first.
+  await expect(page.getByRole("note").first()).toHaveText("Synthetic fixture preview — not live EIA data.");
   await expect(page.locator("#storybook-root")).not.toBeEmpty();
   // Prove the test-only motion-off stylesheet is absent (otherwise nothing here is meaningful).
   await expect(page.locator("style[data-motion-off]")).toHaveCount(0);

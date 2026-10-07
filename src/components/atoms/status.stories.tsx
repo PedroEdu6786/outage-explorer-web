@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Badge, type BadgeTone } from "./Badge";
+import { Skeleton } from "./Skeleton";
 import { Spinner } from "./Spinner";
 import { Surface } from "./Surface";
 
@@ -77,3 +78,27 @@ function ToneSwitch() {
 
 /** One badge changing tone, to review the color crossfade (toolbar Motion global on). */
 export const ToneSwitchReview: Story = { render: () => <ToneSwitch /> };
+
+/** Static placeholder blocks (A2, E1): decorative, no text, no animation. */
+export const SkeletonBlocks: Story = {
+  render: () => (
+    <div className="grid max-w-sm gap-3" data-testid="skeleton-blocks">
+      <Skeleton className="block h-4 w-2/3" />
+      <Skeleton className="block h-8 w-full" />
+      <div className="flex items-center gap-3"><Skeleton className="size-8 rounded-full" /><Skeleton className="h-3 w-24" /></div>
+    </div>
+  ),
+};
+
+function SpinnerFadeIn() {
+  const [shown, setShown] = useState(false);
+  return (
+    <div className="flex items-center gap-3">
+      <button type="button" className="rounded-control border border-border-strong px-2 py-1 text-[11px]" onClick={() => { setShown((value) => !value); }}>{shown ? "Stop loading" : "Start loading"}</button>
+      {shown && <Spinner label="Loading preview" />}
+    </div>
+  );
+}
+
+/** Spinner mounting (150ms fade-in), to review short loads (toolbar Motion global on). */
+export const SpinnerFadeInReview: Story = { render: () => <SpinnerFadeIn /> };

@@ -51,4 +51,38 @@ describe("lossless positional table", () => {
     await user.keyboard("{Enter}");
     expect(recover).toHaveBeenCalledTimes(1);
   });
+
+  it("dims retained rows while loading, marks them busy and removes them from interaction and the accessibility tree", () => {
+    const { container, rerender } = render(<DataTable data={syntheticQueryTable} caption="Retained page" />);
+    const root = container.firstElementChild as HTMLElement;
+    const cellsBefore = screen.getAllByRole("cell").map((cell) => cell.textContent);
+    // Default output: no busy/inert/hidden attributes, no dim.
+    for (const attribute of ["aria-busy", "aria-hidden", "inert"]) expect(root).not.toHaveAttribute(attribute);
+    expect(root.className).not.toContain("opacity-60");
+    rerender(<DataTable data={syntheticQueryTable} caption="Retained page" loading />);
+    expect(root).toBe(container.firstElementChild);
+    expect(root).toHaveAttribute("aria-busy", "true");
+    expect(root).toHaveAttribute("aria-hidden", "true");
+    expect(root).toHaveAttribute("inert");
+    expect(root.className).toContain("opacity-60");
+    // The stale rows are not exposed to assistive technology or focusable while dimmed.
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(root.querySelectorAll("td").length).toBe(cellsBefore.length);
+    expect(Array.from(root.querySelectorAll("td")).map((cell) => cell.textContent)).toEqual(cellsBefore);
+    rerender(<DataTable data={syntheticQueryTable} caption="Retained page" loading={false} />);
+    for (const attribute of ["aria-busy", "aria-hidden", "inert"]) expect(root).not.toHaveAttribute(attribute);
+    expect(screen.getAllByRole("cell").map((cell) => cell.textContent)).toEqual(cellsBefore);
+  });
+
+  it("does not alter cell values, gaps or zero while loading", () => {
+    const data: TableData = {
+      columns: ["decimal", "decimal"].map((kind, index) => ({ id: String(index), label: `Field ${String(index)}`, kind: kind as "decimal", unit: null, nullable: true })),
+      rows: [{ position: 0, cells: [{ kind: "decimal", exact: "0", display: "0.00" }, { kind: "null" }] }],
+    };
+    const { container, rerender } = render(<DataTable data={data} caption="Zero and gap" />);
+    const before = container.querySelector("tbody")?.innerHTML;
+    rerender(<DataTable data={data} caption="Zero and gap" loading />);
+    expect(container.querySelector("tbody")?.innerHTML).toBe(before);
+    expect(container.querySelector("[aria-label='Missing value']")).toHaveTextContent("—");
+  });
 });

@@ -31,6 +31,20 @@ export const CompactRange: Story = { render: () => <DateExample compact /> };
 export const InvalidRange: Story = { render: () => <DateExample invalid /> };
 export const DisabledRange: Story = { render: () => <DateExample disabled /> };
 
+function ValidationToggle() {
+  const [invalid, setInvalid] = useState(false);
+  return (
+    <div className="grid max-w-xl gap-3 p-[18px]">
+      <button type="button" className="w-fit rounded-control border border-border-strong px-2 py-1 text-[11px]" onClick={() => { setInvalid((value) => !value); }}>{invalid ? "Mark valid" : "Mark invalid"}</button>
+      <DateRangeField start="2026-09-30" end="2026-09-01" onStartChange={() => { /* Review specimen. */ }} onEndChange={() => { /* Review specimen. */ }} startError={invalid ? "Synthetic error: start is after end." : undefined} />
+      <DateRangeField variant="compact" start="2026-09-30" end="2026-09-01" onStartChange={() => { /* Review specimen. */ }} onEndChange={() => { /* Review specimen. */ }} startError={invalid ? "Synthetic error: start is after end." : undefined} />
+    </div>
+  );
+}
+
+/** Invalid/valid toggle to review the validation color transition (toolbar Motion global on). */
+export const ValidationReview: Story = { render: () => <ValidationToggle /> };
+
 function SearchExample() {
   const [value, setValue] = useState("");
   return <div className="grid max-w-xs gap-3 p-3"><SearchField label="Search datasets" value={value} onValueChange={setValue} placeholder="Search datasets" description="Enter text to inspect this synthetic control." /><p className="text-[11px] text-text-muted">Supplied search: {value || "empty"}</p></div>;

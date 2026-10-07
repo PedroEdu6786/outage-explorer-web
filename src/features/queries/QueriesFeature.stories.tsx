@@ -6,9 +6,9 @@ import { AppShell } from "../../components/templates/AppShell";
 import { Badge } from "../../components/atoms/Badge";
 import type { QueryFailure } from "./query-state";
 import { QueriesFeature } from "./QueriesFeature";
-function Demo({ failure }: { readonly failure?: QueryFailure }) {
+function Demo({ failure, holdPage = false }: { readonly failure?: QueryFailure; readonly holdPage?: boolean }) {
   const { controller, runtime } = useFixtureController();
-  useState(() => { if (failure) controller.failNextExecution(failure); });
+  useState(() => { if (failure) controller.failNextExecution(failure); if (holdPage) controller.deferNext("readQueryPage"); });
   return <AppShell title="SQL Workspace" navigation={{ status: "ready", revision: "synthetic-queries", identity: { name: "Synthetic Viewer", initials: "S", roleLabel: "Viewer" }, destinations: [{ id: "queries", label: "SQL Workspace", href: "#queries", icon: "sql", active: true }] }} accessory={<Badge>Sample data</Badge>} onSignOut={() => { runtime.invalidate(); }}><QueriesFeature operations={controller.operations} runtime={runtime} initialPageSize={2} maximumPageSize={100} /></AppShell>;
 }
 const meta = { title: "Features/Queries", component: Demo, parameters: { layout: "fullscreen" }, render: () => <FixtureProvider options={{ persona: "viewer" }}><Demo /></FixtureProvider> } satisfies Meta<typeof Demo>;
@@ -28,3 +28,5 @@ export const Denied: Story = { render: () => <FixtureProvider><Demo failure={{ k
 export const Unavailable: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "data-unavailable", message: "Synthetic data unavailable." }} /></FixtureProvider>, play: executeFailure };
 export const ServiceFailure: Story = { render: () => <FixtureProvider><Demo failure={{ kind: "service-failure", message: "Synthetic service unavailable." }} /></FixtureProvider>, play: executeFailure };
 export const Empty: Story = { render: () => <FixtureProvider options={{ dataState: "empty" }}><Demo /></FixtureProvider>, play: execute };
+/** The next retained page is held open: the current result is dimmed, inert and hidden from assistive technology. */
+export const Paging: Story = { render: () => <FixtureProvider options={{ persona: "analyst" }}><Demo holdPage /></FixtureProvider>, play: async (context) => { await execute(context); const canvas = within(context.canvasElement); await fireEvent.click(canvas.getByRole("button", { name: "Next" })); await waitFor(() => { if (!context.canvasElement.querySelector("[aria-busy=true][inert]")) throw new Error("Waiting for the dimmed page"); }); } };

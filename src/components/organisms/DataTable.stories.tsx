@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { TableData } from "../../contracts/table";
 import { syntheticQueryTable } from "../../../tests/fixtures/scenarios";
@@ -36,3 +37,16 @@ export const NarrowOverflow: Story = {
 export const Empty: Story = {
   args: { data: { columns: variedTable.columns, rows: [] }, caption: "Synthetic empty records", emptyTitle: "No matching records", emptyDescription: "Choose different filters to continue.", emptyActions: <Button variant="secondary">Change filters</Button> },
 };
+
+function LoadingDemo() {
+  const [loading, setLoading] = useState(true);
+  return (
+    <div>
+      <div className="border-b border-border p-3"><Button variant="secondary" onClick={() => { setLoading((value) => !value); }}>{loading ? "Finish loading" : "Load next page"}</Button></div>
+      <DataTable data={variedTable} caption="Synthetic retained page" loading={loading} />
+    </div>
+  );
+}
+
+/** Retained rows dimmed while a caller replaces them: busy, inert and hidden from assistive technology. */
+export const LoadingRetained: Story = { render: () => <LoadingDemo /> };

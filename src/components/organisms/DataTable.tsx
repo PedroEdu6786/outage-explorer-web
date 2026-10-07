@@ -10,6 +10,12 @@ export interface DataTableProps {
   emptyTitle?: string;
   emptyDescription?: ReactNode;
   emptyActions?: ReactNode;
+  /**
+   * The caller is replacing this retained content: it dims, is marked busy and,
+   * being stale, becomes inert and hidden from assistive technology. The caller
+   * owns what is retained and clears it on logout or access change.
+   */
+  loading?: boolean;
   className?: string;
 }
 
@@ -53,6 +59,7 @@ function displayCell(cell: TableCell, missingText: string, missingLabel: string)
  * O1/V2–V4: positional cells and published table geometry. No sorting, parsing
  * or inferred rows. D4 extension: a named, keyboard-focusable scroll region;
  * the hidden caption names the table without adding a second visible heading.
+ * C5: optional `loading` dims retained content; cells are never altered.
  */
 export function DataTable({
   data,
@@ -62,10 +69,16 @@ export function DataTable({
   emptyTitle = "No rows",
   emptyDescription,
   emptyActions,
+  loading = false,
   className = "",
 }: DataTableProps) {
   return (
-    <div className={className}>
+    <div
+      aria-busy={loading || undefined}
+      aria-hidden={loading || undefined}
+      inert={loading}
+      className={`motion-colors ${loading ? "opacity-60" : ""} ${className}`.trim()}
+    >
       <div role="region" aria-label={`${caption}: scrollable table`} tabIndex={0} className="max-w-full overflow-x-auto">
         <table className="w-full border-separate border-spacing-0 text-[11px]">
           <caption className="sr-only">{caption}</caption>

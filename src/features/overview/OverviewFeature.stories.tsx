@@ -20,6 +20,7 @@ const meta = { title: "Features/Overview", component: Story, parameters: { layou
 export default meta;
 type OverviewStory = StoryObj<typeof meta>;
 export const Ready: OverviewStory = {};
+/** First load held open: skeleton metric cards (placeholders only, no zero or "Unavailable") under the announced loading banner. */
 export const Loading: OverviewStory = { args: { loading: true } };
 export const Empty: OverviewStory = { args: { state: "empty" } };
 export const Unavailable: OverviewStory = { args: { state: "unavailable" } };
