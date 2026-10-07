@@ -1,5 +1,29 @@
 # Selective data reuse review
 
+## October 7 correction: production metadata reuse and deliberate date submission
+
+The user reported repeated dataset requests across navigation and refreshes while
+still editing dates, and requested those behaviors be fixed. This authorizes
+production catalog retention and supersedes the earlier enabling-authorization
+gate below. Production now uses the previously selected one-entry / 256 KiB
+UTF-8 serialized JSON admission budget. The repository checks each actual decoded
+response against this cap at runtime; oversized responses remain usable but are
+not retained. No live authenticated catalog size measurement is claimed.
+
+Catalog listings, coverage and embedded schemas share open-app memory until page
+reload or existing session/access/publication invalidation. Ordinary navigation
+and date edits do not invalidate them. Observation rows and SQL page retrieval
+keep their existing behavior; SQL execution remains explicit.
+
+Overview now separates draft dates from applied dates: edits keep the displayed
+results and navigation range unchanged; **Apply dates** submits one valid changed
+range. Invalid and unchanged submissions make no request. Open bounds remain
+supported. Dataset Explorer already uses explicit **Apply filters**.
+
+See [October 7 verification](verification/navigation-and-dates.md). Earlier
+records below preserve their historical scope and evidence.
+
+
 Recorded October 5, 2026, before committing implementation. The user clarified
 that row tables may reload on page visits, while data models should not repeatedly
 refresh, and asked for other examples before optimizing every read. This narrows

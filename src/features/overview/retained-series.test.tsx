@@ -149,6 +149,7 @@ describe("Overview feature dimming (AC5)", () => {
     await screen.findByRole("table", { name: "Daily national observations" });
     const deferred = context.fixture.deferNext("readNationalSeries");
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await waitFor(() => { expect(document.querySelectorAll("[inert][aria-hidden=true]").length).toBe(3); });
     return { view, deferred };
   }

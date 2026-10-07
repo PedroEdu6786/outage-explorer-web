@@ -105,6 +105,7 @@ describe("Overview exact observation behavior", () => {
     expect(document.querySelectorAll("g[data-series=calculated] circle")).toHaveLength(2);
     const deferred = fixture.deferNext("readNationalSeries");
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-01" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await waitFor(() => { expect(screen.getByRole("status")).toHaveTextContent("Loading national observations"); });
     const chart = document.querySelector("svg[data-chart=national-trend]");
     expect(chart?.closest("[inert][aria-hidden=true]")).not.toBeNull();
@@ -153,6 +154,7 @@ describe("Overview exact observation behavior", () => {
     await userEvent.setup().click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
     expect(document.querySelector("svg[data-chart=national-trend]")).toBe(first);
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await waitFor(() => { expect(screen.getByRole("table", { name: "Daily national observations" })).toBeVisible(); });
     await waitFor(() => { expect(document.querySelector("[inert]")).toBeNull(); });
     const second = document.querySelector("svg[data-chart=national-trend]");
@@ -169,6 +171,7 @@ describe("Overview exact observation behavior", () => {
     await waitFor(() => { expect(screen.getByLabelText("End date")).toHaveValue("2026-09-04"); });
     // Changing to a newer valid selection dispatches independently of the lost old request.
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await screen.findByRole("table", { name: "Daily national observations" });
     await act(async () => { deferred.release(); await Promise.resolve(); });
     expect(screen.queryByRole("cell", { name: "2026-09-04" })).not.toBeInTheDocument();
@@ -185,12 +188,43 @@ describe("Overview exact observation behavior", () => {
     expect(screen.getByLabelText("Start date")).not.toHaveAttribute("min");
     const before = fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries").length;
     fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-08-31" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     await screen.findByRole("table", { name: "Daily national observations" });
     expect(fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries")).toHaveLength(before + 1);
     fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await screen.findByRole("table", { name: "Daily national observations" });
     expect(fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries").at(-1)?.input).toEqual({ end: "2026-09-04" });
+    view.unmount(); runtime.dispose();
+  });
+  it("keeps edits local until Apply dates and ignores invalid or unchanged submissions", async () => {
+    const { runtime, fixture } = setup("analyst"); const intents: NavigationIntent[] = [];
+    const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} onNavigate={(intent) => { intents.push(intent); }} />);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    const reads = () => fixture.callLog.read().filter((entry) => entry.operation === "readNationalSeries");
+    const before = reads().length;
+    const table = screen.getByRole("table", { name: "Daily national observations" });
+    const chart = document.querySelector("svg[data-chart=national-trend]");
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-09-05" } });
+    expect(screen.getByRole("button", { name: "Apply dates" })).toBeDisabled();
+    fireEvent.submit(screen.getByRole("form", { name: "Observation dates" }));
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-10" } });
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-09-02" } });
+    await act(async () => { await Promise.resolve(); });
+    expect(reads()).toHaveLength(before);
+    expect(screen.getByRole("table", { name: "Daily national observations" })).toBe(table);
+    expect(document.querySelector("svg[data-chart=national-trend]")).toBe(chart);
+    fireEvent.click(screen.getByRole("button", { name: "Explore dataset" }));
+    expect(intents[0]?.filters.dates).toEqual({ start: "2026-09-01", end: "2026-09-04" });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
+    await screen.findByRole("table", { name: "Daily national observations" });
+    expect(reads()).toHaveLength(before + 1);
+    expect(reads().at(-1)?.input).toEqual({ start: "2026-09-02", end: "2026-09-10" });
+    expect(screen.getByRole("button", { name: "Apply dates" })).toBeDisabled();
+    fireEvent.submit(screen.getByRole("form", { name: "Observation dates" }));
+    await act(async () => { await Promise.resolve(); });
+    expect(reads()).toHaveLength(before + 1);
     view.unmount(); runtime.dispose();
   });
   it("withholds protected content and requests for capability denial", () => {
@@ -264,6 +298,7 @@ describe("Overview exact observation behavior", () => {
     await screen.findByRole("table", { name: "Daily national observations" });
     const deferred = fixture.deferNext("readNationalSeries");
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
     await waitFor(() => { expect(screen.getByRole("status")).toHaveTextContent("Loading national observations"); });
     // The retained previous range (phase 3) is dimmed, inert and absent from the accessibility tree; it is not a skeleton.
     expect(screen.queryByRole("table")).not.toBeInTheDocument();

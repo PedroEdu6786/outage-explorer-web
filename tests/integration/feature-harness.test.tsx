@@ -24,6 +24,7 @@ describe("four-feature fixture composition", () => {
   it("hands authorized dates through Overview and Explorer, requests edited-draft consent, and keeps one unchanged execution while paging", async () => {
     const { fixture } = setup(); await ready();
     fireEvent.change(screen.getByLabelText("End date", { selector: 'section[aria-label="Overview feature"] input' }), { target: { value: "2026-09-03" } });
+    click("Apply dates");
     await waitFor(() => { expect(calls(fixture, "readNationalSeries").at(-1)?.input).toMatchObject({ end: "2026-09-03" }); });
     click("Explore dataset");
     await explorer().findByRole("table", { name: "Synthetic national observations preview" });
@@ -74,6 +75,7 @@ describe("four-feature fixture composition", () => {
     }
     click("Overview view");
     fireEvent.change(screen.getByLabelText("End date", { selector: 'section[aria-label="Overview feature"] input' }), { target: { value: "2026-09-03" } });
+    click("Apply dates");
     // Queue an additional late catalog on access change, captured while still Analyst.
     act(() => { runtime.setResolution(fixture.sessionResolution()); });
     click("Sign out");

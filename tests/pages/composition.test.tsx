@@ -198,6 +198,7 @@ it.each(["accepted", "running", "retained", "failed", "interrupted", "publicatio
   const view = render(<ApplicationProvider operations={operations} runtime={runtime} resources={resources} path="/overview" go={vi.fn()} querySettings={null}><OverviewEntry /></ApplicationProvider>);
   await screen.findByRole("table", { name: "Daily national observations" });
   fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+  fireEvent.click(screen.getByRole("button", { name: "Apply dates" }));
   await screen.findByRole("table", { name: "Daily national observations" });
   const beforeRows = readSeries.mock.calls.length;
   const catalogReads = () => fixture.callLog.read().filter((call) => call.operation === "listDatasets").length;

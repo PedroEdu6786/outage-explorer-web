@@ -201,6 +201,7 @@ for (const preference of preferences) {
       await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
       await page.getByRole("button", { name: "Hold next series response" }).click();
       await page.getByLabel("End date").fill("2026-09-03");
+      await page.getByRole("button", { name: "Apply dates" }).click();
       const retained = page.locator("[inert][aria-hidden=true]");
       await expect(retained).toHaveCount(3);
       await expect(page.getByRole("status")).toHaveText("Loading national observations");

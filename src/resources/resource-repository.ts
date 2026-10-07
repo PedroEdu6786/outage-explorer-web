@@ -3,11 +3,12 @@ import type { OperationContext } from "../contracts/session";
 import type { ResourceIdentity, ResourceInvalidation, ResourceMetadata, ResourceOwnership, ResourcePolicy, ResourceRead, ResourceRepository } from "../contracts/resources";
 import type { SessionRuntime } from "../session/session-runtime";
 
+export const catalogResourcePolicy: ResourcePolicy = { retention: "enabled", maximumEntries: 1, maximumBytes: 256 * 1024, decide: () => "reuse" };
 export const disabledResourcePolicy: ResourcePolicy = { retention: "disabled" };
 const obsolete = (): OperationResult<never> => ({ ok: false, failure: { kind: "unauthenticated", message: "Session or resource context changed." } });
 interface Entry { metadata: ResourceMetadata; value: unknown }
 interface Pending { readonly identity: ResourceIdentity; readonly abort: AbortController; readonly epoch: number; readonly denied: () => boolean; readonly promise: Promise<OperationResult<unknown>> }
-/** Protected open-app memory. Policy admission refuses excess metadata entries; production retention is explicitly disabled. */
+/** Protected open-app memory. Policy admission refuses excess metadata entries; catalog retention lasts until invalidation or page reload. */
 export function createResourceRepository(options: { readonly runtime: SessionRuntime; readonly policy: ResourcePolicy; readonly now?: () => number; readonly attachOnCreate?: boolean }): ResourceRepository {
   const { runtime, policy } = options;
   const now = options.now ?? Date.now;

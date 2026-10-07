@@ -22,6 +22,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
   const [dataset, setDataset] = useState<DatasetSummary | null>(null);
   const [series, setSeries] = useState<NationalSeries | null>(null);
   const [range, setRange] = useState<DateBounds>({});
+  const [draftRange, setDraftRange] = useState<DateBounds>({});
   const [failure, setFailure] = useState<OperationFailure | null>(null);
   const [loading, setLoading] = useState(false);
   const [retained, setRetained] = useState<RetainedSeries | null>(null);
@@ -32,7 +33,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
   const activeSeries = useRef<AbortController | null>(null);
   useEffect(() => runtime.registerCleanup(() => {
     preserveRange.current = false;
-    activeSeries.current?.abort(); selection.current += 1; setDataset(null); setSeries(null); setRange({}); setFailure(null); setLoading(false); setRetained(null);
+    activeSeries.current?.abort(); selection.current += 1; setDataset(null); setSeries(null); setRange({}); setDraftRange({}); setFailure(null); setLoading(false); setRetained(null);
   }), [runtime]);
   useEffect(() => {
     if (session.status !== "authenticated" || !session.session.capabilities.canReadNationalSeries) return;
@@ -44,7 +45,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
         const national = catalog.find((item) => item.grain === "national" && currentSession.status === "authenticated" && currentSession.session.capabilities.datasetIds.includes(item.id)) ?? null;
         setDataset(national);
         if (national?.coverage.status === "available") {
-          if (!preserveRange.current) setRange(national.coverage.range);
+          if (!preserveRange.current) { setRange(national.coverage.range); setDraftRange(national.coverage.range); }
         }
         else setFailure({ kind: "data-unavailable", message: "National observations are unavailable." });
       },
@@ -70,6 +71,8 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
     return () => { abort.abort(); };
   }, [dataset, range, revision, runtime, service, session.generation, session.status]);
   function changeRange(next: DateBounds) {
+    setDraftRange(next);
+    if (next.start === range.start && next.end === range.end) return;
     activeSeries.current?.abort(); selection.current += 1; setSeries(null); setFailure(null); setLoading(false); setRange(next);
     // Remember what this change replaces (only a current, readable series) for the dimmed loading view; an invalid range is not loading.
     const current = runtime.getSnapshot();
@@ -94,5 +97,7 @@ export function useOverview(operations: OverviewOperations, onNavigate?: (intent
   }
   // Non-null only while a refetch is loading under the generation it was fetched in; never feeds `series`, `explore()` or guards.
   const retainedSeries = retained !== null && loading && !failure && session.status === "authenticated" && session.session.capabilities.canReadNationalSeries && retained.generation === session.generation ? retained.series : null;
-  return { dataset, series, retainedSeries, range, failure, loading, session, changeRange, explore, reloadMetadata, retry: () => { if (dataset) setRevision((value) => value + 1); else setCatalogRevision((value) => value + 1); }, invalidRange: !validRange(range) };
+  return { dataset, series, retainedSeries, range, draftRange, setDraftRange, invalidDraftRange: !validRange(draftRange),
+    rangeChanged: draftRange.start !== range.start || draftRange.end !== range.end,
+    applyRange: () => { if (validRange(draftRange)) changeRange(draftRange); }, failure, loading, session, changeRange, explore, reloadMetadata, retry: () => { if (dataset) setRevision((value) => value + 1); else setCatalogRevision((value) => value + 1); }, invalidRange: !validRange(range) };
 }

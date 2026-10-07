@@ -1,5 +1,10 @@
 # Web client implementation handoff
 
+October 7 follow-up: production now reuses one authorized catalog across route
+navigation under the agreed 256 KiB admission cap; Overview dates are applied
+explicitly. See [correction evidence](../../../specs/data-reuse/verification/navigation-and-dates.md).
+This does not close live, visual or release gates.
+
 This plan covers the four inspected prototype views: **Sign in, Overview,
 Dataset Explorer and SQL Workspace**. The user requested atomic components
 first, parallel feature work and individual pages last, then confirmed:

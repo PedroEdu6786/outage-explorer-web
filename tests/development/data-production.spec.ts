@@ -18,6 +18,7 @@ for (const role of ["viewer", "analyst", "admin"] as const) {
   test(`${role} production registration, handoffs and retained SQL`, async ({ page }) => {
     await page.clock.install();
     const errors: string[] = []; const posts: { url: string; sql: string | null; csrf: string | undefined }[] = [];
+    let catalogReads = 0;
     const reads: string[] = []; const expiry = new Date(Date.now() + 600_000).toISOString();
     const queryExpiry = new Date(Date.now() + 300_000).toISOString();
     page.on("pageerror", (error) => { errors.push(error.message); });
@@ -27,7 +28,7 @@ for (const role of ["viewer", "analyst", "admin"] as const) {
       if (url.pathname === "/api/auth/session") return route.fulfill({ status: 200, json: {
         user: { id: "controlled-user", email: "controlled@example.invalid", role }, expires_at: expiry, csrf_token: "controlled-csrf",
       } });
-      if (url.pathname === "/api/datasets") return route.fulfill({ status: 200, json: body(`catalog_${role}`) });
+      if (url.pathname === "/api/datasets") { catalogReads++; return route.fulfill({ status: 200, json: body(`catalog_${role}`) }); }
       if (url.pathname === "/api/datasets/national/preview") {
         reads.push(url.search);
         expect(["10", "100"]).toContain(url.searchParams.get("page_size"));
@@ -88,6 +89,7 @@ for (const role of ["viewer", "analyst", "admin"] as const) {
     await expect(page.getByText("Results expired", { exact: true })).toBeVisible();
     await expect(page.getByRole("table", { name: "SQL query results" })).toHaveCount(0);
     await expect(editor).toHaveValue("SELECT 'edited unsent'");
+    expect(catalogReads).toBe(1);
     expect(posts).toEqual([{ url: "?page=1&page_size=1", sql: JSON.stringify({ sql }), csrf: "controlled-csrf" }]);
     expect(errors).toEqual([]);
   });
@@ -183,7 +185,11 @@ test("both tables start at ten rows, resize and paginate without changing the Ov
   expect(reads).toHaveLength(requestsAfterSeries);
 
   // Requested dates immediately constrain the consumed chart data while HTTP is held.
+  await page.getByLabel("End date", { exact: true }).fill("2026-09-07");
   await page.getByLabel("End date", { exact: true }).fill("2026-09-05");
+  await expect(daily).toBeVisible();
+  expect(reads).toHaveLength(requestsAfterSeries);
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(5);
   await expect(chart.locator("text").last()).toHaveText("2026-09-05");
   await expect(chart.locator("xpath=ancestor::*[@inert]")).toHaveAttribute("aria-hidden", "true");
@@ -193,6 +199,7 @@ test("both tables start at ten rows, resize and paginate without changing the Ov
   await expect(daily.getByRole("row")).toHaveCount(6);
   await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(5);
   await page.getByLabel("End date", { exact: true }).fill("2026-09-23");
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await expect(chart.locator("g[data-series=calculated] circle")).toHaveCount(23);
   await expect(page.getByRole("button", { name: "Explore dataset", exact: true })).toBeVisible();
 

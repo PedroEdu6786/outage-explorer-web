@@ -54,6 +54,7 @@ test("Overview exact inspection, comparison and missing gaps work in Chromium", 
   await chart.focus(); await page.keyboard.press("ArrowRight");
   await expect.poll(async () => chart.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
   await page.getByLabel("End date", { exact: true }).fill("2026-09-01");
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await expect(page.getByText(/EIA reported: 1.01%/)).toBeVisible();
   await page.screenshot({ path: "docs/specs/web-client/evidence/phase-4/overview-exact-390.png", fullPage: true, animations: "disabled" });
 });

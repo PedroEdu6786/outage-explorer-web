@@ -1,5 +1,5 @@
 "use client";
-import { createResourceRepository, disabledResourcePolicy } from "../resources/resource-repository";
+import { createResourceRepository, catalogResourcePolicy } from "../resources/resource-repository";
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createSessionRuntime } from "../session/session-runtime";
@@ -9,7 +9,7 @@ import { routeTitles, type ApplicationPath } from "./navigation";
 
 export function ProductionProvider({ children, authEnabled = false, logoutUrl }: { readonly children: ReactNode; readonly authEnabled?: boolean; readonly logoutUrl?: string | undefined }) {
   const [runtime] = useState(createSessionRuntime);
-  const [resources] = useState(() => createResourceRepository({ runtime, policy: disabledResourcePolicy, attachOnCreate: false }));
+  const [resources] = useState(() => createResourceRepository({ runtime, policy: catalogResourcePolicy, attachOnCreate: false }));
   const [operations] = useState(() => createProductionOperations({ runtime, authEnabled, logoutUrl, resources }));
   const router = useRouter();
   const pathname = usePathname();

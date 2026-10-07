@@ -1,5 +1,12 @@
 # Tasks: Reuse already fetched data
-> Status: draft · Slug: data-reuse · Plan: ./plan.md · Spec: ./spec.md
+
+## October 7 correction
+
+Production catalog reuse is now enabled under the existing one-entry / 256 KiB
+admission policy, as requested by the user. Overview date edits require explicit
+**Apply dates**. This supersedes earlier production-enabling gates below; broader
+row retention remains deferred. See the [updated scope](scope-review.md) and
+[verification](verification/navigation-and-dates.md).
 
 ## Scope revision — October 5, 2026
 - The user narrowed the immediate work to model/schema metadata reuse; row tables may reload on page visits. See [the selective resource review](scope-review.md).

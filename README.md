@@ -168,13 +168,16 @@ work to shared dataset models, schemas and catalog metadata. The controlled
 [phase-1 foundation](specs/data-reuse/verification/phase-1.md) shares one decoded
 catalog loader across consumers; observation rows and SQL-page reads retain
 existing retrieval behavior. The user selected a one-entry / 256 KiB serialized JSON admission budget.
-Production completed-response retention remains disabled pending a live catalog
-size check and explicit production enabling; the cap is not a heap-size guarantee.
+Production completed-response retention is enabled after the October 7 user
+request. Each actual decoded catalog is checked against the cap at runtime;
+oversized responses are used but not retained. The cap is not a heap-size guarantee.
 Successful Admin publication now invalidates catalog metadata before Overview
 reloads metadata and observations, preserving selected dates; see the
 [publication follow-up](specs/data-reuse/verification/publication.md).
 Reuse is scoped to the open app until page reload, with existing session/access
-cleanup and explicit invalidation. Broader row retention remains deferred.
+cleanup and explicit invalidation. Broader row retention remains deferred. Overview date edits remain local until
+**Apply dates** submits a valid changed range; unchanged or invalid submissions
+make no request. See the [navigation/date correction](specs/data-reuse/verification/navigation-and-dates.md).
 
 ## Connected local auth — October 5, 2026
 

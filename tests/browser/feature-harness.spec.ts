@@ -15,6 +15,7 @@ test.beforeEach(async ({ page }) => {
 test("composed handoffs preserve dates, require edited-draft consent and never execute until Run", async ({ page }) => {
   const errors: string[] = []; page.on("pageerror", (error) => { errors.push(error.message); });
   await page.getByRole("region", { name: "Overview feature" }).getByLabel("End date", { exact: true }).fill("2026-09-03");
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await button(page, "Explore dataset").click();
   await expect(page.getByRole("table", { name: "Synthetic national observations preview" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Explorer feature" }).getByLabel("End date", { exact: true })).toHaveValue("2026-09-03");

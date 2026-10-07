@@ -1,5 +1,12 @@
 # Plan: Reuse already fetched data
-> Status: controlled implementation complete; production budget selected, enabling gated · Slug: data-reuse · Spec: ./spec.md
+
+## October 7 correction
+
+Production catalog reuse is now enabled under the existing one-entry / 256 KiB
+admission policy, as requested by the user. Overview date edits require explicit
+**Apply dates**. This supersedes earlier production-enabling gates below; broader
+row retention remains deferred. See the [updated scope](scope-review.md) and
+[verification](verification/navigation-and-dates.md).
 
 ## Scope and decisions
 

@@ -8,6 +8,7 @@ test("Overview page preserves exact national values, date filtering and authoriz
   await page.getByRole("checkbox", { name: "Compare EIA reported %" }).check();
   await expect(page.getByRole("checkbox", { name: "Compare EIA reported %" })).toBeChecked();
   await page.getByLabel("End date", { exact: true }).fill("2026-09-03");
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await expect(page.getByRole("table", { name: "Daily national observations" })).toBeVisible();
   await page.getByRole("button", { name: "Explore dataset", exact: true }).click();
   await expect(page.getByTestId("route-path")).toHaveText("/datasets");
@@ -24,6 +25,7 @@ test("with motion on, withholding the session during a range change removes prot
   await expect(page.getByText("Fleet capacity offline", { exact: true })).toBeVisible();
   // Change the range, then withhold the session before the (synthetic, asynchronous) response is rendered.
   await page.getByLabel("End date", { exact: true }).fill("2026-09-03");
+  await page.getByRole("button", { name: "Apply dates", exact: true }).click();
   await page.getByRole("button", { name: "Withhold unresolved session", exact: true }).click();
   // Protected content, the dimmed retained copy and its chart are gone without waiting for any animation.
   await expect(page.getByRole("heading", { name: "Restoring your session" })).toBeVisible({ timeout: 1000 });

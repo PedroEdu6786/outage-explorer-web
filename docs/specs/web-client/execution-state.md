@@ -1,5 +1,10 @@
 # Execution state
 
+October 7 follow-up: production now reuses one authorized catalog across route
+navigation under the agreed 256 KiB admission cap; Overview dates are applied
+explicitly. See [correction evidence](../../../specs/data-reuse/verification/navigation-and-dates.md).
+This does not close live, visual or release gates.
+
 > Phases 1–4 complete; Phase 5 composed fixture and Phase 6 fixture pages accepted; local data adaptation verified; backend auth ready for frontend integration; frontend live acceptance pending. Coordinator-owned dispatch ledger for the
 > [technical execution plan](execution-plan.md). This file records runtime
 > scheduling; the [task files](tasks.md) remain authoritative for task completion.
