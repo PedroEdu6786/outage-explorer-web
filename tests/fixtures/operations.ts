@@ -3,7 +3,7 @@ import type { CatalogCachePolicy, CatalogCache } from "../../src/contracts/catal
 import type { CatalogOperations, DateBounds } from "../../src/contracts/catalog";
 import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from "../../src/contracts/failures";
 import type { NavigationOperations } from "../../src/contracts/navigation";
-import type { ObservationOperations } from "../../src/contracts/observations";
+import type { NationalSeries, ObservationOperations } from "../../src/contracts/observations";
 import type { PreviewOperations, PreviewSequence } from "../../src/contracts/preview";
 import type { QueryExecution, QueryOperations, QueryPage } from "../../src/contracts/query";
 import type { OperationContext, SessionOperations, SessionResolution } from "../../src/contracts/session";
@@ -16,6 +16,8 @@ export const syntheticCatalogCachePolicy: CatalogCachePolicy = { retention: "ena
 export type FixtureOperations = { readonly catalogCache?: CatalogCache } & SessionOperations & CatalogOperations & ObservationOperations & PreviewOperations & QueryOperations & NavigationOperations;
 
 export interface FixtureOptions {
+  /** Opt-in synthetic national data and matching metadata; never a live fallback. */
+  readonly nationalSeries?: NationalSeries;
   readonly catalogCache?: CatalogCache;
   readonly persona?: FixturePersona;
   readonly dataState?: FixtureDataState;
@@ -45,6 +47,9 @@ const positiveInteger = (value: number) => Number.isSafeInteger(value) && value 
 const validRange = (range: DateBounds) => (range.start === undefined || /^\d{4}-\d{2}-\d{2}$/.test(range.start)) && (range.end === undefined || /^\d{4}-\d{2}-\d{2}$/.test(range.end)) && (range.start === undefined || range.end === undefined || range.start <= range.end);
 
 export function createFixtureOperations(options: FixtureOptions = {}) {
+  const fixtureCatalog = options.nationalSeries
+    ? syntheticCatalog.map((dataset) => dataset.grain === "national" ? { ...dataset, coverage: options.nationalSeries?.coverage ?? dataset.coverage } : dataset)
+    : syntheticCatalog;
   const now = options.now ?? Date.now;
   const callLog = createFixtureCallLog();
   let persona = options.persona ?? "analyst";
@@ -62,7 +67,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
   const executeFailures: (OperationFailure | UnknownExecutionOutcome)[] = [];
   const queryDatasetIds = options.queryDatasetIds ?? syntheticSettings.queryDatasetIds;
 
-  const allowed = (datasetId: string) => syntheticCatalog.some((dataset) => dataset.id === datasetId && (persona !== "viewer" || dataset.grain === "national"));
+  const allowed = (datasetId: string) => fixtureCatalog.some((dataset) => dataset.id === datasetId && (persona !== "viewer" || dataset.grain === "national"));
   const sessionFailure = () => !signedIn || expiresAt <= now() ? failure("unauthenticated") : undefined;
   const datasetFailure = (datasetId: string) => sessionFailure() ?? (allowed(datasetId) ? undefined : failure("forbidden"));
 
@@ -71,7 +76,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
     if (expiresAt <= now()) return { status: "expired" };
     return { status: "authenticated", session: {
       identity: { subject: `synthetic-${persona}-${String(epoch)}`, displayName: `Synthetic ${persona}` },
-      capabilities: { datasetIds: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => item.id), canReadNationalSeries: true, canRefreshDatasets: persona === "admin", canExploreDatasets: persona !== "viewer", canExecuteQuery: persona !== "viewer" },
+      capabilities: { datasetIds: fixtureCatalog.filter((item) => allowed(item.id)).map((item) => item.id), canReadNationalSeries: true, canRefreshDatasets: persona === "admin", canExploreDatasets: persona !== "viewer", canExecuteQuery: persona !== "viewer" },
       expiresAt: new Date(expiresAt).toISOString(),
     } };
   }
@@ -115,8 +120,8 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       context,
       load: (owned) => invoke("listDatasets", owned, null, () => sessionFailure() ?? success({
         generationId: `synthetic-snapshot-${String(snapshot)}`,
-        datasets: syntheticCatalog.filter((item) => allowed(item.id)),
-        schemas: syntheticCatalog.filter((item) => allowed(item.id)).map((item) => syntheticSchema(item.id)),
+        datasets: fixtureCatalog.filter((item) => allowed(item.id)),
+        schemas: fixtureCatalog.filter((item) => allowed(item.id)).map((item) => syntheticSchema(item.id)),
       })),
     });
   };
@@ -135,7 +140,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       return success(undefined);
     }),
     listDatasets: async (context) => {
-      if (!options.catalogCache) return invoke("listDatasets", context, null, () => sessionFailure() ?? success(syntheticCatalog.filter((item) => allowed(item.id))));
+      if (!options.catalogCache) return invoke("listDatasets", context, null, () => sessionFailure() ?? success(fixtureCatalog.filter((item) => allowed(item.id))));
       const result = await catalog(context); return result.ok ? success(result.value.datasets) : result;
     },
     readSchema: async (context, datasetId) => {
@@ -151,13 +156,13 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       if (denied) return denied;
       if (!validRange(range)) return failure("invalid-input");
       if (dataState === "unavailable") return failure("data-unavailable");
-      return success({ range, coverage: syntheticCatalog[0]?.coverage ?? { status: "unavailable" }, provenance: { source: "Synthetic fixture, not EIA observations", snapshotId: `synthetic-snapshot-${String(snapshot)}` }, observations: dataState === "empty" ? [] : syntheticObservations.filter((row) => (!range.start || row.date >= range.start) && (!range.end || row.date <= range.end)) });
+      return success({ range, coverage: fixtureCatalog[0]?.coverage ?? { status: "unavailable" }, provenance: { source: "Synthetic fixture, not EIA observations", snapshotId: `synthetic-snapshot-${String(snapshot)}` }, observations: dataState === "empty" ? [] : (options.nationalSeries?.observations ?? syntheticObservations).filter((row) => (!range.start || row.date >= range.start) && (!range.end || row.date <= range.end)) });
     });
     },
     startPreview: (context, selection) => invoke("startPreview", context, selection, () => {
       const denied = datasetFailure(selection.datasetId);
       if (denied) return denied;
-      const dataset = syntheticCatalog.find((item) => item.id === selection.datasetId);
+      const dataset = fixtureCatalog.find((item) => item.id === selection.datasetId);
       if (!positiveInteger(selection.pageSize) || selection.pageSize > 500 || (selection.filters.dates && !validRange(selection.filters.dates)) || (selection.filters.facilityId !== undefined && (!dataset?.filters.facilityId || !isFacilityId(selection.filters.facilityId)))) return failure("invalid-input");
       if (dataState === "unavailable") return failure("data-unavailable");
       const original = syntheticPreviewTable(selection.datasetId);
@@ -207,7 +212,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
     consumeNavigationIntent(context, intent) {
       const id = callLog.start("consumeNavigationIntent", context.generation, intent);
       const denied = datasetFailure(intent.datasetId);
-      const dataset = syntheticCatalog.find((item) => item.id === intent.datasetId);
+      const dataset = fixtureCatalog.find((item) => item.id === intent.datasetId);
       const invalidFilters = (intent.filters.dates !== undefined && !validRange(intent.filters.dates)) || (intent.filters.facilityId !== undefined && (!dataset?.filters.facilityId || !isFacilityId(intent.filters.facilityId)));
       const result = denied ?? (intent.generation !== context.generation || !dataset ? failure("forbidden") : invalidFilters ? failure("invalid-input") : success(intent.target === "explorer" ? { target: "explorer" as const, datasetId: intent.datasetId, filters: intent.filters } : { target: "queries" as const, datasetId: intent.datasetId, filters: intent.filters, proposedDraft: `SELECT * FROM ${dataset.sqlName}` }));
       callLog.finish(id, result.ok ? "success" : "failure");

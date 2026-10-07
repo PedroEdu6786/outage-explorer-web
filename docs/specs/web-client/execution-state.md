@@ -299,3 +299,28 @@ performed by this documentation update.
 - All checkpoint AC evidence remains partial foundation evidence. Emulated
   touch taps do not establish physical touch gestures; chart/page/native-input,
   live and human visual acceptance remain later phases. Stop for phase review.
+
+## Overview chart zoom — phase 2 assignment, October 7
+
+- User authorized continuing through all implementation phases. Coordinator
+  assigns T2.1–T2.C to `overview_zoom_spec`, preserving the accepted phase-1
+  foundation on `feat/overview-chart-zoom` at `bfb76fb`.
+- Exclusive writes: long-range fixture/operations seam, chart input hook,
+  NationalTrend, connected chart tests/stories, phase-2 evidence and task/log
+  records. Coordinator separately checks live prerequisites read-only.
+- No Overview page assembly, shared configuration, external runtime/env edits,
+  new dependencies or deployment in this phase. Fixture acceptance precedes
+  subsequent page assembly; each phase reports evidence before next dispatch.
+
+## Overview chart zoom — phase 2 checkpoint, October 7
+
+- T2.1–T2.4/T2.C complete: feature-local input/controller and SVG integration,
+  long synthetic fixture seam, connected tests and six isolated chart stories.
+  [Phase-2 evidence](../../../specs/overview-chart-zoom/verification/phase-2.md)
+  binds source digests, 84 passing Overview tests (final affected rerun 31/31),
+  typecheck/lint, 33 boundary tests, source boundaries and fresh Storybook.
+- Twelve desktop/narrow Chromium specimens passed, including wheel after SVG
+  scroll and stable geometry over empty gaps. Agent reviewed captures. No live
+  or physical-device acceptance implied; user owns the pending live test.
+- Phase 3 may proceed from this isolated feature gate. AC8/page lifecycle remains
+  its responsibility; final browser/motion/device/live evidence remains phase 4.
