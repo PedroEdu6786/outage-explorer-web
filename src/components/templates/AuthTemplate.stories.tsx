@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "../atoms/Button";
 import { StatusMessage } from "../molecules/StatusMessage";
@@ -46,3 +47,22 @@ export const Error: Story = {
     actions: <Button className="w-full" style={{ minHeight: "38px" }} onClick={() => { /* Synthetic recovery slot. */ }}>Try again</Button>,
   },
 };
+
+const states = [
+  { title: "Sign in to your workspace", description: "Explore stored daily observations and run read-only analysis.", message: <StatusMessage title="Ready" description="Continue when ready." tone="success" /> },
+  { title: "Checking session", description: "Checking your existing session. Your workspace will open automatically.", message: <StatusMessage title="Checking session" description="Protected content is withheld while your session is unresolved." pending /> },
+  { title: "Sign in again", description: "Your session ended.", message: <StatusMessage title="Session expired" description="Sign in again to continue." tone="warning" /> },
+] as const;
+
+function SwitchDemo() {
+  const [index, setIndex] = useState(0);
+  const state = states[index] ?? states[0];
+  return <AuthTemplate
+    title={state.title}
+    description={state.description}
+    actions={<><Button className="w-full" style={{ minHeight: "38px" }} onClick={() => { setIndex((value) => (value + 1) % states.length); }}>Next state</Button></>}
+  >{state.message}</AuthTemplate>;
+}
+
+/** Title/description fade when the supplied title changes; the card enters with a scale-in. Actions and children stay mounted (Motion global on to review). */
+export const StateSwitch: Story = { render: () => <SwitchDemo /> };

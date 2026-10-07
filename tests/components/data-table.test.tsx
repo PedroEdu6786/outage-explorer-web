@@ -85,4 +85,34 @@ describe("lossless positional table", () => {
     expect(container.querySelector("tbody")?.innerHTML).toBe(before);
     expect(container.querySelector("[aria-label='Missing value']")).toHaveTextContent("—");
   });
+  describe("row entrance (C5)", () => {
+    const rowsData = (count: number): TableData => ({
+      columns: [{ id: "n", label: "Number", kind: "decimal", unit: null, nullable: true }, { id: "t", label: "Text", kind: "text", unit: null, nullable: false }],
+      rows: Array.from({ length: count }, (_, position) => ({ position, cells: [position % 4 === 3 ? { kind: "null" } : { kind: "decimal", exact: String(position), display: `${String(position)}.00` }, { kind: "text", value: `Row ${String(position)}` }] })),
+    });
+    const bodyRows = (container: HTMLElement) => Array.from(container.querySelectorAll("tbody tr"));
+
+    it("staggers only the first ten rows with an index custom property and leaves the tail unanimated", () => {
+      const { container } = render(<DataTable data={rowsData(14)} caption="Entrance" />);
+      const rows = bodyRows(container);
+      expect(rows).toHaveLength(14);
+      const indexed = rows.filter((row) => (row as HTMLElement).style.getPropertyValue("--stagger-index") !== "");
+      expect(indexed).toHaveLength(10);
+      expect(indexed.map((row) => (row as HTMLElement).style.getPropertyValue("--stagger-index"))).toEqual(Array.from({ length: 10 }, (_, index) => String(index)));
+      for (const row of indexed) expect(row).toHaveClass("motion-stagger");
+      for (const row of rows.slice(10)) { expect(row).not.toHaveClass("motion-stagger"); expect((row as HTMLElement).style.getPropertyValue("--stagger-index")).toBe(""); }
+    });
+
+    it('skips the stagger entirely with entrance="none" and never touches cells', () => {
+      const data = rowsData(5);
+      const { container, rerender } = render(<DataTable data={data} caption="Entrance" />);
+      const staggered = container.querySelector("tbody")?.innerHTML.replace(/ class="[^"]*"| style="[^"]*"/g, "");
+      rerender(<DataTable data={data} caption="Entrance" entrance="none" />);
+      for (const row of bodyRows(container)) { expect(row).not.toHaveClass("motion-stagger"); expect((row as HTMLElement).style.getPropertyValue("--stagger-index")).toBe(""); }
+      // Cells (text, gaps, zero) are identical to the stagger render; only the row presentation differs.
+      expect(container.querySelector("tbody")?.innerHTML.replace(/ class="[^"]*"| style="[^"]*"/g, "")).toBe(staggered);
+      expect(screen.getAllByRole("cell").map((cell) => cell.textContent)).toContain("0.00");
+      expect(container.querySelectorAll("[aria-label='Missing value']").length).toBeGreaterThan(0);
+    });
+  });
 });

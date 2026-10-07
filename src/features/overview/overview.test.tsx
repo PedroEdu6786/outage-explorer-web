@@ -54,6 +54,45 @@ describe("Overview exact observation behavior", () => {
     await user.selectOptions(screen.getByLabelText("Inspect observation"), "2026-09-03");
     expect(screen.getByText("Calculated offline: 0.00%")).toBeVisible();
   });
+  it("wipes only the persistent svg: points, segments and gaps are untouched by the wipe and the compare toggle", async () => {
+    const user = userEvent.setup();
+    const series = { range: { start: "2026-09-01", end: "2026-09-04" }, coverage: { status: "unavailable" as const }, provenance: { source: "Synthetic", snapshotId: "fixture" }, observations: syntheticObservations };
+    const { container } = render(<NationalTrend series={series} />);
+    const chart = container.querySelector("svg[data-chart=national-trend]");
+    if (!chart) throw new Error("Chart required");
+    expect(chart).toHaveClass("animate-chart-wipe");
+    expect(container.querySelectorAll(".animate-chart-wipe")).toHaveLength(1);
+    const observed = () => Array.from(container.querySelectorAll("polyline[data-segment=observed]")).map((line) => line.getAttribute("points"));
+    const before = observed();
+    // Unavailable observations break the line into separate segments: gaps are never bridged.
+    expect(before).toHaveLength(plotSegments(syntheticObservations, "calculatedPercentage").length);
+    expect(before.length).toBeGreaterThan(1);
+    await user.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    // Same svg element (no remount, so no replayed wipe); the calculated segments are byte-identical and the reported ones are added.
+    expect(container.querySelector("svg[data-chart=national-trend]")).toBe(chart);
+    expect(Array.from(container.querySelectorAll("g[data-series=calculated] polyline")).map((line) => line.getAttribute("points"))).toEqual(before);
+    expect(container.querySelectorAll("g[data-series=reported] polyline[data-segment=observed]")).toHaveLength(plotSegments(syntheticObservations, "reportedPercentage").length);
+    await user.click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    expect(container.querySelector("svg[data-chart=national-trend]")).toBe(chart);
+    expect(observed()).toEqual(before);
+  });
+  it("remounts the chart (a new wipe) when the range changes, with the same points per range", async () => {
+    const { runtime, fixture } = setup(); const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Daily national observations" });
+    const first = document.querySelector("svg[data-chart=national-trend]");
+    expect(first).not.toBeNull();
+    await userEvent.setup().click(screen.getByRole("checkbox", { name: "Compare EIA reported %" }));
+    expect(document.querySelector("svg[data-chart=national-trend]")).toBe(first);
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
+    await waitFor(() => { expect(screen.getByRole("table", { name: "Daily national observations" })).toBeVisible(); });
+    await waitFor(() => { expect(document.querySelector("[inert]")).toBeNull(); });
+    const second = document.querySelector("svg[data-chart=national-trend]");
+    expect(second).not.toBeNull();
+    expect(second).not.toBe(first);
+    // The dimmed superseded chart was never a second live chart afterwards.
+    expect(document.querySelectorAll("svg[data-chart=national-trend]")).toHaveLength(1);
+    view.unmount(); runtime.dispose();
+  });
   it("ignores earlier ranges and emits only current authorized intent", async () => {
     const { runtime, fixture } = setup("analyst"); const user = userEvent.setup(); const intents: NavigationIntent[] = [];
     const deferred = fixture.deferNext("readNationalSeries");
@@ -151,15 +190,20 @@ describe("Overview exact observation behavior", () => {
     expect(document.querySelector("[aria-busy=true]")).toBeNull();
     view.unmount(); runtime.dispose();
   });
-  it("replaces skeletons with exact metric text and keeps no stale values while a new range loads", async () => {
+  it("dims the superseded range inert and hidden from assistive technology while a new range loads, then shows exact values", async () => {
     const { runtime, fixture } = setup(); const view = render(<OverviewFeature operations={fixture.operations} runtime={runtime} />);
     await screen.findByRole("table", { name: "Daily national observations" });
     const deferred = fixture.deferNext("readNationalSeries");
     fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-03" } });
     await waitFor(() => { expect(screen.getByRole("status")).toHaveTextContent("Loading national observations"); });
-    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+    // The retained previous range (phase 3) is dimmed, inert and absent from the accessibility tree; it is not a skeleton.
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
-    expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(3);
+    const retained = Array.from(document.querySelectorAll("[inert][aria-hidden=true]"));
+    expect(retained).toHaveLength(3);
+    // Cards and trend dim to 50%; the table keeps DataTable's shared loading dim (60%).
+    for (const element of retained) expect(element.className).toMatch(/opacity-(?:50|60)/);
+    expect(document.querySelectorAll("dl[aria-busy=true]")).toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Explore dataset" })).not.toBeInTheDocument();
     await act(async () => { deferred.release(); await Promise.resolve(); });
     await screen.findByRole("table", { name: "Daily national observations" });
     expect(screen.getAllByText("0.00").length).toBeGreaterThanOrEqual(2);

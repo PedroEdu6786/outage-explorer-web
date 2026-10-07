@@ -113,7 +113,10 @@
   --motion-nudge: 2px;
   --motion-drawer-shift: -100%;
   --motion-scale-from: 0.98;
+  --motion-icon-rotate: -90deg;
   --stagger-step: 50ms;
+  /* Denser stagger for table rows (capped at ten rows by DataTable). */
+  --stagger-step-row: 20ms;
 }
 
 /* The single reduced-motion rule. Unlayered so it wins over the theme layer.
@@ -127,7 +130,9 @@
     --motion-nudge: 0px;
     --motion-drawer-shift: 0%;
     --motion-scale-from: 1;
+    --motion-icon-rotate: 0deg;
     --stagger-step: 0ms;
+    --stagger-step-row: 0ms;
     --duration-move: 0s;
     --duration-fast: 60ms;
     --duration-appear: 100ms;

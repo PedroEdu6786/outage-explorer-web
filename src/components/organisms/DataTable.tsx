@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { TableCell, TableData } from "../../contracts/table";
 import { EmptyState } from "../molecules/EmptyState";
 
@@ -16,8 +16,17 @@ export interface DataTableProps {
    * owns what is retained and clears it on logout or access change.
    */
   loading?: boolean;
+  /**
+   * Row entrance on mount: `stagger` (default) fades rows in with a capped index
+   * (first rows only, content is present immediately); `none` skips it, for tables
+   * inside Tabs panels whose display toggles would otherwise replay the stagger.
+   */
+  entrance?: "stagger" | "none";
   className?: string;
 }
+
+/** Only the first rows are staggered, so a long table never delays its tail. */
+const STAGGER_ROWS = 10;
 
 function structuredText(cell: TableCell): string {
   switch (cell.kind) {
@@ -59,7 +68,8 @@ function displayCell(cell: TableCell, missingText: string, missingLabel: string)
  * O1/V2–V4: positional cells and published table geometry. No sorting, parsing
  * or inferred rows. D4 extension: a named, keyboard-focusable scroll region;
  * the hidden caption names the table without adding a second visible heading.
- * C5: optional `loading` dims retained content; cells are never altered.
+ * C5: optional `loading` dims retained content and rows enter with a capped
+ * stagger; cells are never altered.
  */
 export function DataTable({
   data,
@@ -70,6 +80,7 @@ export function DataTable({
   emptyDescription,
   emptyActions,
   loading = false,
+  entrance = "stagger",
   className = "",
 }: DataTableProps) {
   return (
@@ -92,8 +103,12 @@ export function DataTable({
             </tr>
           </thead>
           <tbody>
-            {data.rows.map((row) => (
-              <tr key={row.position} className="group">
+            {data.rows.map((row, rowIndex) => (
+              <tr
+                key={row.position}
+                className={entrance === "stagger" && rowIndex < STAGGER_ROWS ? "group motion-stagger [--stagger-step:var(--stagger-step-row)]" : "group"}
+                style={entrance === "stagger" && rowIndex < STAGGER_ROWS ? { "--stagger-index": rowIndex } as CSSProperties : undefined}
+              >
                 {row.cells.map((cell, index) => (
                   <td key={index} className={`border-b border-[#edf1f3] px-[13px] py-[10px] whitespace-nowrap text-[#3e5059] group-last:border-b-0 group-hover:bg-[#fbfcfc] ${data.columns[index]?.kind === "integer" || data.columns[index]?.kind === "decimal" ? "text-right tabular-nums" : "text-left"}`}>
                     {displayCell(cell, missingText, missingLabel)}

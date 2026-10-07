@@ -13,4 +13,6 @@ export const motionOffCss = `
   transition-delay: 0s !important;
   scroll-behavior: auto !important;
 }
+/* Scroll-linked decoration has no end state of its own (it depends on scroll position); captures show the scroll-top state. */
+.motion-scroll-shadow { animation: none !important; }
 `;

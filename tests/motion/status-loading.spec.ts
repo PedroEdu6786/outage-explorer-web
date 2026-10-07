@@ -15,9 +15,12 @@ async function liveRegionCount(page: Page) {
   return page.locator("[role=status], [role=alert], [aria-live]").count();
 }
 
-/** Every element under `root` that could animate or transition decoratively. */
+/**
+ * Animations under `root` other than the one-shot row entrance (`fade-rise` on mount, phase 3):
+ * dimming and loading themselves never animate.
+ */
 async function animationsUnder(root: Locator) {
-  return root.evaluate((element) => element.getAnimations({ subtree: true }).length);
+  return root.evaluate((element) => element.getAnimations({ subtree: true }).filter((animation) => (animation as CSSAnimation).animationName !== "fade-rise").length);
 }
 
 for (const preference of preferences) {

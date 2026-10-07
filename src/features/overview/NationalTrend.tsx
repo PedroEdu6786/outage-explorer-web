@@ -27,7 +27,7 @@ export function NationalTrend({ series }: { readonly series: NationalSeries }) {
     <PanelHeader title="Daily fleet capacity offline" description="Daily share of EIA-reported nuclear capacity out of service" actions={<label className="flex items-center gap-2 text-[12px]"><Checkbox checked={compare} onChange={(event) => { setCompare(event.currentTarget.checked); }} />Compare EIA reported %</label>} />
     <div className="p-[18px]">
       <div role="region" aria-label="National trend: scrollable chart" tabIndex={0} className="max-w-full overflow-x-auto">
-      <svg role="img" aria-labelledby={id} viewBox="0 0 920 300" className="block w-full min-w-[920px]" data-chart="national-trend">
+      <svg role="img" aria-labelledby={id} viewBox="0 0 920 300" className="block w-full min-w-[920px] animate-chart-wipe" data-chart="national-trend">
         <title id={id}>National offline capacity trend. Missing observations remain gaps; exact values are in the Daily observations table.</title>
         {[0, 1, 2, 3].map((index) => {
           const value = min + (max - min) * index / 3;

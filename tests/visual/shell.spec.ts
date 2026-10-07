@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-test("native mobile drawer traps focus, excludes background, restores and closes deliberately", async ({ page }) => {
+/** The same keyboard/focus scenario runs with the test-only motion-off sheet and with motion on (C2, AC4). */
+for (const motion of ["off", "on"] as const) test(`native mobile drawer traps focus, excludes background, restores and closes deliberately (motion ${motion})`, async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 1100 });
-  await page.goto("/iframe.html?id=organisms-shell--ready&viewMode=story");
+  await page.goto(`/iframe.html?id=organisms-shell--ready&viewMode=story&globals=motion:${motion}`);
   const trigger = page.getByRole("button", { name: "Open navigation" });
   await trigger.click();
   const drawer = page.getByRole("dialog", { name: "Application navigation" });

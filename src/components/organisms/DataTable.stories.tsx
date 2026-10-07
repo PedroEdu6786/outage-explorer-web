@@ -50,3 +50,26 @@ function LoadingDemo() {
 
 /** Retained rows dimmed while a caller replaces them: busy, inert and hidden from assistive technology. */
 export const LoadingRetained: Story = { render: () => <LoadingDemo /> };
+
+const manyRows: TableData = {
+  columns: variedTable.columns,
+  rows: Array.from({ length: 14 }, (_, position) => ({ position, cells: [
+    { kind: "date", value: `2026-10-${String(position + 1).padStart(2, "0")}` }, { kind: "identifier", value: `ID-${String(position)}` },
+    position % 5 === 3 ? { kind: "null" } : { kind: "decimal", exact: String(position), display: `${String(position)}.00` }, { kind: "text", value: `Synthetic row ${String(position + 1)}` },
+  ] })),
+};
+
+function EntranceDemo({ entrance }: { entrance: "stagger" | "none" }) {
+  const [replay, setReplay] = useState(0);
+  return (
+    <div>
+      <div className="border-b border-border p-3"><Button variant="secondary" onClick={() => { setReplay((value) => value + 1); }}>Replay entrance</Button></div>
+      <DataTable key={replay} data={manyRows} caption="Synthetic entrance rows" entrance={entrance} />
+    </div>
+  );
+}
+
+/** First ten rows fade in with a 20ms stagger on mount (cells untouched); rows past ten appear with the table. */
+export const StaggeredRows: Story = { render: () => <EntranceDemo entrance="stagger" /> };
+/** `entrance="none"` for tables inside Tabs panels, whose display toggles would replay the stagger. */
+export const NoEntrance: Story = { render: () => <EntranceDemo entrance="none" /> };

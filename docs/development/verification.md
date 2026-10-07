@@ -280,3 +280,39 @@ checks; they are neither live-integration nor Figma-fidelity evidence.
 - **Checks.** `tests/motion/status-loading.spec.ts` (reduce vs no-preference, one live
   region, text identical with motion on/off); RTL scenarios in the Overview, Explorer
   and Queries feature tests cover first-load skeletons and paging dim/invalidation.
+
+### Entrances, drawer, chart and retained-series conventions (phase 3)
+
+- **Drawer.** `AppNavigation`'s native `<dialog>` slides and fades its backdrop at or
+  below 1000px through the `motion-drawer` utility (CSS only: `@starting-style`,
+  `transition-behavior: allow-discrete` on `display`/`overlay`). `showModal`/`close`,
+  focus placement, return-focus and `cancel` handling are untouched, `close()` is
+  synchronous and nothing awaits a transition event. During exit the dialog is
+  `pointer-events: none` and shows already-updated content. Above 1000px no transition
+  exists, so crossing the breakpoint never flashes. Under reduced motion open and close
+  jump. `tests/motion/entrances.spec.ts` asserts these computed states (no timing), and
+  `tests/visual/shell.spec.ts` runs the focus-trap, return-focus, Escape and sign-out
+  scenario with `globals=motion:off` and `globals=motion:on`.
+- **Chart wipe.** The persistent trend `svg` has a left-to-right `clip-path` wipe
+  (`chart-wipe`); points, segments and gaps are never moved or interpolated, the compare
+  toggle keeps the same `svg` (no replay) and reduced motion has no wipe. The Storybook
+  motion-off sheet sets durations to 0, so the end state (`clip-path: none`) is visible
+  at once. The header scroll shadow is a scroll-linked progressive enhancement; the
+  motion-off sheet disables it (it has no end state of its own).
+- **Entrances.** Template slots, metric cards and the first ten table rows rise with a
+  capped stagger (`--stagger-index`); content is in the DOM and operable immediately.
+  Tables inside Tabs panels use `entrance="none"` because a hidden panel restarts
+  descendant animations whenever it is displayed.
+- **Overview `retainedSeries` (AC5).** On a range change the previous series is shown
+  dimmed (about 50%; the table uses the shared `DataTable` loading dim), `inert` and
+  `aria-hidden` while the new one loads. It is derived in `useOverview`: non-null only
+  while loading, bound to its session generation and requiring an authenticated session
+  with `canReadNationalSeries`; it is cleared by runtime cleanup, any failure (including
+  `forbidden`), the end of loading and `reloadMetadata`, and never feeds `series`,
+  `explore()` or navigation. `src/features/overview/retained-series.test.tsx` covers the
+  matrix (logout, expiry, pending, `beginLogout`, new generation, capability loss,
+  forbidden/other failure mid-refetch, publication reload) and that a late response
+  cannot restore it. The page scenario in `tests/browser/overview-page.spec.ts` (motion
+  on) withholds the session right after a range change and asserts no protected content
+  or dim remains; the held-dim state itself is shown by the `Features/Overview`
+  `RangeChangeRefetch` story and asserted in `tests/motion/entrances.spec.ts`.

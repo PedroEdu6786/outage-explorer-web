@@ -237,4 +237,31 @@ describe("Auth fixture lifecycle", () => {
     expect(screen.queryByText(/secret token/)).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Try sign in again" })).toBeEnabled();
   });
+  it("keeps headings, text, focus and the single Checking session banner through restoring, expired and ready states (D1)", async () => {
+    const { controller, runtime, entry } = setup();
+    runtime.invalidate("pending");
+    const delayed = controller.deferNext("resolveSession");
+    const view = render(entry);
+    // Restoring: the keyed title block says so; one banner announces; no focus is stolen and no control is offered.
+    expect(screen.getByRole("heading", { level: 1, name: "Restoring your session" })).toBeVisible();
+    expect(screen.getByText("Checking your existing session. Your workspace will open automatically.")).toBeVisible();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(screen.getByRole("status")).toHaveTextContent("Checking session");
+    expect(document.body).toHaveFocus();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    await act(async () => { delayed.release(); await Promise.resolve(); });
+    await screen.findByText("Protected analysis");
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    // Expiry returns to the sign-in surface with its own heading, banner and an operable, focusable action.
+    act(() => { runtime.invalidate("expired"); });
+    expect(screen.getByRole("heading", { level: 1, name: "Sign in again" })).toBeVisible();
+    expect(screen.getByText("Session expired")).toBeVisible();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    const action = screen.getByRole("button", { name: "Continue to sign in" });
+    action.focus();
+    expect(action).toHaveFocus();
+    expect(action).toBeEnabled();
+    expect(screen.queryByText("Checking session")).not.toBeInTheDocument();
+    view.unmount();
+  });
 });

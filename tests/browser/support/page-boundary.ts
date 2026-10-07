@@ -1,7 +1,7 @@
 import { expect, type Page } from "@playwright/test";
 export interface Call { readonly operation: string; readonly input: unknown; readonly outcome: string }
-export async function openPage(page: Page, story: string) {
-  await page.goto(`/iframe.html?id=pages-${story}&viewMode=story`);
+export async function openPage(page: Page, story: string, globals = "") {
+  await page.goto(`/iframe.html?id=pages-${story}&viewMode=story${globals ? `&globals=${globals}` : ""}`);
   await expect(page.locator('[data-fixture-root="synthetic-only"]').getByRole("note")).toContainText("Synthetic fixture page demo");
 }
 export async function calls(page: Page): Promise<readonly Call[]> {

@@ -24,8 +24,8 @@ const ready: Extract<NavigationData, { status: "ready" }> = {
   coverage: { availableThrough: "September 30, 2026", updated: "Synthetic update metadata" },
 };
 
-function ShellPreview({ pending = false, title = "Dataset Explorer" }: { pending?: boolean; title?: string }) {
-  const [open, setOpen] = useState(false);
+function ShellPreview({ pending = false, title = "Dataset Explorer", initiallyOpen = false }: { pending?: boolean; title?: string; initiallyOpen?: boolean }) {
+  const [open, setOpen] = useState(initiallyOpen);
   const [backgroundCount, setBackgroundCount] = useState(0);
   const [signOutCount, setSignOutCount] = useState(0);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -62,3 +62,13 @@ function IndicatorPreview() {
 
 /** Desktop shell whose active destination changes, to review the sliding indicator (Motion global on). */
 export const DesktopIndicator: Story = { render: () => <IndicatorPreview /> };
+
+/**
+ * Drawer review (Motion global on): at or below 1000px wide the navigation opens as a
+ * native modal dialog that slides in with a backdrop fade; this story starts open.
+ * The coverage status dot pulses once per open. Reduced motion jumps instead.
+ */
+export const DrawerOpen: Story = { render: () => <ShellPreview initiallyOpen /> };
+
+/** Desktop sidebar: the coverage status dot pulses once on mount; the header icon swaps with `navigationOpen`. */
+export const CoverageDot: Story = { render: () => <ShellPreview /> };

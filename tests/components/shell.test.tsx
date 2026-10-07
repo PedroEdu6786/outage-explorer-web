@@ -104,4 +104,37 @@ describe("supplied shell navigation", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
     expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
   });
+  it("keeps the header trigger label, aria-expanded and aria-haspopup while the icon swaps decoratively", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const trigger = screen.getByRole("button", { name: "Open navigation" });
+    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    const closedIcon = trigger.querySelector("span[aria-hidden=true]");
+    expect(closedIcon).toBeInTheDocument();
+    expect(trigger.querySelectorAll("svg[aria-hidden=true]")).toHaveLength(1);
+    expect(trigger.textContent).toBe("");
+    await user.click(trigger);
+    // The icon wrapper is keyed by state (the swap); label and relationships are unchanged.
+    expect(screen.getAllByRole("button", { name: "Open navigation", hidden: true })[0]).toBe(trigger);
+    expect(trigger).toHaveAttribute("aria-label", "Open navigation");
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
+    const openIcon = trigger.querySelector("span[aria-hidden=true]");
+    expect(openIcon).not.toBe(closedIcon);
+    expect(openIcon).toHaveClass("animate-icon-swap");
+    expect(trigger.querySelectorAll("svg[aria-hidden=true]")).toHaveLength(1);
+  });
+
+  it("leaves the coverage block text unchanged and marks the status dot decorative", () => {
+    narrow = false;
+    const { container } = render(<Harness />);
+    const coverage = container.querySelector("aside")?.textContent ?? "";
+    expect(coverage).toContain("Data available through");
+    expect(coverage).toContain("Synthetic coverage");
+    const dot = container.querySelector("aside span.animate-dot-pulse");
+    expect(dot).toHaveAttribute("aria-hidden", "true");
+    expect(dot?.textContent).toBe("");
+    expect(container.querySelectorAll("[role=status]")).toHaveLength(0);
+  });
 });

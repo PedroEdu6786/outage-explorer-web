@@ -1,5 +1,5 @@
 # Spec: Animations and micro-interactions
-> Status: in progress, phases 1–2 verified · Slug: ui-motion · Date: October 6, 2026
+> Status: in progress, phases 1–3 verified · Slug: ui-motion · Date: October 6, 2026
 
 ## Decision record
 

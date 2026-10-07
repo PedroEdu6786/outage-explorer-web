@@ -13,7 +13,7 @@ export interface AuthTemplateProps {
 export function AuthTemplate({ title, description, children, actions, footer }: AuthTemplateProps) {
   return (
     <main className="relative grid min-h-screen place-items-center bg-background p-[30px] before:absolute before:inset-x-0 before:top-0 before:h-1 before:bg-accent before:content-[''] [@media(width<=760px)]:p-[18px]">
-      <section className="grid w-full max-w-[390px] gap-[15px] rounded-auth border border-border bg-surface p-[30px] shadow-auth [@media(width<=760px)]:p-[23px]">
+      <section className="animate-scale-in grid w-full max-w-[390px] gap-[15px] rounded-auth border border-border bg-surface p-[30px] shadow-auth [@media(width<=760px)]:p-[23px]">
         <div className="flex items-center gap-[10px] border-b border-border pb-[18px]">
           <BrandMark />
           <div className="grid gap-[2px]">
@@ -21,7 +21,8 @@ export function AuthTemplate({ title, description, children, actions, footer }: 
             <span className="text-[10px] uppercase tracking-[.05em] text-text-muted">U.S. nuclear outage data</span>
           </div>
         </div>
-        <div className="mb-[3px] mt-1">
+        {/* Keyed by the supplied title so a state change fades; it holds no focusable controls. */}
+        <div key={title} className="mb-[3px] mt-1 animate-fade-in">
           <h1 className="text-[20px]">{title}</h1>
           {description && <div className="mt-[6px] text-[11px] leading-normal text-text-muted">{description}</div>}
         </div>

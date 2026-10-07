@@ -130,7 +130,7 @@ export function AppNavigation({ data, open, onOpenChange, onSignOut, returnFocus
             <div className="mt-auto">
               {data.coverage && (
                 <div className="m-[12px] flex gap-[9px] rounded-[7px] border border-white/10 bg-white/[.035] p-[12px]">
-                  <span aria-hidden="true" className="mt-[3px] size-[7px] shrink-0 rounded-full bg-[#51b88c]" />
+                  <span aria-hidden="true" className="mt-[3px] size-[7px] shrink-0 animate-dot-pulse rounded-full bg-[#51b88c]" />
                   <div className="grid gap-[3px] text-[11px]">
                     <strong className="text-[10px] font-medium tracking-[.04em] text-[#91a5ad] uppercase">Data available through</strong>
                     <span className="font-semibold text-white">{data.coverage.availableThrough}</span>
@@ -157,7 +157,7 @@ export function AppNavigation({ data, open, onOpenChange, onSignOut, returnFocus
         onCancel={(event) => { event.preventDefault(); onOpenChange(false); }}
         onKeyDown={containFocus}
         onClick={(event) => { if (event.target === event.currentTarget) onOpenChange(false); }}
-        className="fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-(--sidebar-width) max-w-full border-0 bg-sidebar p-0 text-[#d8e2e5] shadow-[8px_0_28px_#0003] backdrop:bg-[#0a191f61]"
+        className="motion-drawer fixed inset-y-0 left-0 m-0 h-dvh max-h-none w-(--sidebar-width) max-w-full border-0 bg-sidebar p-0 text-[#d8e2e5] shadow-[8px_0_28px_#0003] backdrop:bg-[#0a191f61]"
       >
         <div className="flex min-h-full flex-col">{content(true)}</div>
       </dialog>
