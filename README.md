@@ -238,3 +238,11 @@ live acceptance or Figma sign-off. See [Phase 4 evidence](specs/backend-integrat
 and [verification commands](docs/development/verification.md). Phase 5 and original
 T5.L/T6.L remain open until named enabled backend resources and authorized
 persona/lifecycle scenarios are verified.
+
+## UI motion improvements — October 6, 2026
+
+Subtle animations and micro-interactions across views and components are
+accepted in scope but **not implemented**; the catalog, exclusions (no count-up
+metrics, no chart interpolation, no hover-lift), assumptions and acceptance
+criteria are in the [motion spec](specs/ui-motion/spec.md). Implementation
+awaits an explicit request.
