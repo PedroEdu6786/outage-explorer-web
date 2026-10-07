@@ -1,3 +1,4 @@
+import { isFacilityId } from "../../src/lib/facility-id";
 import type { CatalogCachePolicy, CatalogCache } from "../../src/contracts/catalog-cache";
 import type { CatalogOperations, DateBounds } from "../../src/contracts/catalog";
 import type { OperationFailure, OperationResult, UnknownExecutionOutcome } from "../../src/contracts/failures";
@@ -157,13 +158,13 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       const denied = datasetFailure(selection.datasetId);
       if (denied) return denied;
       const dataset = syntheticCatalog.find((item) => item.id === selection.datasetId);
-      if (!positiveInteger(selection.pageSize) || selection.pageSize > 500 || (selection.filters.dates && !validRange(selection.filters.dates)) || (selection.filters.facilityId && !dataset?.filters.facilities.some((option) => option.id === selection.filters.facilityId))) return failure("invalid-input");
+      if (!positiveInteger(selection.pageSize) || selection.pageSize > 500 || (selection.filters.dates && !validRange(selection.filters.dates)) || (selection.filters.facilityId !== undefined && (!dataset?.filters.facilityId || !isFacilityId(selection.filters.facilityId)))) return failure("invalid-input");
       if (dataState === "unavailable") return failure("data-unavailable");
       const original = syntheticPreviewTable(selection.datasetId);
       const table = { ...original, rows: dataState === "empty" ? [] : original.rows.filter((row) => {
         const date = row.cells[0];
         const facility = row.cells[5];
-        const matchesFacility = !selection.filters.facilityId || (facility?.kind === "identifier" && facility.value === selection.filters.facilityId);
+        const matchesFacility = selection.filters.facilityId === undefined || (facility?.kind === "identifier" && facility.value === selection.filters.facilityId);
         return matchesFacility && (!selection.filters.dates || (date?.kind === "date" && (!selection.filters.dates.start || date.value >= selection.filters.dates.start) && (!selection.filters.dates.end || date.value <= selection.filters.dates.end)));
       }) };
       const sequence: PreviewSequence = { selection: structuredClone(selection), snapshotId: `synthetic-snapshot-${String(snapshot)}`, expiresAt: new Date(now() + syntheticSettings.previewLifetimeMs).toISOString() };
@@ -207,7 +208,7 @@ export function createFixtureOperations(options: FixtureOptions = {}) {
       const id = callLog.start("consumeNavigationIntent", context.generation, intent);
       const denied = datasetFailure(intent.datasetId);
       const dataset = syntheticCatalog.find((item) => item.id === intent.datasetId);
-      const invalidFilters = (intent.filters.dates !== undefined && !validRange(intent.filters.dates)) || (intent.filters.facilityId !== undefined && !dataset?.filters.facilities.some((option) => option.id === intent.filters.facilityId));
+      const invalidFilters = (intent.filters.dates !== undefined && !validRange(intent.filters.dates)) || (intent.filters.facilityId !== undefined && (!dataset?.filters.facilityId || !isFacilityId(intent.filters.facilityId)));
       const result = denied ?? (intent.generation !== context.generation || !dataset ? failure("forbidden") : invalidFilters ? failure("invalid-input") : success(intent.target === "explorer" ? { target: "explorer" as const, datasetId: intent.datasetId, filters: intent.filters } : { target: "queries" as const, datasetId: intent.datasetId, filters: intent.filters, proposedDraft: `SELECT * FROM ${dataset.sqlName}` }));
       callLog.finish(id, result.ok ? "success" : "failure");
       return structuredClone(result);

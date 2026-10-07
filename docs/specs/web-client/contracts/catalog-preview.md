@@ -7,7 +7,8 @@ See [current status](../../../development/current-status.md).
 
 `GET /api/datasets` returns `{generation_id, datasets}`. Each dataset includes
 `id`, `sql_name`, `label`, `schema_version: "1"`, ordered `columns`,
-`supported_filters: ["start_date", "end_date"]` and
+`supported_filters: ["start_date", "end_date"]` for national or
+`["start_date", "end_date", "facility"]` for facilities/generators, and
 `coverage: {start_date, end_date}` (nullable dates).
 
 Public IDs and SQL relation names are `national`, `facilities`, `generators`.
@@ -38,20 +39,26 @@ the [fixtures](data-api-v1/fixtures.json) and backend supplemental HTTP referenc
 ## Preview request
 
 First page: `GET /api/datasets/{dataset}/preview`, with optional inclusive
-`start_date`, `end_date`, `page_size` (default 100, allowed 1–500).
+`start_date`, `end_date`, `facility` (detail datasets only), `page_size` (default 100, allowed 1–500).
 The October 6 web preference explicitly sends 10 initially in Dataset Explorer;
 its adjustable size starts a new sequence. Overview still assembles the complete
 national series through 100-row backend pages for its chart and cards, then
 presents the Daily observations table in adjustable pages starting at 10 rows.
 Either date side can be omitted; both omitted browse all stored coverage.
-Facility/generator ID filters are explicitly excluded initially and rejected,
-not ignored. A valid range without matching observations returns an empty page.
+The October 7 update adds one exact facility-ID input to Facilities for
+Analyst/Admin, combining its value with the selected date bounds. Generators
+retains adapter/catalog support without a new UI control. No selector/discovery
+endpoint is available. Clearing the field omits `facility`; a supplied value must
+be 1–256 UTF-8 bytes, with no surrounding Unicode whitespace, Cc controls or
+malformed Unicode. Preserve case, leading zeros, quotes and internal spaces;
+never trim, normalize or convert to a number. National rejects the parameter.
+A valid ID or range without matching observations returns a normal empty page.
 
 Ordering is newest `period` first, then applicable identifiers ascending using
 binary UTF-8 comparison. This does not establish default ordering for user SQL.
 
 Continuation/revisit: same route with **only** `cursor` in the query string.
-Do not repeat dates or page size. The path still identifies the dataset.
+Do not repeat facility, dates or page size. The path still identifies the dataset.
 `page_cursor` revisits the current page (including page 1); `next_cursor` advances.
 Previous navigation can send a previously visited page cursor. Changing filters
 or page size explicitly starts another sequence.
@@ -62,8 +69,8 @@ Required fields: `dataset`, `generation_id`, `columns`, `rows`, `page_size`,
 `page_cursor`, nullable `next_cursor`, `has_more`, `expires_at`.
 Empty result: `200`, empty rows, no next cursor. No total-page/count field exists.
 
-The cursor binds caller, dataset, published generation, normalized filters,
-fixed size and position. Expiry is 15 minutes from first-page creation and never
+The cursor binds caller, dataset, published generation, exact facility/date filters,
+fixed size and position. Expiry is 60 seconds from first-page creation and never
 renews. Publication cannot mix a new generation into the sequence. Clear stored
 pages/cursors on identity/access change and reject stale response publication.
 
@@ -72,8 +79,8 @@ restart. Unknown or unauthorized dataset IDs return generic
 `404 dataset_unavailable` without schemas. `403 forbidden` can also deny access;
 the UI must support both without exposing hidden datasets.
 
-Following user feedback, the frontend accepts date-only optional bounds and
-valid ranges outside coverage. V1 decoders retain current/next cursors and validate
+The October 5 date-only adaptation remains historical provenance; October 7
+adds facility filtering under the [updated contract intake](data-api.md#facility-filter-contract-intake--october-7-2026). Optional date bounds and valid ranges outside coverage remain supported. V1 decoders retain current/next cursors and validate
 `has_more`; local Previous navigation still uses unexpired retained pages. See
 [the adaptation record](frontend-adaptation.md). Backend wire examples
 are synthetic; their dates and IDs are not production coverage.

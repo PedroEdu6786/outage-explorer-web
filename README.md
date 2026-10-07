@@ -96,14 +96,16 @@ synthetic data. These fixtures are excluded from production.
 | --- | --- | --- |
 | **Authentication** | `/sign-in` | Cognito login, session checks and logout. |
 | **Overview** | `/overview` | National capacity metrics, trend chart, date filters and daily table. Admin refresh controls. |
-| **Dataset Explorer** | `/datasets` | Permitted datasets, schemas, date filters and paginated previews. |
+| **Dataset Explorer** | `/datasets` | Permitted datasets, schemas, date/facility filters and paginated previews. |
 | **SQL Workspace** | `/query` | SQL editor, schema browser, results and numbered result pages. |
 
 `/` redirects to Overview. Dataset Explorer and SQL Workspace require Analyst
 or Admin access.
 
 Dates apply when you submit **Apply dates** or the preview filters. Overview and
-Explorer tables start at 10 rows; SQL starts at 100. Explorer follows backend
+Explorer tables start at 10 rows; SQL starts at 100. Facilities offers an optional exact Facility ID for Analyst/Admin; it combines
+with dates. IDs preserve leading zeros and case. Clear the field to browse all
+facilities; unmatched IDs show an empty preview. Explorer follows backend
 preview cursors. SQL pages reuse one execution with a fixed page size; paging
 never runs the query again. Expired results require an explicit rerun.
 

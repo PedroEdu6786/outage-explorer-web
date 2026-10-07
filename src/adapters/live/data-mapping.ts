@@ -15,7 +15,7 @@ export function decodeCatalog(raw: unknown): CatalogBundle {
     grain: grains[dataset.id],
     // Client presentation text: not an undocumented server-returned description.
     description: `Daily ${grains[dataset.id]} observations`,
-    filters: { dates: true, facilities: [] },
+    filters: { dates: true, facilityId: dataset.supported_filters.length === 3, facilities: [] },
     coverage:
       dataset.coverage.start_date !== null && dataset.coverage.end_date !== null
         ? {

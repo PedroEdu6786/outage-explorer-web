@@ -9,6 +9,7 @@ import type { ObservationOperations } from "../../contracts/observations";
 import type { PreviewOperations } from "../../contracts/preview";
 import type { QueryOperations } from "../../contracts/query";
 import type { OperationContext } from "../../contracts/session";
+import { isFacilityId } from "../../lib/facility-id";
 import { dateSchema, datasetIdSchema } from "./data-schema";
 import { decodeCatalog, decodePreview, decodeQuery } from "./data-mapping";
 import { mapNationalRows } from "./metric-mapping";
@@ -108,7 +109,7 @@ export function createDataAdapter(
     startPreview(context, selection) {
       if (
         !datasetIdSchema.safeParse(selection.datasetId).success ||
-        selection.filters.facilityId !== undefined ||
+        (selection.filters.facilityId !== undefined && (selection.datasetId === "national" || !isFacilityId(selection.filters.facilityId))) ||
         !pageSizeValid(selection.pageSize) ||
         !boundsValid(selection.filters.dates)
       ) {
@@ -116,6 +117,10 @@ export function createDataAdapter(
       }
 
       const params = new URLSearchParams({ page_size: String(selection.pageSize) });
+
+      if (selection.filters.facilityId !== undefined) {
+        params.set("facility", selection.filters.facilityId);
+      }
 
       if (selection.filters.dates?.start !== undefined) {
         params.set("start_date", selection.filters.dates.start);

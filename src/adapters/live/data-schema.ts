@@ -154,10 +154,14 @@ export const catalogSchema = z
             label: z.string(),
             schema_version: z.literal("1"),
             columns: columnsSchema,
-            supported_filters: z.tuple([z.literal("start_date"), z.literal("end_date")]),
+            supported_filters: z.union([
+              z.tuple([z.literal("start_date"), z.literal("end_date")]),
+              z.tuple([z.literal("start_date"), z.literal("end_date"), z.literal("facility")]),
+            ]),
             coverage: coverageSchema,
           })
-          .strict(),
+          .strict()
+          .refine((dataset) => dataset.id !== "national" || dataset.supported_filters.length === 2),
       )
       .refine((items) => new Set(items.map((item) => item.id)).size === items.length),
   })

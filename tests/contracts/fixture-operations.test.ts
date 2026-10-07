@@ -67,7 +67,7 @@ describe("shared synthetic operation behavior", () => {
     const filtered = value(await fixture.operations.startPreview(context, { datasetId: "synthetic-facility", filters: { dates: { start: "2026-09-03", end: "2026-09-03" } }, pageSize: 10 }));
     expect(filtered.table.rows).toHaveLength(1);
     expect(filtered.table.rows[0]?.cells[5]).toEqual({ kind: "identifier", value: "0012" });
-    expect(await fixture.operations.startPreview(context, { datasetId: "synthetic-facility", filters: { facilityId: "A07" }, pageSize: 10 })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
+    expect(await fixture.operations.startPreview(context, { datasetId: "synthetic-facility", filters: { facilityId: "A07" }, pageSize: 10 })).toMatchObject({ ok: true, value: { table: { rows: [] } } });
     expect(await fixture.operations.startPreview(context, { ...selection, filters: { facilityId: "0012" } })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
   });
 

@@ -50,3 +50,26 @@ test("motion-on pending Explorer paging clears rows and schema synchronously whe
   await expect(page.locator("#storybook-root").getByRole("table", { includeHidden: true })).toHaveCount(0);
   await expect(page.getByText("Synthetic facility observations", { exact: true })).toHaveCount(0);
 });
+
+test("Facilities applies exact ID with dates, clears it, and shows unmatched IDs as empty", async ({ page }) => {
+  await openPage(page, "explorer--ready");
+  await page.getByRole("button", { name: /Synthetic facility observations/ }).click();
+  await expect(page.getByRole("table", { name: "Synthetic facility observations preview" })).toBeVisible();
+  await page.getByLabel("Start date", { exact: true }).fill("2026-09-01");
+  await page.getByLabel("End date", { exact: true }).fill("2026-09-30");
+  await page.getByLabel("Facility ID (optional)", { exact: true }).fill("0012");
+  await page.getByRole("button", { name: "Apply filters", exact: true }).click();
+  await expect(page.getByRole("table", { name: "Synthetic facility observations preview" })).toBeVisible();
+  expect((await calls(page)).filter((call) => call.operation === "startPreview").at(-1)?.input).toMatchObject({ filters: { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-30" } } });
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Previous", exact: true })).toBeEnabled();
+  await page.getByLabel("Facility ID (optional)", { exact: true }).fill("UnmatchedID");
+  await page.getByRole("button", { name: "Apply filters", exact: true }).click();
+  await expect(page.getByText("No records match these filters", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Previous", exact: true })).toBeDisabled();
+  await page.getByLabel("Facility ID (optional)", { exact: true }).fill("");
+  await page.getByRole("button", { name: "Apply filters", exact: true }).click();
+  await expect(page.getByRole("table", { name: "Synthetic facility observations preview" })).toBeVisible();
+  expect((await calls(page)).filter((call) => call.operation === "startPreview").at(-1)?.input).toMatchObject({ filters: { dates: { start: "2026-09-01", end: "2026-09-30" } } });
+  expect((await calls(page)).filter((call) => call.operation === "startPreview").at(-1)?.input).not.toHaveProperty("filters.facilityId");
+});

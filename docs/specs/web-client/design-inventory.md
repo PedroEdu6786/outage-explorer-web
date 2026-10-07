@@ -105,3 +105,13 @@ Refresh uses existing secondary/ghost button variants beneath the heading and
 shared status messages for admission/publication outcomes. This is a requested
 extension to the inspected prototype, not an existing Figma control or a new-data
 status card. No new visual-fidelity acceptance is claimed.
+
+
+## October 7 Facilities ID extension
+
+The supplied `evidence/datasets-preview-desktop.png` reference was inspected
+again for this change. Its filter strip is extended with an optional Facility ID
+text input on Facilities, reusing `FormField`/`Input` and the existing wrap/stack
+layout. No facility selector or discovery endpoint is evidenced. The input is a
+user-requested behavioral extension, not an observed prototype control. Browser
+layout checks pass; final visual comparison and human sign-off remain open.

@@ -16,9 +16,9 @@ export const syntheticSettings = {
 
 const coverage = { status: "available", range: { start: "2026-09-01", end: "2026-09-04" } } as const;
 export const syntheticCatalog: readonly DatasetSummary[] = [
-  { id: "synthetic-national", label: "Synthetic national observations", description: "Invented test data, not EIA findings.", grain: "national", sqlName: "synthetic_national", coverage, filters: { dates: true, facilities: [] } },
-  { id: "synthetic-facility", label: "Synthetic facility observations", description: "Invented test data, not EIA findings.", grain: "facility", sqlName: "synthetic_facility", coverage, filters: { dates: true, facilities: [] } },
-  { id: "synthetic-generator", label: "Synthetic generator observations", description: "Invented test data, not EIA findings.", grain: "generator", sqlName: "synthetic_generator", coverage, filters: { dates: true, facilities: [] } },
+  { id: "synthetic-national", label: "Synthetic national observations", description: "Invented test data, not EIA findings.", grain: "national", sqlName: "synthetic_national", coverage, filters: { dates: true, facilityId: false, facilities: [] } },
+  { id: "synthetic-facility", label: "Synthetic facility observations", description: "Invented test data, not EIA findings.", grain: "facility", sqlName: "synthetic_facility", coverage, filters: { dates: true, facilityId: true, facilities: [] } },
+  { id: "synthetic-generator", label: "Synthetic generator observations", description: "Invented test data, not EIA findings.", grain: "generator", sqlName: "synthetic_generator", coverage, filters: { dates: true, facilityId: true, facilities: [] } },
 ];
 
 export const syntheticObservations: readonly NationalObservation[] = [

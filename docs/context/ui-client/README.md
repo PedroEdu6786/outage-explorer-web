@@ -1,5 +1,11 @@
 # Outage Explorer web client context
 
+October 7 facility-preview update: Facilities now offers Analyst/Admin an
+optional exact facility-ID input combined with dates. Catalog decoding and the
+adapter also support Generators' facility capability; Viewer restrictions remain.
+See the [contract and verification](../../specs/web-client/verification/facility-filter.md). Runtime acceptance requires a
+matching protocol-v2 worker image and remains open.
+
 This context pack describes the web client to build in `outage-explorer-web`,
 separately from its Python/Flask backend. It captures the user's selected stack and component architecture,
 the product's accepted behavior, and the backend integration gaps as of

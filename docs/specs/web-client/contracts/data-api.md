@@ -20,7 +20,32 @@ connected acceptance remains open. See [current status](../../../development/cur
 explicitly configured for the named live target; user-owned isolation validation
 is outside this frontend work. No live or visual acceptance gate is closed here.
 
-## Current frozen contract reconciliation — October 5, 2026
+## Facility-filter contract intake — October 7, 2026
+
+Backend feature commit `6142ec5` supplies single-facility filtering. Read-only
+intake used backend HEAD `3092b113e78fdccbd1fd3e50ec2d55ca5733843f` and the current
+working-tree files below. OpenAPI and synthetic fixtures are copied byte-for-byte
+into `data-api-v1/`; previous hashes below identify historical snapshots.
+
+| Source | SHA-256 |
+| --- | --- |
+| `data-api/openapi.json` | `1a9539d0bf5618898448c1f9fd4c218beb003da124b6ce19508e0e6031f56fa1` |
+| `data-api/fixtures.json` | `a2844c4775110a7ec2293a21fc99374a48996706f2596c2a5ed51a24cc7df9a7` |
+| `preview-facility-filter/contract.md` | `67d4b586801437f7e5ed04e448ceed851a4367c9e08633c687acb0675b398f90` |
+| `data-api/client-handoff.md` | `34de1372dd6098282d23932a57edb186f335009900f7ff1e3c7f33a46d10f36c` |
+
+The catalog expands detail datasets to include `facility`. Initial previews
+combine an exact opaque facility ID and optional dates; continuation sends only
+cursor. The web adds the input to Facilities only, preserving Generators adapter
+compatibility and legacy date-only catalog decoding. The current backend handoff
+also specifies fixed 60-second expiry; the client uses returned expiry timestamps.
+See [preview semantics](catalog-preview.md) and
+[verification](../verification/facility-filter.md).
+Runtime availability requires the matching protocol-v2 worker image and reviewed
+runtime identity. No backend modification, activation, deployment or live
+acceptance is implied by this frontend update.
+
+## Historical frozen contract reconciliation — October 5, 2026
 
 Integration phase 1 imports byte-identical current OpenAPI and explicitly synthetic
 examples into the existing documentation paths. Read-only revalidation found

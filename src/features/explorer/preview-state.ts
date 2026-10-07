@@ -1,6 +1,7 @@
 import type { DatasetSummary, DatasetSchema } from "../../contracts/catalog";
 import type { OperationFailure } from "../../contracts/failures";
 import type { PreviewPage, PreviewSelection } from "../../contracts/preview";
+import { isFacilityId } from "../../lib/facility-id";
 import { isCalendarDate } from "../../lib/calendar-date";
 
 export interface ExplorerState {
@@ -35,7 +36,10 @@ export function validateSelection(dataset: DatasetSummary, selection: PreviewSel
   if (dates) {
     if (!dataset.filters.dates || (dates.start !== undefined && !isPreviewDate(dates.start)) || (dates.end !== undefined && !isPreviewDate(dates.end)) || (dates.start !== undefined && dates.end !== undefined && dates.start > dates.end)) return "Enter valid calendar dates with the start on or before the end.";
   }
-  if (facilityId !== undefined) return "Facility filtering is not available in this version. Use date filters.";
+  if (facilityId !== undefined) {
+    if (!dataset.filters.facilityId || dataset.grain === "national") return "Facility filtering is not available for this dataset.";
+    if (!isFacilityId(facilityId)) return "Enter a facility ID of 1–256 UTF-8 bytes without surrounding whitespace or control characters.";
+  }
   return null;
 }
 

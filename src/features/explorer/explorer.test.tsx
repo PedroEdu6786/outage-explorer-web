@@ -95,13 +95,12 @@ describe("Explorer authorized cursor lifecycle", () => {
     expect(fixture.callLog.read()).toHaveLength(count);
     expect(controller.getSnapshot().failure?.kind).toBe("invalid-input");
   });
-  it("accepts optional bounds and empty results outside coverage while forbidding facility filters for Analysts", async () => {
-    const { controller, fixture } = setup(); await ready(controller);
+  it("accepts optional bounds, facility filters and empty results outside coverage for Analysts", async () => {
+    const { controller } = setup(); await ready(controller);
     controller.select("synthetic-facility", { dates: { start: "2026-09-03" } }); await ready(controller);
     expect(controller.getSnapshot().pages[0]?.table.rows).not.toHaveLength(0);
-    const before = fixture.callLog.read().length;
-    controller.select("synthetic-facility", { facilityId: "0012" });
-    expect(fixture.callLog.read()).toHaveLength(before);
+    controller.select("synthetic-facility", { facilityId: "0012" }); await ready(controller);
+    expect(controller.getSnapshot().selection?.filters.facilityId).toBe("0012");
     controller.select("synthetic-facility", { dates: { end: "2025-12-31" } }); await ready(controller);
     expect(controller.getSnapshot().pages[0]?.table.rows).toHaveLength(0);
     controller.select("synthetic-facility", {}); await ready(controller);
@@ -493,4 +492,72 @@ it("preserves schema scroll focus while replacing only presentational table cont
   expect(region).toHaveFocus();
   expect(screen.getByRole("table")).not.toBe(table);
   expect(screen.getByRole("table").querySelector("button,input,select,textarea,a[href],[tabindex]")).toBeNull();
+});
+
+describe("facility-filtered preview behavior", () => {
+  it.each(["analyst", "admin"] as const)("lets %s apply combined filters, clear the ID, and see unmatched results", async (persona) => {
+    const user = userEvent.setup();
+    const fixture = createFixtureOperations({ persona });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+    render(<ExplorerFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(screen.queryByLabelText("Facility ID (optional)")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Synthetic facility observations/ }));
+    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    fireEvent.change(screen.getByLabelText("Start date"), { target: { value: "2026-09-01" } });
+    fireEvent.change(screen.getByLabelText("End date"), { target: { value: "2026-09-30" } });
+    await user.type(screen.getByLabelText("Facility ID (optional)"), "0012");
+    await user.click(screen.getByRole("button", { name: "Apply filters" }));
+    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-facility", filters: { facilityId: "0012", dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
+    expect(screen.getAllByText("0012").length).toBeGreaterThan(0);
+    await user.clear(screen.getByLabelText("Facility ID (optional)"));
+    await user.type(screen.getByLabelText("Facility ID (optional)"), "MissingCaseID");
+    await user.click(screen.getByRole("button", { name: "Apply filters" }));
+    await screen.findByText("No records match these filters");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Facility ID (optional)"));
+    await user.click(screen.getByRole("button", { name: "Apply filters" }));
+    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toEqual({ datasetId: "synthetic-facility", filters: { dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 10 });
+    await user.type(screen.getByLabelText("Facility ID (optional)"), " 0012");
+    const before = fixture.callLog.read().length;
+    await user.click(screen.getByRole("button", { name: "Apply filters" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("1–256 UTF-8 bytes");
+    expect(screen.getByLabelText("Facility ID (optional)")).toHaveValue(" 0012");
+    expect(fixture.callLog.read()).toHaveLength(before);
+    await user.click(screen.getByRole("button", { name: "Reset" }));
+    await screen.findByRole("table", { name: "Synthetic facility observations preview" });
+    expect(screen.getByLabelText("Facility ID (optional)")).toHaveValue("");
+    expect(fixture.callLog.read().filter((call) => call.operation === "startPreview").at(-1)?.input).toMatchObject({ filters: {} });
+  });
+  it("withholds facility controls and detail metadata from Viewer", async () => {
+    const fixture = createFixtureOperations({ persona: "viewer" });
+    const runtime = createSessionRuntime(); runtime.setResolution(fixture.sessionResolution()); releases.push(() => { runtime.dispose(); });
+    render(<ExplorerFeature operations={fixture.operations} runtime={runtime} />);
+    await screen.findByRole("table", { name: "Synthetic national observations preview" });
+    expect(screen.queryByLabelText("Facility ID (optional)")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Synthetic facility observations/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Synthetic generator observations/ })).not.toBeInTheDocument();
+  });
+  it("resets paging on facility changes and ignores old initial and continuation responses", async () => {
+    const { controller, fixture } = setup({ persona: "analyst" }); await ready(controller);
+    controller.select("synthetic-facility", { facilityId: "0012" }); await ready(controller);
+    controller.next(); await ready(controller);
+    expect(controller.getSnapshot().pageIndex).toBe(1);
+    const continuation = fixture.deferNext("continuePreview");
+    controller.next();
+    const initial = fixture.deferNext("startPreview");
+    controller.select("synthetic-facility", { facilityId: "oldID" });
+    expect(controller.getSnapshot().pages).toEqual([]);
+    expect(controller.getSnapshot().pageIndex).toBe(0);
+    controller.select("synthetic-facility", { facilityId: "NewID" }); await ready(controller);
+    continuation.release(); initial.release();
+    await waitFor(() => { expect(fixture.callLog.read().some((call) => call.outcome === "pending")).toBe(false); });
+    expect(controller.getSnapshot().selection?.filters).toEqual({ facilityId: "NewID" });
+    expect(controller.getSnapshot().pages).toHaveLength(1);
+    expect(controller.getSnapshot().pages[0]?.sequence.selection.filters).toEqual({ facilityId: "NewID" });
+    expect(controller.getSnapshot().pages[0]?.table.rows).toEqual([]);
+    expect(controller.getSnapshot().pageIndex).toBe(0);
+  });
 });

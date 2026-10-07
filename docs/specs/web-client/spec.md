@@ -4,6 +4,23 @@
 See the [dated implementation/evidence map](../../development/current-status.md).
 Original acceptance checkboxes below are not closed by registration or controlled tests.
 
+## October 7 facility-preview extension
+
+The user-authorized Facilities preview now accepts one optional exact facility-ID
+filter for Analyst/Admin, combined with independently optional dates. Validate
+1–256 UTF-8 bytes without normalization, trimming or numeric conversion; reject
+empty supplied IDs, surrounding whitespace, controls and malformed Unicode.
+Clearing the input omits the parameter. An unmatched valid ID is a normal empty
+preview. Filter changes reset pagination and invalidate older responses;
+continuation sends cursor only. Catalog decoding supports the expanded Facilities
+and Generators capabilities; this UI extension targets Facilities. Viewer access
+remains Overview-only. These requirements supersede date-only scope below.
+See [contract](contracts/catalog-preview.md) and
+[verification](verification/facility-filter.md). The current source contract uses
+60-second preview expiry; the web follows returned timestamps rather than a
+hardcoded duration. Backend runtime requires a matching protocol-v2 worker image;
+no deployment or activation is authorized.
+
 ## Problem
 Analysts need a trustworthy way to explore permitted U.S. nuclear outage observations without manually reshaping EIA records. The frontend includes fixture and configured production compositions; live integration needs shared acceptance boundaries so views do not duplicate UI, invent domain behavior or diverge from the supplied design.
 

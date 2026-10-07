@@ -131,10 +131,10 @@ describe("Data API v1 frontend adaptation (controlled responses only)", () => {
     expect(backend.request.mock.calls[0]?.[2]?.body.sql).toBe(accepted);
   });
 
-  it("maps every catalog and supports date-only schemas embedded in the catalog", () => {
+  it("maps every catalog and supports schemas embedded in the catalog", () => {
     const viewer = decodeCatalog(example("catalog_viewer"));
     expect(viewer.datasets.map((dataset) => dataset.id)).toEqual(["national"]);
-    expect(viewer.datasets[0]?.filters).toEqual({ dates: true, facilities: [] });
+    expect(viewer.datasets[0]?.filters).toEqual({ dates: true, facilityId: false, facilities: [] });
     expect(viewer.schemas[0]?.columns[1]?.sqlType).toBe("decimal(38,12)");
     expect(decodeCatalog(example("catalog_analyst")).datasets).toHaveLength(3);
   });
@@ -355,4 +355,46 @@ describe("decoded catalog reuse only (explicit synthetic policy)", () => {
     } finally { catalogCache.dispose(); runtime.dispose(); }
   });
 
+});
+
+describe("facility preview backend contract", () => {
+  it.each(["catalog_analyst", "catalog_admin"])("decodes expanded %s capabilities and legacy date-only catalogs", (name) => {
+    const raw = example(name);
+    expect(decodeCatalog(raw).datasets.map((dataset) => [dataset.id, dataset.filters.facilityId])).toEqual([
+      ["national", false], ["facilities", true], ["generators", true],
+    ]);
+    if (!("datasets" in raw)) throw new Error("Catalog required");
+    const legacy = { ...raw, datasets: raw.datasets.map((dataset) => ({ ...dataset, supported_filters: ["start_date", "end_date"] })) };
+    expect(decodeCatalog(legacy).datasets.every((dataset) => !dataset.filters.facilityId)).toBe(true);
+    const invalid = { ...raw, datasets: raw.datasets.map((dataset) => ({ ...dataset, supported_filters: ["start_date", "end_date", "facility"] })) };
+    expect(() => decodeCatalog(invalid)).toThrow();
+  });
+  it.each(["facilities", "generators"])("combines exact ID and dates for %s and continues with only cursor", async (datasetId) => {
+    const raw = example(`preview_${datasetId}`);
+    const backend = transport([raw, raw, raw]);
+    const adapter = createDataAdapter(backend);
+    const selection = { datasetId, filters: { facilityId: "001", dates: { start: "2026-09-01", end: "2026-09-30" } }, pageSize: 100 };
+    const first = await adapter.startPreview(context, selection);
+    if (!first.ok) throw new Error("Expected detail preview");
+    expect(first.value.sequence.selection.filters.facilityId).toBe("001");
+    expect(backend.request.mock.calls[0]?.[1]).toBe(`/api/datasets/${datasetId}/preview?page_size=100&facility=001&start_date=2026-09-01&end_date=2026-09-30`);
+    await adapter.continuePreview(context, { sequence: first.value.sequence, cursor: "next/+?" });
+    expect(backend.request.mock.calls[1]?.[1]).toBe(`/api/datasets/${datasetId}/preview?cursor=next%2F%2B%3F`);
+    await adapter.startPreview(context, { ...selection, filters: { dates: selection.filters.dates } });
+    expect(new URL(backend.request.mock.calls[2]?.[1] ?? "", "https://example.invalid").searchParams.has("facility")).toBe(false);
+  });
+  it("preserves case, quotes, internal spaces and Unicode through URL encoding", async () => {
+    const backend = transport([example("preview_facilities")]);
+    const id = "00aB 'é%_";
+    expect(await createDataAdapter(backend).startPreview(context, { datasetId: "facilities", filters: { facilityId: id }, pageSize: 100 })).toMatchObject({ ok: true });
+    expect(new URL(backend.request.mock.calls[0]?.[1] ?? "", "https://example.invalid").searchParams.getAll("facility")).toEqual([id]);
+  });
+  it("rejects malformed supplied IDs before dispatch, including empty and over-byte-limit values", async () => {
+    const backend = transport([]);
+    const adapter = createDataAdapter(backend);
+    for (const facilityId of ["", " 001", "001 ", "a\nB", "a\u0085b", "\ud800", "é".repeat(129)]) {
+      expect(await adapter.startPreview(context, { datasetId: "facilities", filters: { facilityId }, pageSize: 100 })).toMatchObject({ ok: false, failure: { kind: "invalid-input" } });
+    }
+    expect(backend.request).not.toHaveBeenCalled();
+  });
 });

@@ -1,5 +1,11 @@
 # Web client implementation handoff
 
+October 7 facility-preview update: Facilities now offers Analyst/Admin an
+optional exact facility-ID input combined with dates. Catalog decoding and the
+adapter also support Generators' facility capability; Viewer restrictions remain.
+See the [contract and verification](verification/facility-filter.md). Runtime acceptance requires a
+matching protocol-v2 worker image and remains open.
+
 For source-checked implementation and open gates, see
 [current status](../../development/current-status.md). Dated intake below is
 provenance; it does not require rebuilding adapters already registered.

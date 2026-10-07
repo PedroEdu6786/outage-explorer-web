@@ -28,6 +28,8 @@ export interface FacilityOption {
 
 export interface DatasetFilters {
   readonly dates: boolean;
+  /** Exact ID input capability; does not imply a discovery endpoint or choices. */
+  readonly facilityId?: boolean;
   /** Only authorized choices; absent detail access must never leak into autocomplete. */
   readonly facilities: readonly FacilityOption[];
 }
